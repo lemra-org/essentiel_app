@@ -45,35 +45,35 @@ extension CategoryIcon on Category {
 }
 
 extension EssentielCardsForCategory on Category {
-  List<EssentielCard> essentielCards() => {
+  List<EssentielCardData> essentielCards() => {
         Category.VIE_FRATERNELLE: [
-          EssentielCard(
+          EssentielCardData(
               category: this,
               question: "Comment je vis la vie fraternelle dans ma famille?"),
         ],
         Category.PRIERE: [
-          EssentielCard(
+          EssentielCardData(
               category: this,
               question: "Ai-je déjà prié pour mon/mes enfant(s)?"),
         ],
         Category.FORMATION: [
-          EssentielCard(
+          EssentielCardData(
               category: this,
               question: "Comment je pense aider mes enfants à grandir?"),
         ],
         Category.SERVICE: [
-          EssentielCard(
+          EssentielCardData(
               category: this,
               question: "Quelle grâce j'aimerais recevoir pour servir mieux?"),
         ],
         Category.EVANGELISATION: [
-          EssentielCard(
+          EssentielCardData(
               category: this,
               question:
                   "De quoi ai-je besoin pour oser témoigner de l'amour de Dieu autour de moi?"),
         ],
         Category.ESSENTIELLES_PLUS: [
-          EssentielCard(
+          EssentielCardData(
               category: this,
               question: "Je partage mon chant de louange préféré!"),
         ]

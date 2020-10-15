@@ -5,11 +5,10 @@ import 'package:essentiel/resources/category.dart';
 import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
-import 'package:flip_card/flip_card.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:infinite_cards/infinite_cards.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:shake/shake.dart';
+import 'package:stacked_card_carousel/stacked_card_carousel.dart';
 
 class Game extends StatefulWidget {
   final String title;
@@ -21,102 +20,24 @@ class Game extends StatefulWidget {
 }
 
 class _GameState extends State<Game> {
-  InfiniteCardsController _controller;
-  bool _isTypeSwitch = true;
-
-  int _startIndex;
-  int _currentIndex;
-
-  Widget _renderItem(
-      BuildContext context, List<EssentielCard> allCards, int index) {
-    final essentielCard = allCards.elementAt(index);
-    return FlipCard(
-      front: Container(
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(color: Colors.black, width: 2.0),
-            color: Colors.white),
-        padding: EdgeInsets.all(18),
-        child: Image.asset("assets/images/essentiel_logo.svg.png",
-            fit: BoxFit.fill),
-      ),
-      back: Container(
-          decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(8.0),
-              border: Border.all(color: Colors.black, width: 2.0),
-              color: Colors.white),
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Stack(
-              children: [
-                Center(
-                  child: Text(
-                    essentielCard.question,
-                    style: TextStyle(
-                        fontSize: 28.0, color: essentielCard.category.color()),
-                  ),
-                ),
-                Positioned.fill(
-                    child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    padding: const EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: essentielCard.category.color(),
-                    ),
-                    child: Text(
-                      essentielCard.category.title(),
-                      style: TextStyle(
-                        fontSize: 22.0,
-                        color: Colors.white,
-                      ),
-                    ),
-                  ),
-                )),
-              ],
-            ),
-          )
-          // child: ClipRect(
-          //   child: Banner(
-          //     location: BannerLocation.bottomEnd,
-          //     message: essentielCard.category.title(),
-          //     color:
-          //         essentielCard.category.color() ?? Color(0xA0B71C1C),
-          //     textStyle: TextStyle(fontSize: 10.0),
-          //     child: Center(
-          //       child: Padding(
-          //         padding: const EdgeInsets.all(8.0),
-          //         child: Text(
-          //           essentielCard.question,
-          //           style: TextStyle(fontSize: 22.0),
-          //         ),
-          //       ),
-          //     ),
-          //   ),
-          // ),
-          ),
-    );
-  }
+  PageController _cardsController;
+  List<EssentielCardData> _allCardsData;
+  int _currentPageIndex = 0;
 
   @override
   void initState() {
     super.initState();
-    _startIndex = 0;
 
-    final allCards = Category.values
-        .expand((category) => category.essentielCards())
-        .toList();
-    allCards.shuffle();
+    final allCategories = Category.values.toList();
 
-    _controller = InfiniteCardsController(
-      itemBuilder: (BuildContext context, int index) =>
-          _renderItem(context, allCards, index),
-      itemCount: 5,
-      animType: AnimType.SWITCH,
-    );
+    _allCardsData =
+        allCategories.expand((category) => category.essentielCards()).toList();
+    _allCardsData.shuffle();
+
+    _cardsController = PageController(initialPage: _allCardsData.length);
 
     ShakeDetector.autoStart(onPhoneShake: () {
-      _randomDraw(allCards.length);
+      _randomDraw();
     });
   }
 
@@ -124,44 +45,21 @@ class _GameState extends State<Game> {
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
-    debugPrint("Start index: $_startIndex");
-
-    _currentIndex = _startIndex;
-
-    final int maxCards = 20;
-
-    final allCards = Category.values
-        .expand((category) => category.essentielCards())
-        .toList();
-    allCards.shuffle();
-
-    final allColors =
-        Category.values.map((category) => category.color()).toList();
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: Text(widget.title),
-      //   elevation: 0.0,
-      //   // backgroundColor: Colors.teal,
-      // ),
-      // appBar: GradientAppBar(
-      //     elevation: 0.0,
-      //     title: Text(widget.title),
-      //     gradient: LinearGradient(
-      //         colors: [Category.FORMATION.color(), Category.PRIERE.color()])),
       body: Stack(
         children: [
           Positioned.fill(child: AnimatedBackground()),
-          onBottom(AnimatedWave(
+          _onBottom(AnimatedWave(
             height: 180,
             speed: 1.0,
           )),
-          onBottom(AnimatedWave(
+          _onBottom(AnimatedWave(
             height: 120,
             speed: 0.9,
             offset: pi,
           )),
-          onBottom(AnimatedWave(
+          _onBottom(AnimatedWave(
             height: 220,
             speed: 1.2,
             offset: pi / 2,
@@ -177,188 +75,57 @@ class _GameState extends State<Game> {
               ),
             ),
           ),
-          Center(
-            child: InfiniteCards(
-              background: Colors.transparent,
-              height: screenHeight * 0.3,
-              width: screenWidth,
-              controller: _controller,
-            ),
-            // child: Swiper(
-            //   index: _startIndex,
-            //   controller: _swiperController,
-            //   itemBuilder: (BuildContext context, int index) {
-            //     final essentielCard = allCards.elementAt(index);
-            //     return FlipCard(
-            //       front: Container(
-            //         decoration: BoxDecoration(
-            //             borderRadius: BorderRadius.circular(8.0),
-            //             border: Border.all(color: Colors.black, width: 2.0),
-            //             color: Colors.white),
-            //         padding: EdgeInsets.all(screenWidth * 0.12),
-            //         child: Image.asset("assets/images/essentiel_logo.svg.png",
-            //             fit: BoxFit.fill),
-            //       ),
-            //       back: Container(
-            //           decoration: BoxDecoration(
-            //               borderRadius: BorderRadius.circular(8.0),
-            //               border: Border.all(color: Colors.black, width: 2.0),
-            //               color: Colors.white),
-            //           child: Padding(
-            //             padding: const EdgeInsets.all(8.0),
-            //             child: Stack(
-            //               children: [
-            //                 Center(
-            //                   child: Text(
-            //                     essentielCard.question,
-            //                     style: TextStyle(
-            //                         fontSize: 28.0,
-            //                         color: essentielCard.category.color()),
-            //                   ),
-            //                 ),
-            //                 Positioned.fill(
-            //                     child: Align(
-            //                   alignment: Alignment.bottomCenter,
-            //                   child: Container(
-            //                     padding: const EdgeInsets.all(5.0),
-            //                     decoration: BoxDecoration(
-            //                       color: essentielCard.category.color(),
-            //                     ),
-            //                     child: Text(
-            //                       essentielCard.category.title(),
-            //                       style: TextStyle(
-            //                         fontSize: 22.0,
-            //                         color: Colors.white,
-            //                       ),
-            //                     ),
-            //                   ),
-            //                 )),
-            //               ],
-            //             ),
-            //           )
-            //           // child: ClipRect(
-            //           //   child: Banner(
-            //           //     location: BannerLocation.bottomEnd,
-            //           //     message: essentielCard.category.title(),
-            //           //     color:
-            //           //         essentielCard.category.color() ?? Color(0xA0B71C1C),
-            //           //     textStyle: TextStyle(fontSize: 10.0),
-            //           //     child: Center(
-            //           //       child: Padding(
-            //           //         padding: const EdgeInsets.all(8.0),
-            //           //         child: Text(
-            //           //           essentielCard.question,
-            //           //           style: TextStyle(fontSize: 22.0),
-            //           //         ),
-            //           //       ),
-            //           //     ),
-            //           //   ),
-            //           // ),
-            //           ),
-            //     );
-            //   },
-            //   itemCount: allCards.length,
-            //   itemWidth: screenWidth * 0.8,
-            //   itemHeight: screenHeight * 0.3,
-            //   layout: SwiperLayout.STACK,
-            //   onIndexChanged: (int index) {
-            //     debugPrint("index changed: $index");
-            //     _currentIndex = index;
-            //   },
-            //   loop: true,
-            //   autoplay: false,
-            //   autoplayDisableOnInteraction: true,
-            // ),
+          Positioned.fill(
+            child: Align(
+                alignment: Alignment.center,
+                child: Container(
+                  padding: EdgeInsets.only(
+                      left: screenWidth * 0.05, right: screenWidth * 0.05),
+                  height: screenHeight * 0.5,
+                  child: StackedCardCarousel(
+                    pageController: _cardsController,
+                    onPageChanged: (int pageIndex) {
+                      _currentPageIndex = pageIndex;
+                    },
+                    type: StackedCardCarouselType.cardsStack,
+                    items: _allCardsData.asMap().entries.map((entry) {
+                      final index = entry.key;
+                      final cardData = entry.value;
+                      return EssentialCard(
+                          cardData: cardData, onFlip: () => _jumpTo(index));
+                    }).toList(),
+                  ),
+                )),
           ),
         ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () {
-          _randomDraw(maxCards);
-          // _swiperController.move(3, animation: true);
+          _randomDraw();
         },
         label: Text("Choisir une carte au hasard"),
-        icon: Icon(Icons.autorenew_sharp),
-        backgroundColor: Colors.red,
+        icon: FaIcon(FontAwesomeIcons.random),
+        backgroundColor: Category.EVANGELISATION.color(),
       ),
     );
   }
 
-  void _randomDraw(int maxCards) {
-    final randomPick = RandomUtils.getRandomValueInRange(0, maxCards - 1);
-    debugPrint("randomPick: $randomPick");
-    // for (int i = 0; i < randomPick; i++) {
-    //   _controller.reset(animType: AnimType.TO_END);
-    //   _controller.next();
-    // }
-
-    _controller.reset(animType: AnimType.TO_END);
-    _controller.next();
-
-    //TODO Flip Card at index i
+  void _randomDraw() {
+    final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
+        0, _allCardsData.length, _currentPageIndex);
+    debugPrint("_currentPageIndex=$_currentPageIndex / randomPick=$randomPick");
+    _jumpTo(randomPick);
   }
 
-  onBottom(Widget child) => Positioned.fill(
+  _onBottom(Widget child) => Positioned.fill(
         child: Align(
           alignment: Alignment.bottomCenter,
           child: child,
         ),
       );
 
-  void _changeType(BuildContext context) {
-    if (_isTypeSwitch) {
-      _controller.reset(
-        itemCount: 4,
-        animType: AnimType.TO_FRONT,
-        transformToBack: _customToBackTransform,
-      );
-    } else {
-      _controller.reset(
-        itemCount: 5,
-        animType: AnimType.SWITCH,
-        transformToBack: DefaultToBackTransform,
-      );
-    }
-    _isTypeSwitch = !_isTypeSwitch;
-  }
-
-  Transform _customToBackTransform(
-      Widget item,
-      double fraction,
-      double curveFraction,
-      double cardHeight,
-      double cardWidth,
-      int fromPosition,
-      int toPosition) {
-    int positionCount = fromPosition - toPosition;
-    double scale =
-        (0.8 - 0.1 * fromPosition) + (0.1 * fraction * positionCount);
-    double rotateY;
-    double translationX;
-    if (fraction < 0.5) {
-      translationX = cardWidth * fraction * 1.5;
-      rotateY = pi / 2 * fraction;
-    } else {
-      translationX = cardWidth * 1.5 * (1 - fraction);
-      rotateY = pi / 2 * (1 - fraction);
-    }
-    double interpolatorScale =
-        0.8 - 0.1 * fromPosition + (0.1 * curveFraction * positionCount);
-    double translationY = -cardHeight * (0.8 - interpolatorScale) * 0.5 -
-        cardHeight *
-            (0.02 * fromPosition - 0.02 * curveFraction * positionCount);
-    return Transform.translate(
-      offset: Offset(translationX, translationY),
-      child: Transform.scale(
-        scale: scale,
-        child: Transform(
-          transform: Matrix4.identity()
-            ..setEntry(3, 2, 0.002)
-            ..rotateY(rotateY),
-          alignment: Alignment.center,
-          child: item,
-        ),
-      ),
-    );
+  _jumpTo(int index) {
+    _cardsController.animateToPage(index,
+        curve: Curves.ease, duration: Duration(milliseconds: 500));
   }
 }

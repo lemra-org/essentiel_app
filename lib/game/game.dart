@@ -46,7 +46,7 @@ class _GameState extends State<Game> {
   void initState() {
     super.initState();
 
-    _cardsController = PageController(initialPage: 300);
+    _cardsController = PageController(initialPage: 200);
 
     ShakeDetector.autoStart(onPhoneShake: () {
       _randomDraw();
@@ -136,7 +136,7 @@ class _GameState extends State<Game> {
                   items: allCardsData.asMap().entries.map((entry) {
                     final index = entry.key;
                     final cardData = entry.value;
-                    return EssentialCard(
+                    return EssentielCard(
                         cardData: cardData, onFlip: () => _jumpTo(index));
                   }).toList(),
                 );

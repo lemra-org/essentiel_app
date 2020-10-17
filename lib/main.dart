@@ -1,4 +1,4 @@
-import 'package:essentiel/game/game.dart';
+import 'package:essentiel/game/game_v2.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
@@ -33,7 +33,7 @@ class MyApp extends StatelessWidget {
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
       ),
-      home: Game(title: 'Jeu Essentiel'),
+      home: GameV2(title: 'Jeu Essentiel'),
     );
   }
 }

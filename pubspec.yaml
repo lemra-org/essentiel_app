@@ -27,7 +27,7 @@ dependencies:
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.0
-  google_fonts: ^1.1.0
+  google_fonts: ^1.1.1
   font_awesome_flutter: ^8.10.0
 #  flutter_stack_card: ^0.2.0+1
   flutter_tindercard: ^0.2.0
@@ -41,7 +41,7 @@ dependencies:
       url: https://github.com/rm3l/Flutter-InfiniteCards
   flip_card: ^0.4.4
   shake: ^0.1.0
-  simple_animations: ^2.2.2
+  simple_animations: ^2.2.3
   swipeable_card: ^1.0.2
   stacked_card_carousel: ^0.0.2+1
   gsheets: ^0.2.5

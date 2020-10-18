@@ -2,11 +2,14 @@ import 'dart:math';
 
 import 'package:essentiel/game/cards.dart';
 import 'package:essentiel/resources/category.dart';
+import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gsheets/gsheets.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shake/shake.dart';
 
 const _credentials = r'''
@@ -35,9 +38,13 @@ class GameV3 extends StatefulWidget {
 }
 
 class _GameV3State extends State<GameV3> {
-  List<EssentielCard> _allCards;
+  List<EssentielCardData> _allCardsData;
   Object _errorWhileLoadingData;
   int _currentIndex;
+
+  final ItemScrollController itemScrollController = ItemScrollController();
+  final ItemPositionsListener itemPositionsListener =
+      ItemPositionsListener.create();
 
   @override
   void initState() {
@@ -62,17 +69,12 @@ class _GameV3State extends State<GameV3> {
           .then((cardData) {
         setState(() {
           _errorWhileLoadingData = null;
-          _allCards = cardData.asMap().entries.map((entry) {
-            final index = entry.key;
-            final cardData = entry.value;
-            return EssentielCard(
-                index: index, cardData: cardData, onFlip: () => _jumpTo(index));
-          }).toList();
+          _allCardsData = cardData;
         });
       }).catchError((e) {
         setState(() {
           _errorWhileLoadingData = e;
-          _allCards = null;
+          _allCardsData = null;
         });
       });
     });
@@ -107,7 +109,7 @@ class _GameV3State extends State<GameV3> {
                 style:
                     TextStyle(fontSize: 20, height: 1.7, color: Colors.white))),
       ]));
-    } else if (_allCards == null) {
+    } else if (_allCardsData == null) {
       //Not initialized yet
       body = Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -122,7 +124,7 @@ class _GameV3State extends State<GameV3> {
                 style:
                     TextStyle(fontSize: 20, height: 1.7, color: Colors.white))),
       ]));
-    } else if (_allCards.isEmpty) {
+    } else if (_allCardsData.isEmpty) {
       //No data
       body = Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -136,57 +138,120 @@ class _GameV3State extends State<GameV3> {
         ),
         Flexible(
             child: Text(
-                "Aucune donnée trouvée pour initialiser le jeu Essentiel. Merci de réessayer dans quelques instants.",
+                "Aucune donnée trouvée pour initialiser le jeu. Merci de réessayer dans quelques instants.",
                 textAlign: TextAlign.center,
                 style:
                     TextStyle(fontSize: 20, height: 1.7, color: Colors.white))),
       ]));
     } else {
       //Yeah - we have some data !
+      Widget widgetToDisplay;
+      if (_currentIndex == null) {
+        widgetToDisplay = Container(
+            // height: screenHeight * 0.4,
+            padding: const EdgeInsets.all(10.0),
+            child: Center(
+                child: Text(
+                    "Merci de sélectionner une carte en dessous ou d'en choisir une au hasard.",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                        fontSize: 20, height: 1.7, color: Colors.white))));
+      } else {
+        final cardData = _allCardsData.elementAt(_currentIndex);
+        widgetToDisplay = Container(
+            padding: const EdgeInsets.all(10.0),
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(color: Colors.black, width: 2.0),
+                color: Colors.white),
+            // height: screenHeight * 0.1,
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Stack(
+                children: [
+                  Center(
+                    child: Text(
+                      cardData.question,
+                      style: TextStyle(
+                          fontSize: 28.0, color: cardData.category.color()),
+                    ),
+                  ),
+                  Positioned.fill(
+                      child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        color: cardData.category.color(),
+                      ),
+                      child: Text(
+                        cardData.category.title(),
+                        style: TextStyle(
+                          fontSize: 22.0,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  )),
+                ],
+              ),
+            ));
+      }
       body = Column(
         children: [
           Expanded(
-            flex: 5,
-            child: Container(
-                // height: screenHeight * 0.4,
-                padding: const EdgeInsets.all(10.0),
-                color: Colors.orangeAccent,
-                child: (_currentIndex == null)
-                    ? Center(
-                        child: Flexible(
-                            child: Text(
-                                "Merci de sélectionner une carte en dessous ou d'en choisir une au hasard.",
-                                textAlign: TextAlign.center,
-                                style: TextStyle(
-                                    fontSize: 20,
-                                    height: 1.7,
-                                    color: Colors.white))),
-                      )
-                    :
-                    //TODO
-                    Container(child: Text('TODO'))),
+            flex: 4,
+            child: widgetToDisplay,
           ),
           SizedBox(
-            height: 20.0,
+            height: screenHeight * 0.05,
           ),
           Expanded(
-              flex: 2,
-              child: Container(
-                // height: screenHeight * 0.1,
-                color: Colors.greenAccent,
+              flex: 1,
+              child: AnimationLimiter(
+                child: ScrollablePositionedList.builder(
+                  physics: BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics()),
+                  // clipBehavior: Clip.none,
+                  scrollDirection: Axis.horizontal,
+                  itemScrollController: itemScrollController,
+                  itemPositionsListener: itemPositionsListener,
+                  // shrinkWrap: true,
+                  itemCount: _allCardsData.length,
+                  itemBuilder: (BuildContext context, int index) =>
+                      AnimationConfiguration.staggeredList(
+                    position: index,
+                    duration: const Duration(milliseconds: 375),
+                    child: Align(
+                      widthFactor: (_currentIndex == index) ? 1.25 : 0.4,
+                      alignment: Alignment.topCenter,
+                      child: SlideAnimation(
+                        horizontalOffset: 50.0,
+                        child: FadeInAnimation(
+                          child: GestureDetector(
+                              child: EssentielCardWidget(
+                                  index: index,
+                                  selected: _currentIndex == index,
+                                  noCardSelected: _currentIndex == null,
+                                  cardData: _allCardsData.elementAt(index)),
+                              onTap: () {
+                                //TODO Animate card selection
+                                if (_currentIndex == index) {
+                                  setState(() {
+                                    _currentIndex = null;
+                                  });
+                                } else {
+                                  _jumpTo(index);
+                                }
+                              }),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
               ))
         ],
       );
-      //FIXME
-      // body = StackedCardCarousel(
-      //   pageController: _cardsController,
-      //   onPageChanged: (int pageIndex) {
-      //     _currentPageIndex = pageIndex;
-      //     // if (currentPageIndex)
-      //   },
-      //   type: StackedCardCarouselType.cardsStack,
-      //   items: _allCards.toList(),
-      // );
     }
 
     return Scaffold(
@@ -223,8 +288,8 @@ class _GameV3State extends State<GameV3> {
                   alignment: Alignment.center,
                   child: Container(
                     padding: EdgeInsets.only(
-                        top: screenHeight * 0.1,
-                        bottom: screenHeight * 0.1,
+                        top: screenHeight * 0.2,
+                        bottom: screenHeight * 0.13,
                         left: 10.0,
                         right: 10.0),
                     // height: screenHeight * 0.5,
@@ -234,7 +299,7 @@ class _GameV3State extends State<GameV3> {
           ],
         ),
       ),
-      floatingActionButton: (_allCards != null && _allCards.isNotEmpty)
+      floatingActionButton: (_allCardsData != null && _allCardsData.isNotEmpty)
           ? FloatingActionButton.extended(
               onPressed: () {
                 _randomDraw();
@@ -248,13 +313,12 @@ class _GameV3State extends State<GameV3> {
   }
 
   void _randomDraw() {
-    //TODO
-    final _numberOfCards = _allCards.length;
-    // final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
-    //     0, _numberOfCards, _currentPageIndex);
-    // debugPrint(
-    //     "_currentPageIndex=$_currentPageIndex / randomPick=$randomPick / _numberOfCards=$_numberOfCards");
-    // _jumpTo(randomPick);
+    final _numberOfCards = _allCardsData.length;
+    final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
+        0, _numberOfCards, _currentIndex);
+    debugPrint(
+        "_currentPageIndex=$_currentIndex / randomPick=$randomPick / _numberOfCards=$_numberOfCards");
+    _jumpTo(randomPick);
   }
 
   _onBottom(Widget child) => Positioned.fill(
@@ -264,9 +328,57 @@ class _GameV3State extends State<GameV3> {
         ),
       );
 
-  _jumpTo(int index) {
-    //TODO
-    // _cardsController.animateToPage(index,
-    //     curve: Curves.ease, duration: Duration(milliseconds: 500));
+  _jumpTo(int index) => itemScrollController
+          .scrollTo(
+              index: max(0, index - 3),
+              duration: Duration(seconds: 1),
+              curve: Curves.easeInOutCubic)
+          .whenComplete(() {
+        setState(() {
+          _currentIndex = index;
+        });
+      });
+}
+
+class EssentielCardWidget extends StatelessWidget {
+  final EssentielCardData cardData;
+  final bool selected;
+  final bool noCardSelected;
+  final int index;
+
+  const EssentielCardWidget(
+      {Key key,
+      @required this.index,
+      @required this.cardData,
+      this.selected = false,
+      this.noCardSelected = false})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
+    return Transform.scale(
+        scale: selected ? 1.0 : 0.6,
+        child: ClipRRect(
+            borderRadius: BorderRadius.circular(8.0),
+            child: ColorFiltered(
+                colorFilter: ColorFilter.mode(
+                    Colors.grey,
+                    (noCardSelected || selected)
+                        ? BlendMode.dstOver
+                        : BlendMode.darken),
+                child: Container(
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: Colors.black, width: 2.0),
+                      color: Colors.white),
+                  padding: EdgeInsets.all(15),
+                  height: screenHeight * 0.3,
+                  width: screenWidth * 0.3,
+                  child: Image.asset("assets/images/essentiel_logo.svg.png",
+                      fit: BoxFit.fill),
+                ))));
   }
 }

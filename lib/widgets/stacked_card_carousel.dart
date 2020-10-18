@@ -134,15 +134,18 @@ class _StackedCardCarouselState extends State<StackedCardCarousel> {
           case StackedCardCarouselType.cardsStack:
           default:
             double scale = 1.0;
-            // final newPageValue = min(5.0, _pageValue);
             if (item.key - _pageValue < 0) {
               final double factor = 1 + (item.key - _pageValue);
               scale = 0.95 + (factor * 0.1 / 2);
             }
+
+            final positionedTop = -position + (20.0 * item.key);
+
             debugPrint(
-                "item.key=${item.key} / _pageValue=$_pageValue / scale=$scale / position=$position / -position + (20.0 * item.key): ${-position + (20.0 * item.key)}");
+                "item.key=${item.key} / _pageValue=$_pageValue / scale=$scale / position=$position / positionedTop: $positionedTop");
+
             return Positioned.fill(
-              top: -position + (20.0 * item.key),
+              top: positionedTop,
               child: Align(
                 alignment: Alignment.topCenter,
                 child: Wrap(

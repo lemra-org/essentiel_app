@@ -1,6 +1,7 @@
-import 'package:essentiel/game/game_v2.dart';
+import 'package:essentiel/game/game_v3.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -32,8 +33,11 @@ class MyApp extends StatelessWidget {
         // the app on. For desktop platforms, the controls will be smaller and
         // closer together (more dense) than on mobile platforms.
         visualDensity: VisualDensity.adaptivePlatformDensity,
+        textTheme: GoogleFonts.chilankaTextTheme(
+          Theme.of(context).textTheme,
+        ),
       ),
-      home: GameV2(title: 'Jeu Essentiel'),
+      home: GameV3(),
     );
   }
 }

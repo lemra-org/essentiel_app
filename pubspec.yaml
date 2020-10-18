@@ -45,6 +45,9 @@ dependencies:
   swipeable_card: ^1.0.2
   stacked_card_carousel: ^0.0.2+1
   gsheets: ^0.2.5
+  circle_list: ^1.0.4
+  flutter_staggered_animations: ^0.1.2
+  scrollable_positioned_list: ^0.1.8
 
 dev_dependencies:
   flutter_test:

@@ -1,13 +1,15 @@
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:essentiel/game/cards.dart';
 import 'package:essentiel/resources/category.dart';
 import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
+import 'package:essentiel/widgets/particles.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shake/shake.dart';
@@ -254,51 +256,52 @@ class _GameV3State extends State<GameV3> {
       );
     }
 
-    return Scaffold(
-      body: SafeArea(
-        child: Stack(
-          children: [
-            Positioned.fill(child: AnimatedBackground()),
-            _onBottom(AnimatedWave(
-              height: 180,
-              speed: 1.0,
-            )),
-            _onBottom(AnimatedWave(
-              height: 120,
-              speed: 0.9,
-              offset: pi,
-            )),
-            _onBottom(AnimatedWave(
-              height: 220,
-              speed: 1.2,
-              offset: pi / 2,
-            )),
-            Align(
-              alignment: Alignment.topLeft,
-              child: Padding(
-                padding: EdgeInsets.only(top: screenHeight * 0.03, left: 10.0),
-                child: Text(
-                  title,
-                  style: TextStyle(fontSize: 30.0, color: Colors.white),
-                ),
-              ),
+    final toDisplay = Stack(
+      children: [
+        Positioned.fill(child: AnimatedBackground()),
+        Positioned.fill(child: Particles(10)),
+        _onBottom(AnimatedWave(
+          height: 180,
+          speed: 1.0,
+        )),
+        _onBottom(AnimatedWave(
+          height: 120,
+          speed: 0.9,
+          offset: pi,
+        )),
+        _onBottom(AnimatedWave(
+          height: 220,
+          speed: 1.2,
+          offset: pi / 2,
+        )),
+        Align(
+          alignment: Alignment.topLeft,
+          child: Padding(
+            padding: EdgeInsets.only(top: screenHeight * 0.085, left: 10.0),
+            child: Text(
+              title,
+              style: TextStyle(fontSize: 30.0, color: Colors.white),
             ),
-            Positioned.fill(
-              child: Align(
-                  alignment: Alignment.center,
-                  child: Container(
-                    padding: EdgeInsets.only(
-                        top: screenHeight * 0.2,
-                        bottom: screenHeight * 0.13,
-                        left: 10.0,
-                        right: 10.0),
-                    // height: screenHeight * 0.5,
-                    child: body,
-                  )),
-            ),
-          ],
+          ),
         ),
-      ),
+        Positioned.fill(
+          child: Align(
+              alignment: Alignment.center,
+              child: Container(
+                padding: EdgeInsets.only(
+                    top: screenHeight * 0.2,
+                    bottom: screenHeight * 0.13,
+                    left: 10.0,
+                    right: 10.0),
+                // height: screenHeight * 0.5,
+                child: body,
+              )),
+        ),
+      ],
+    );
+
+    return Scaffold(
+      body: toDisplay,
       floatingActionButton: (_allCardsData != null && _allCardsData.isNotEmpty)
           ? SpeedDial(
               animatedIcon: AnimatedIcons.menu_close,
@@ -360,7 +363,7 @@ class _GameV3State extends State<GameV3> {
   _jumpTo(int index) => itemScrollController
           .scrollTo(
               index: max(0, index - 3),
-              duration: Duration(seconds: 1),
+              duration: Duration(milliseconds: 500),
               curve: Curves.easeInOutCubic)
           .whenComplete(() {
         setState(() {

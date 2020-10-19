@@ -9,6 +9,7 @@ import 'package:essentiel/widgets/animated_wave.dart';
 import 'package:essentiel/widgets/particles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
+import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -91,6 +92,8 @@ class _GameV3State extends State<GameV3> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    final categoryValues = Category.values;
+
     Widget body;
     if (_errorWhileLoadingData != null) {
       //Oh no!
@@ -115,7 +118,15 @@ class _GameV3State extends State<GameV3> {
       //Not initialized yet
       body = Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        CircularProgressIndicator(),
+        SpinKitCubeGrid(
+          size: 100.0,
+          itemBuilder: (BuildContext context, int idx) => DecoratedBox(
+              decoration: BoxDecoration(
+                  color: categoryValues[idx < categoryValues.length
+                          ? idx
+                          : (idx % categoryValues.length)]
+                      .color())),
+        ),
         SizedBox(
           height: 20.0,
         ),
@@ -259,7 +270,9 @@ class _GameV3State extends State<GameV3> {
     final toDisplay = Stack(
       children: [
         Positioned.fill(child: AnimatedBackground()),
-        Positioned.fill(child: Particles(10)),
+        (_allCardsData != null)
+            ? Positioned.fill(child: Particles(10))
+            : Container(),
         _onBottom(AnimatedWave(
           height: 180,
           speed: 1.0,

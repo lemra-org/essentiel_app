@@ -300,16 +300,45 @@ class _GameV3State extends State<GameV3> {
         ),
       ),
       floatingActionButton: (_allCardsData != null && _allCardsData.isNotEmpty)
-          ? FloatingActionButton.extended(
-              onPressed: () {
-                _randomDraw();
-              },
-              label: Text("Je choisis une carte au hasard"),
-              icon: FaIcon(FontAwesomeIcons.random),
-              backgroundColor: Category.EVANGELISATION.color(),
+          ? SpeedDial(
+              animatedIcon: AnimatedIcons.menu_close,
+              animatedIconTheme: IconThemeData(size: 22.0),
+              overlayColor: Colors.black,
+              overlayOpacity: 0.5,
+              tooltip: 'Menu',
+              heroTag: 'essentiel-speed-dial-hero-tag',
+              elevation: 8.0,
+              shape: CircleBorder(),
+              foregroundColor: Colors.white,
+              backgroundColor: Colors.lightGreen,
+              curve: Curves.bounceIn,
+              children: [
+                SpeedDialChild(
+                    child: Icon(Icons.shuffle),
+                    backgroundColor: Category.EVANGELISATION.color(),
+                    label: 'Choisir une carte au hasard',
+                    labelBackgroundColor: Category.EVANGELISATION.color(),
+                    labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
+                    onTap: _randomDraw),
+                SpeedDialChild(
+                  child: Icon(Icons.autorenew_rounded),
+                  backgroundColor: Category.PRIERE.color(),
+                  label: 'Mélanger les cartes',
+                  labelBackgroundColor: Category.PRIERE.color(),
+                  labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
+                  onTap: _shuffleCards,
+                ),
+              ],
             )
           : null,
     );
+  }
+
+  void _shuffleCards() {
+    setState(() {
+      _currentIndex = null;
+      _allCardsData.shuffle();
+    });
   }
 
   void _randomDraw() {
@@ -317,7 +346,7 @@ class _GameV3State extends State<GameV3> {
     final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
         0, _numberOfCards, _currentIndex);
     debugPrint(
-        "_currentPageIndex=$_currentIndex / randomPick=$randomPick / _numberOfCards=$_numberOfCards");
+        "_numberOfCards=$_numberOfCards / _currentPageIndex=$_currentIndex / randomPick=$randomPick");
     _jumpTo(randomPick);
   }
 

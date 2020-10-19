@@ -48,6 +48,8 @@ dependencies:
   circle_list: ^1.0.4
   flutter_staggered_animations: ^0.1.2
   scrollable_positioned_list: ^0.1.8
+  flutter_speed_dial: ^1.2.5
+  supercharged: ^1.10.0
 
 dev_dependencies:
   flutter_test:

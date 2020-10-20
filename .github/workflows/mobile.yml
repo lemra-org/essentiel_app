@@ -20,15 +20,12 @@ jobs:
           channel: 'stable'
       - name: Get Flutter packages
         run: |
-          cd mobile
           flutter pub get
       - name: Run Flutter tests
         run: |
-          cd mobile
           flutter test
       - name: Build APK
         run: |
-          cd mobile
           flutter build apk --debug
       - name: Archive artifacts
         uses: actions/upload-artifact@v2

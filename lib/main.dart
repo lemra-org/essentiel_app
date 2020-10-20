@@ -1,4 +1,4 @@
-import 'package:essentiel/game/game_v3.dart';
+import 'package:essentiel/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
@@ -37,7 +37,7 @@ class MyApp extends StatelessWidget {
           Theme.of(context).textTheme,
         ),
       ),
-      home: GameV3(),
+      home: Game(),
     );
   }
 }

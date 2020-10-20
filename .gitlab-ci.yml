@@ -17,7 +17,7 @@ cache:
 validate_dependencies:
   stage: build
   script:
-    - flutter pub run dependency_validator --ignore coverage,dartdoc
+    - flutter pub run dependency_validator --ignore coverage,dartdoc,flutter_launcher_icons,flutter_launcher_name
 
 build_android:
   stage: build

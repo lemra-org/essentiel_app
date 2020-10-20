@@ -34,4 +34,4 @@ jobs:
           path: mobile/build/app/outputs/apk/debug/app-*.apk
       - name: Check dependencies
         run: |
-          flutter pub run dependency_validator --ignore coverage,dartdoc
+          flutter pub run dependency_validator --ignore coverage,dartdoc,flutter_launcher_icons,flutter_launcher_name

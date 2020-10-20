@@ -112,7 +112,7 @@ class _GameState extends State<Game> {
                 "Une erreur s'est produite. Merci de réessayer dans quelques instants.\n\n$_errorWhileLoadingData",
                 textAlign: TextAlign.center,
                 style:
-                    TextStyle(fontSize: 20, height: 1.7, color: Colors.white))),
+                    TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
       ]));
     } else if (_allCardsData == null) {
       //Not initialized yet
@@ -135,7 +135,7 @@ class _GameState extends State<Game> {
                 "Initialisation en cours. Merci de patienter quelques instants...",
                 textAlign: TextAlign.center,
                 style:
-                    TextStyle(fontSize: 20, height: 1.7, color: Colors.white))),
+                    TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
       ]));
     } else if (_allCardsData.isEmpty) {
       //No data
@@ -154,7 +154,7 @@ class _GameState extends State<Game> {
                 "Aucune donnée trouvée pour initialiser le jeu. Merci de réessayer dans quelques instants.",
                 textAlign: TextAlign.center,
                 style:
-                    TextStyle(fontSize: 20, height: 1.7, color: Colors.white))),
+                    TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
       ]));
     } else {
       //Yeah - we have some data !
@@ -165,10 +165,10 @@ class _GameState extends State<Game> {
             padding: const EdgeInsets.all(10.0),
             child: Center(
                 child: Text(
-                    "Merci de sélectionner une carte en dessous ou d'en choisir une au hasard.",
+                    "Sélectionnez une carte ou choisissez-en une au hasard à l'aide du menu tout en bas.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                        fontSize: 20, height: 1.7, color: Colors.white))));
+                        fontSize: 24, height: 1.7, color: Colors.white))));
       } else {
         final cardData = _allCardsData.elementAt(_currentIndex);
         widgetToDisplay = Container(

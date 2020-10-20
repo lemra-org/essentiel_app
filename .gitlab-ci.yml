@@ -14,6 +14,11 @@ cache:
   paths:
     - ~/.pub-cache
 
+validate_dependencies:
+  stage: build
+  script:
+    - flutter pub run dependency_validator --ignore coverage,dartdoc
+
 build_android:
   stage: build
   script:

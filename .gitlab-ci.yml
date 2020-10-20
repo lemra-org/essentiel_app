@@ -1,0 +1,51 @@
+stages:
+  - build
+  - test
+
+default:
+  image: cirrusci/flutter:beta # Latest 'stable' Flutter tag
+
+  before_script:
+    - flutter packages get
+
+cache:
+  key: "cache-$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG" # per branch caching
+  untracked: true
+  paths:
+    - ~/.pub-cache
+
+build_android:
+  stage: build
+  script:
+    - flutter build apk --debug
+  cache:
+    key: "cache-$CI_PROJECT_PATH_SLUG-$CI_COMMIT_REF_SLUG" # per branch caching
+    untracked: true
+    paths:
+      - ~/.pub-cache
+      - /opt/android-sdk-linux
+  artifacts:
+    paths:
+      - build/**/outputs/**/*.apk
+      - build/**/outputs/**/*.aab
+      - build/**/outputs/**/mapping.txt
+      - flutter_drive.log
+
+build_ios:
+  stage: build
+  script:
+    - flutter build ios || true # Skipped for now
+    - cd ios
+    - xcodebuild clean archive -workspace Runner.xcworkspace -scheme Runner -archivePath RunnerArchive || true # Skipped for now
+    - xcodebuild -exportArchive -archivePath RunnerArchive.xcarchive -exportOptionsPlist ExportOptions.plist -exportPath ./build || true # Skipped for now
+  artifacts:
+    paths:
+      - ios/build/*.ipa
+      - /tmp/xcodebuild_logs/*.log
+      - flutter_drive.log
+
+
+flutter_test:
+  stage: test
+  script:
+    - flutter test

@@ -32,3 +32,6 @@ jobs:
         with:
           name: APKs
           path: mobile/build/app/outputs/apk/debug/app-*.apk
+      - name: Check dependencies
+        run: |
+          flutter pub run dependency_validator --ignore coverage,dartdoc

@@ -28,7 +28,7 @@ dependencies:
 #  # Use with the CupertinoIcons class for iOS style icons.
 #  cupertino_icons: ^1.0.0
   google_fonts: ^1.1.1
-  font_awesome_flutter: ^8.10.0
+#  font_awesome_flutter: ^8.10.0
 #  flutter_stack_card: ^0.2.0+1
 #  flutter_tindercard: ^0.2.0
 #  card_selector: ^0.1.0

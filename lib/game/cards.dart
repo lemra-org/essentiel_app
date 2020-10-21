@@ -6,9 +6,15 @@ class EssentielCardData {
   final Category category;
   final String question;
   final Widget header;
+  final bool isForCouples;
+  final bool isForFamilies;
 
   const EssentielCardData(
-      {@required this.category, @required this.question, this.header});
+      {@required this.category,
+      @required this.question,
+      this.header,
+      this.isForCouples = false,
+      this.isForFamilies = false});
 
   factory EssentielCardData.fromGSheet(Map<String, dynamic> json) {
     final image = json['Image'];
@@ -18,7 +24,11 @@ class EssentielCardData {
         question: json['Question'],
         header: (image != null && image.toString().trim().isNotEmpty)
             ? Image.network(image)
-            : null);
+            : null,
+        isForCouples: json["Pour Couples"]?.toString()?.toLowerCase() ==
+            "Oui".toLowerCase(),
+        isForFamilies: json["Pour Familles"]?.toString()?.toLowerCase() ==
+            "Oui".toLowerCase());
   }
 }
 

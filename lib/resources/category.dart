@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
+const CATEGORY_FILTER_PREF_KEY = "categories_selected";
+
 enum Category {
   VIE_FRATERNELLE,
   PRIERE,

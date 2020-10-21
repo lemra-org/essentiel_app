@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:essentiel/about.dart';
 import 'package:essentiel/game/cards.dart';
 import 'package:essentiel/resources/category.dart';
 import 'package:essentiel/utils.dart';

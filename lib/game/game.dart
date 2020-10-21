@@ -8,6 +8,7 @@ import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
 import 'package:essentiel/widgets/particles.dart';
+import 'package:filter_list/filter_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -15,6 +16,7 @@ import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shake/shake.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 const _credentials = r'''
 {
@@ -42,9 +44,13 @@ class Game extends StatefulWidget {
 }
 
 class _GameState extends State<Game> {
+  List<EssentielCardData> _rawCardsData;
   List<EssentielCardData> _allCardsData;
   Object _errorWhileLoadingData;
   int _currentIndex;
+  bool _doShuffleCards;
+  bool _applyFilter;
+  List<String> _categoryListFilter;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -53,8 +59,12 @@ class _GameState extends State<Game> {
   @override
   void initState() {
     super.initState();
+    _doShuffleCards = false;
+    _applyFilter = false;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final prefs = await SharedPreferences.getInstance();
+      final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
       final gsheets = GSheets(_credentials);
       gsheets
           .spreadsheet(_spreadsheetId)
@@ -73,12 +83,20 @@ class _GameState extends State<Game> {
           .then((cardData) {
         setState(() {
           _errorWhileLoadingData = null;
-          _allCardsData = cardData;
+          _doShuffleCards = false;
+          _applyFilter = false;
+          _categoryListFilter = categoryListFilter;
+          _rawCardsData = cardData.toList(growable: false);
+          _allCardsData = _filter(_categoryListFilter);
         });
       }).catchError((e) {
         setState(() {
           _errorWhileLoadingData = e;
+          _rawCardsData = null;
           _allCardsData = null;
+          _doShuffleCards = false;
+          _applyFilter = false;
+          _categoryListFilter = categoryListFilter;
         });
       });
     });
@@ -115,7 +133,7 @@ class _GameState extends State<Game> {
                 style:
                     TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
       ]));
-    } else if (_allCardsData == null) {
+    } else if (_doShuffleCards || _applyFilter || _allCardsData == null) {
       //Not initialized yet
       body = Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -133,7 +151,12 @@ class _GameState extends State<Game> {
         ),
         Flexible(
             child: Text(
-                "Initialisation en cours. Merci de patienter quelques instants...",
+                (_doShuffleCards
+                        ? "Mélange de cartes"
+                        : _applyFilter
+                            ? "Filtrage des catégories de cartes"
+                            : "Initialisation") +
+                    " en cours. Merci de patienter quelques instants...",
                 textAlign: TextAlign.center,
                 style:
                     TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
@@ -253,6 +276,8 @@ class _GameState extends State<Game> {
                                 if (_currentIndex == index) {
                                   setState(() {
                                     _currentIndex = null;
+                                    _doShuffleCards = false;
+                                    _applyFilter = false;
                                   });
                                 } else {
                                   _jumpTo(index);
@@ -291,10 +316,11 @@ class _GameState extends State<Game> {
         Align(
           alignment: Alignment.topLeft,
           child: Padding(
-            padding: EdgeInsets.only(top: screenHeight * 0.085, left: 10.0),
+            padding: EdgeInsets.only(
+                top: screenHeight * 0.085, left: 10.0, right: 10.0),
             child: Text(
               title,
-              style: TextStyle(fontSize: 30.0, color: Colors.white),
+              style: TextStyle(fontSize: 28.0, color: Colors.white),
             ),
           ),
         ),
@@ -314,9 +340,33 @@ class _GameState extends State<Game> {
       ],
     );
 
+    if (_doShuffleCards) {
+      Future.delayed(Duration(seconds: 1), () {
+        setState(() {
+          _currentIndex = null;
+          _allCardsData.shuffle();
+          _doShuffleCards = false;
+          _applyFilter = false;
+        });
+      });
+    } else if (_applyFilter) {
+      Future.delayed(Duration(seconds: 1), () {
+        setState(() {
+          _currentIndex = null;
+          _allCardsData = _filter(_categoryListFilter);
+          _doShuffleCards = false;
+          _applyFilter = false;
+        });
+      });
+    }
+
+    final allCategoryFilters =
+        categoryValues.map((category) => category.title()).toList();
+    allCategoryFilters.addAll(["Familles", "Couples"]);
+
     return Scaffold(
       body: toDisplay,
-      floatingActionButton: (_allCardsData != null && _allCardsData.isNotEmpty)
+      floatingActionButton: (_rawCardsData != null && _rawCardsData.isNotEmpty)
           ? SpeedDial(
               animatedIcon: AnimatedIcons.menu_close,
               animatedIconTheme: IconThemeData(size: 22.0),
@@ -331,19 +381,59 @@ class _GameState extends State<Game> {
               curve: Curves.bounceIn,
               children: [
                 SpeedDialChild(
-                    child: Icon(Icons.shuffle),
+                    child: Icon(Icons.find_replace_outlined),
                     backgroundColor: Category.EVANGELISATION.color(),
                     label: 'Choisir une carte au hasard',
                     labelBackgroundColor: Category.EVANGELISATION.color(),
                     labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
                     onTap: _randomDraw),
                 SpeedDialChild(
-                  child: Icon(Icons.autorenew_rounded),
+                  child: Icon(Icons.shuffle_outlined),
                   backgroundColor: Category.PRIERE.color(),
                   label: 'Mélanger les cartes',
                   labelBackgroundColor: Category.PRIERE.color(),
                   labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
                   onTap: _shuffleCards,
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.filter_alt_sharp),
+                  backgroundColor: Category.FORMATION.color(),
+                  label: 'Filter les catégories de carte',
+                  labelBackgroundColor: Category.FORMATION.color(),
+                  labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
+                  onTap: () async {
+                    await FilterListDialog.display(context,
+                        allTextList: allCategoryFilters,
+                        height: 480,
+                        borderRadius: 20,
+                        headlineText: "Catégories de carte à afficher",
+                        hideSearchField: true,
+                        selectedTextList:
+                            _categoryListFilter ?? allCategoryFilters,
+                        onApplyButtonClick: (list) async {
+                      if (list != null) {
+                        final selectedCategories =
+                            list.map((e) => e.toString()).toList();
+                        final prefs = await SharedPreferences.getInstance();
+                        prefs.setStringList(
+                            CATEGORY_FILTER_PREF_KEY, selectedCategories);
+                        setState(() {
+                          _categoryListFilter = selectedCategories;
+                          _applyFilter = true;
+                          _doShuffleCards = false;
+                        });
+                      }
+                      Navigator.pop(context);
+                    });
+                  },
+                ),
+                SpeedDialChild(
+                  child: Icon(Icons.info_outline),
+                  backgroundColor: Category.SERVICE.color(),
+                  label: 'À propos',
+                  labelBackgroundColor: Category.SERVICE.color(),
+                  labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
+                  onTap: () => showGalleryAboutDialog(context),
                 ),
               ],
             )
@@ -351,14 +441,38 @@ class _GameState extends State<Game> {
     );
   }
 
+  List<EssentielCardData> _filter(List<String> filter) {
+    if (filter == null) {
+      return _rawCardsData;
+    }
+    if (filter.isEmpty) {
+      return List.empty(growable: true);
+    }
+    return _rawCardsData.where((cardData) {
+      if (_categoryListFilter.contains(cardData.category.title())) {
+        return true;
+      }
+      if (_categoryListFilter.contains("Familles") && cardData.isForFamilies) {
+        return true;
+      }
+      if (_categoryListFilter.contains("Couples") && cardData.isForCouples) {
+        return true;
+      }
+      return false;
+    }).toList();
+  }
+
   void _shuffleCards() {
     setState(() {
-      _currentIndex = null;
-      _allCardsData.shuffle();
+      _doShuffleCards = true;
+      _applyFilter = false;
     });
   }
 
   void _randomDraw() {
+    if (_allCardsData == null || _allCardsData.isEmpty) {
+      return;
+    }
     final _numberOfCards = _allCardsData.length;
     final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
         0, _numberOfCards, _currentIndex);
@@ -382,6 +496,8 @@ class _GameState extends State<Game> {
           .whenComplete(() {
         setState(() {
           _currentIndex = index;
+          _doShuffleCards = false;
+          _applyFilter = false;
         });
       });
 }

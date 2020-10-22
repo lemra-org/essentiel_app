@@ -5,26 +5,26 @@ import 'package:flutter/material.dart';
 class EssentielCardData {
   final Category category;
   final String question;
-  final Widget header;
   final bool isForCouples;
   final bool isForFamilies;
+  final bool isForInternalMood;
 
   const EssentielCardData(
       {@required this.category,
       @required this.question,
-      this.header,
+      this.isForInternalMood = false,
       this.isForCouples = false,
       this.isForFamilies = false});
 
   factory EssentielCardData.fromGSheet(Map<String, dynamic> json) {
     final image = json['Image'];
+    final question = json['Question'];
     return EssentielCardData(
         category: Category.values
             .firstWhere((element) => element.title() == json['Catégorie']),
-        question: json['Question'],
-        header: (image != null && image.toString().trim().isNotEmpty)
-            ? Image.network(image)
-            : null,
+        question: question,
+        isForInternalMood: question != null &&
+            question.toString().toLowerCase().contains("météo"),
         isForCouples: json["Pour Couples"]?.toString()?.toLowerCase() ==
             "Oui".toLowerCase(),
         isForFamilies: json["Pour Familles"]?.toString()?.toLowerCase() ==

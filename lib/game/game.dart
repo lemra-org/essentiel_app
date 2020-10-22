@@ -13,6 +13,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shake/shake.dart';
@@ -206,6 +207,64 @@ class _GameState extends State<Game> {
               padding: const EdgeInsets.all(8.0),
               child: Stack(
                 children: [
+                  if (cardData.isForFamilies)
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Image.asset(
+                          'assets/images/family.jpg',
+                          fit: BoxFit.scaleDown,
+                          height: 60.0,
+                          width: 60.0,
+                          // colorBlendMode: ,
+                        ),
+                      ),
+                    ),
+                  if (cardData.isForCouples)
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: Image.asset(
+                          'assets/images/couple.png',
+                          fit: BoxFit.scaleDown,
+                          height: 60.0,
+                          width: 60.0,
+                          // colorBlendMode: ,
+                        ),
+                      ),
+                    ),
+                  if (cardData.isForInternalMood)
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.wb_sunny,
+                              color: const Color(0xFFF7B900),
+                              size: 40.0,
+                            ),
+                            FaIcon(
+                              FontAwesomeIcons.cloudSun,
+                              color: const Color(0xFFb5a347),
+                              size: 35.0,
+                            ),
+                            FaIcon(
+                              FontAwesomeIcons.cloudSunRain,
+                              color: Colors.blueGrey,
+                              size: 35.0,
+                            ),
+                            FaIcon(
+                              FontAwesomeIcons.cloudRain,
+                              color: Colors.blue,
+                              size: 35.0,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ),
                   Center(
                     child: SingleChildScrollView(
                       child: Text(

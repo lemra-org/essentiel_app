@@ -39,6 +39,7 @@ dependencies:
   shared_preferences: ^0.5.12+2
   filter_list: ^0.0.5
   package_info: ^0.4.3
+  font_awesome_flutter: ^8.10.0
 
 dev_dependencies:
   flutter_test:

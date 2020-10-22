@@ -4,11 +4,8 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:package_info/package_info.dart';
 
-Future<Null> showGalleryAboutDialog(BuildContext context) async {
+Future<Null> showAppAboutDialog(BuildContext context) async {
   final PackageInfo packageInfo = await PackageInfo.fromPlatform();
-
-  final ThemeData themeData = Theme.of(context);
-  final TextStyle aboutTextStyle = themeData.textTheme.bodyText1;
 
   showAboutDialog(
     context: context,
@@ -23,7 +20,7 @@ Future<Null> showGalleryAboutDialog(BuildContext context) async {
           text: TextSpan(
             children: <TextSpan>[
               TextSpan(
-                  style: aboutTextStyle,
+                  style: Theme.of(context).textTheme.bodyText1,
                   text: 'Application pour les groupes de partage Essentiel'
                       '\nDisponible sur '
                       '${defaultTargetPlatform == TargetPlatform.iOS ? 'plusieurs plateformes' : 'iOS et Android'}.')

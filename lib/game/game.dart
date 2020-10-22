@@ -433,7 +433,7 @@ class _GameState extends State<Game> {
                   label: 'À propos',
                   labelBackgroundColor: Category.SERVICE.color(),
                   labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
-                  onTap: () => showGalleryAboutDialog(context),
+                  onTap: () => showAppAboutDialog(context),
                 ),
               ],
             )

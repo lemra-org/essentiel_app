@@ -1,5 +1,5 @@
 name: essentiel
-description: Essentiel
+description: Application pour les groupes de partage Essentiel
 
 # The following line prevents the package from being accidentally published to
 # pub.dev using `pub publish`. This is preferred for private packages.
@@ -24,32 +24,17 @@ dependencies:
   flutter:
     sdk: flutter
 
-#  # The following adds the Cupertino Icons font to your application.
-#  # Use with the CupertinoIcons class for iOS style icons.
-#  cupertino_icons: ^1.0.0
+  # The following adds the Cupertino Icons font to your application.
+  # Use with the CupertinoIcons class for iOS style icons.
+  cupertino_icons: ^1.0.0
   google_fonts: ^1.1.1
-#  font_awesome_flutter: ^8.10.0
-#  flutter_stack_card: ^0.2.0+1
-#  flutter_tindercard: ^0.2.0
-#  card_selector: ^0.1.0
-#  flutter_swiper: ^1.1.6
-#  list_wheel_scroll_view_x: ^0.0.2
-#  gradient_app_bar: ^0.1.3
-
-#  infinite_cards:
-#    git:
-#      url: https://github.com/rm3l/Flutter-InfiniteCards
   flip_card: ^0.4.4
   shake: ^0.1.0
   simple_animations: ^2.2.3
-#  swipeable_card: ^1.0.2
-#  stacked_card_carousel: ^0.0.2+1
   gsheets: ^0.2.6
-#  circle_list: ^1.0.4
   flutter_staggered_animations: ^0.1.2
   scrollable_positioned_list: ^0.1.8
   flutter_speed_dial: ^1.2.5
-#  supercharged: ^1.10.0
   flutter_spinkit: ^4.1.2+1
   shared_preferences: ^0.5.12+2
   filter_list: ^0.0.5

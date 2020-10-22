@@ -1,6 +1,6 @@
-# essentiel
+# Essentiel
 
-Essentiel
+Application pour les groupes de partage Essentiel
 
 ## Getting Started
 

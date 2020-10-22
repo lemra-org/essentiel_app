@@ -207,10 +207,16 @@ class _GameState extends State<Game> {
               child: Stack(
                 children: [
                   Center(
-                    child: Text(
-                      cardData.question,
-                      style: TextStyle(
-                          fontSize: 28.0, color: cardData.category.color()),
+                    child: SingleChildScrollView(
+                      child: Text(
+                        cardData.question,
+                        style: TextStyle(
+                            fontSize: 30.0,
+                            color: cardData.category.color(),
+                            wordSpacing: 2.0,
+                            height: 1.75),
+                        textAlign: TextAlign.center,
+                      ),
                     ),
                   ),
                   Positioned.fill(

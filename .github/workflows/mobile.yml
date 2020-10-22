@@ -46,6 +46,9 @@ jobs:
       - uses: subosito/flutter-action@v1
         with:
           channel: 'stable'
+      - name: Get Flutter packages
+        run: |
+          flutter pub get
       - name: Check dependencies
         run: |
           flutter pub run dependency_validator --ignore coverage,dartdoc,cupertino_icons,flutter_launcher_icons,flutter_launcher_name

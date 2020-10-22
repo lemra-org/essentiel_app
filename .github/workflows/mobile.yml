@@ -33,7 +33,7 @@ jobs:
         uses: actions/upload-artifact@v2
         with:
           name: essentiel_flutter_artifacts
-          path: mobile/build/app/outputs/flutter-apk/*.apk
+          path: build/app/outputs/flutter-apk/*.apk
 
   check_dependencies:
     name: Validate dependencies

@@ -410,7 +410,7 @@ class _GameState extends State<Game> {
     );
 
     if (_doShuffleCards) {
-      Future.delayed(Duration(seconds: 1), () {
+      Future.delayed(Duration(milliseconds: 500), () {
         setState(() {
           _currentIndex = null;
           _allCardsData.shuffle();
@@ -419,7 +419,7 @@ class _GameState extends State<Game> {
         });
       });
     } else if (_applyFilter) {
-      Future.delayed(Duration(seconds: 1), () {
+      Future.delayed(Duration(milliseconds: 500), () {
         setState(() {
           _currentIndex = null;
           _allCardsData = _filter(_categoryListFilter);

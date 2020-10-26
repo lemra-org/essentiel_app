@@ -190,7 +190,7 @@ class _GameState extends State<Game> {
             padding: const EdgeInsets.all(10.0),
             child: Center(
                 child: Text(
-                    "Sélectionnez une carte ou choisissez-en une au hasard à l'aide du menu tout en bas.",
+                    "Cliquez sur une carte ou choisissez-en une au hasard à l'aide du menu tout en bas.",
                     textAlign: TextAlign.center,
                     style: TextStyle(
                         fontSize: 24, height: 1.7, color: Colors.white))));
@@ -477,8 +477,7 @@ class _GameState extends State<Game> {
                         borderRadius: 20,
                         headlineText: "Catégories de carte à afficher",
                         hideSearchField: true,
-                        selectedTextList:
-                            _categoryListFilter ?? allCategoryFilters,
+                        selectedTextList: _categoryListFilter,
                         onApplyButtonClick: (list) async {
                       if (list != null) {
                         final selectedCategories =

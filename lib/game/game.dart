@@ -326,17 +326,20 @@ class _GameState extends State<Game> {
                     position: index,
                     duration: const Duration(milliseconds: 175),
                     child: Align(
-                      widthFactor: (_currentIndex == index) ? 1.25 : 0.4,
+                      // widthFactor: (_currentIndex == index) ? 1.25 : 0.4,
                       alignment: Alignment.topCenter,
                       child: SlideAnimation(
                         horizontalOffset: 50.0,
                         child: FadeInAnimation(
                           child: GestureDetector(
-                              child: EssentielCardWidget(
-                                  index: index,
-                                  selected: _currentIndex == index,
-                                  noCardSelected: _currentIndex == null,
-                                  cardData: _allCardsData.elementAt(index)),
+                              child: Container(
+                                margin: const EdgeInsets.only(left: 5.0),
+                                child: EssentielCardWidget(
+                                    index: index,
+                                    selected: _currentIndex == index,
+                                    noCardSelected: _currentIndex == null,
+                                    cardData: _allCardsData.elementAt(index)),
+                              ),
                               onTap: () {
                                 //TODO Animate card selection
                                 if (_currentIndex == index) {
@@ -556,8 +559,8 @@ class _GameState extends State<Game> {
 
   _jumpTo(int index) => itemScrollController
           .scrollTo(
-              index: max(0, index - 3),
-              duration: Duration(milliseconds: 500),
+              index: max(0, index - 1),
+              duration: Duration(milliseconds: 250),
               curve: Curves.easeInOutCubic)
           .whenComplete(() {
         setState(() {
@@ -587,9 +590,11 @@ class EssentielCardWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    return Transform.scale(
-        scale: selected ? 1.0 : 0.6,
-        child: ClipRRect(
+    return
+        // Transform.scale(
+        //   scale: selected ? 1.0 : 0.9,
+        //   child:
+        ClipRRect(
             borderRadius: BorderRadius.circular(8.0),
             child: ColorFiltered(
                 colorFilter: ColorFilter.mode(
@@ -607,6 +612,8 @@ class EssentielCardWidget extends StatelessWidget {
                   width: screenWidth * 0.3,
                   child: Image.asset("assets/images/essentiel_logo.svg.png",
                       fit: BoxFit.fill),
-                ))));
+                ))
+            // )
+            );
   }
 }

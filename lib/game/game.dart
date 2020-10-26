@@ -324,7 +324,7 @@ class _GameState extends State<Game> {
                   itemBuilder: (BuildContext context, int index) =>
                       AnimationConfiguration.staggeredList(
                     position: index,
-                    duration: const Duration(milliseconds: 375),
+                    duration: const Duration(milliseconds: 175),
                     child: Align(
                       widthFactor: (_currentIndex == index) ? 1.25 : 0.4,
                       alignment: Alignment.topCenter,

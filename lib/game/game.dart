@@ -212,7 +212,7 @@ class _GameState extends State<Game> {
                       child: Align(
                         alignment: Alignment.topRight,
                         child: Image.asset(
-                          'assets/images/family.jpg',
+                          'assets/images/family.png',
                           fit: BoxFit.scaleDown,
                           height: 60.0,
                           width: 60.0,

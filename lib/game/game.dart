@@ -18,6 +18,8 @@ import 'package:gsheets/gsheets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:showcaseview/showcase.dart';
+import 'package:showcaseview/showcase_widget.dart';
 
 const _credentials = r'''
 {
@@ -57,6 +59,9 @@ class _GameState extends State<Game> {
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
 
+  GlobalKey _cardListShowcaseKey = GlobalKey();
+  BuildContext myContext;
+
   @override
   void initState() {
     super.initState();
@@ -82,7 +87,7 @@ class _GameState extends State<Game> {
                       element.question != null &&
                       element.question.trim().isNotEmpty)
                   .toList()))
-          .then((cardData) {
+          .then((cardData) async {
         setState(() {
           _errorWhileLoadingData = null;
           _doShuffleCards = false;
@@ -90,6 +95,14 @@ class _GameState extends State<Game> {
           _categoryListFilter = categoryListFilter;
           _rawCardsData = cardData.toList(growable: false);
           _allCardsData = _filter(_categoryListFilter);
+        });
+        await AppUtils.isFirstLaunch().then((result) {
+          if (result) {
+            if (myContext != null) {
+              ShowCaseWidget.of(myContext)
+                  .startShowCase([_cardListShowcaseKey]);
+            }
+          }
         });
       }).catchError((e) {
         setState(() {
@@ -312,47 +325,58 @@ class _GameState extends State<Game> {
           ),
           Expanded(
               flex: 1,
-              child: AnimationLimiter(
-                child: ScrollablePositionedList.builder(
-                  physics: BouncingScrollPhysics(
-                      parent: AlwaysScrollableScrollPhysics()),
-                  // clipBehavior: Clip.none,
-                  scrollDirection: Axis.horizontal,
-                  itemScrollController: itemScrollController,
-                  itemPositionsListener: itemPositionsListener,
-                  // shrinkWrap: true,
-                  itemCount: _allCardsData.length,
-                  itemBuilder: (BuildContext context, int index) =>
-                      AnimationConfiguration.staggeredList(
-                    position: index,
-                    duration: const Duration(milliseconds: 175),
-                    child: Align(
-                      // widthFactor: (_currentIndex == index) ? 1.25 : 0.4,
-                      alignment: Alignment.topCenter,
-                      child: SlideAnimation(
-                        horizontalOffset: 50.0,
-                        child: FadeInAnimation(
-                          child: GestureDetector(
-                              child: Container(
-                                margin: const EdgeInsets.only(left: 5.0),
-                                child: EssentielCardWidget(
-                                    index: index,
-                                    selected: _currentIndex == index,
-                                    noCardSelected: _currentIndex == null,
-                                    cardData: _allCardsData.elementAt(index)),
-                              ),
-                              onTap: () {
-                                //TODO Animate card selection
-                                if (_currentIndex == index) {
-                                  setState(() {
-                                    _currentIndex = null;
-                                    _doShuffleCards = false;
-                                    _applyFilter = false;
-                                  });
-                                } else {
-                                  _jumpTo(index);
-                                }
-                              }),
+              child: Showcase(
+                key: _cardListShowcaseKey,
+                descTextStyle: TextStyle(
+                  fontSize: 20.0,
+                ),
+                overlayOpacity: 0.6,
+                contentPadding:
+                    const EdgeInsets.only(left: 25.0, top: 5.0, bottom: 5.0),
+                description:
+                    'Faites défiler de gauche à droite pour découvrir plus de cartes',
+                child: AnimationLimiter(
+                  child: ScrollablePositionedList.builder(
+                    physics: BouncingScrollPhysics(
+                        parent: AlwaysScrollableScrollPhysics()),
+                    // clipBehavior: Clip.none,
+                    scrollDirection: Axis.horizontal,
+                    itemScrollController: itemScrollController,
+                    itemPositionsListener: itemPositionsListener,
+                    // shrinkWrap: true,
+                    itemCount: _allCardsData.length,
+                    itemBuilder: (BuildContext context, int index) =>
+                        AnimationConfiguration.staggeredList(
+                      position: index,
+                      duration: const Duration(milliseconds: 175),
+                      child: Align(
+                        // widthFactor: (_currentIndex == index) ? 1.25 : 0.4,
+                        alignment: Alignment.topCenter,
+                        child: SlideAnimation(
+                          horizontalOffset: 50.0,
+                          child: FadeInAnimation(
+                            child: GestureDetector(
+                                child: Container(
+                                  margin: const EdgeInsets.only(left: 5.0),
+                                  child: EssentielCardWidget(
+                                      index: index,
+                                      selected: _currentIndex == index,
+                                      noCardSelected: _currentIndex == null,
+                                      cardData: _allCardsData.elementAt(index)),
+                                ),
+                                onTap: () {
+                                  //TODO Animate card selection
+                                  if (_currentIndex == index) {
+                                    setState(() {
+                                      _currentIndex = null;
+                                      _doShuffleCards = false;
+                                      _applyFilter = false;
+                                    });
+                                  } else {
+                                    _jumpTo(index);
+                                  }
+                                }),
+                          ),
                         ),
                       ),
                     ),
@@ -451,121 +475,154 @@ class _GameState extends State<Game> {
       return null;
     };
 
-    return Scaffold(
-      body: toDisplay,
-      floatingActionButton: (_rawCardsData != null && _rawCardsData.isNotEmpty)
-          ? SpeedDial(
-              animatedIcon: AnimatedIcons.menu_close,
-              animatedIconTheme: IconThemeData(size: 22.0),
-              overlayColor: Colors.black,
-              overlayOpacity: 0.5,
-              tooltip: 'Menu',
-              heroTag: 'essentiel-speed-dial-hero-tag',
-              elevation: 8.0,
-              shape: CircleBorder(),
-              foregroundColor: Colors.white,
-              backgroundColor: Colors.lightGreen,
-              curve: Curves.bounceIn,
-              children: [
-                SpeedDialChild(
-                  child: Icon(Icons.info_outline),
-                  backgroundColor: Category.SERVICE.color(),
-                  label: 'À propos',
-                  labelBackgroundColor: Category.SERVICE.color(),
-                  labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
-                  onTap: () => showAppAboutDialog(context),
-                ),
-                SpeedDialChild(
-                    child: Icon(Icons.filter_alt_sharp),
-                    backgroundColor: Category.FORMATION.color(),
-                    label: 'Filter les catégories de carte',
-                    labelBackgroundColor: Category.FORMATION.color(),
-                    labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
-                    onTap: () async => showDialog(
-                        context: context,
-                        barrierDismissible: false,
-                        builder: (BuildContext ctx) => CategorySelectorDialog(
-                              title: Text(
-                                'Catégories à afficher',
-                                style: TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 20.0),
-                              ),
-                              all: allCategoryFilters,
-                              selected: _categoryListFilter,
-                              textBackgroundColorProvider:
-                                  (String category, bool isSelected) {
-                                return isSelected
-                                    ? chipColorFn(category)
-                                    : Colors.grey[200];
-                              },
-                              textColorProvider:
-                                  (String category, bool isSelected) {
-                                return isSelected
-                                    ? Colors.white
-                                    : chipColorFn(category);
-                              },
-                              callback:
-                                  (List<String> selectedCategories) async {
-                                debugPrint(
-                                    "selectedCategories: $selectedCategories");
-                                if (selectedCategories != null &&
-                                    selectedCategories.isNotEmpty) {
-                                  final prefs =
-                                      await SharedPreferences.getInstance();
-                                  prefs.setStringList(CATEGORY_FILTER_PREF_KEY,
-                                      selectedCategories);
-                                  setState(() {
-                                    _categoryListFilter = selectedCategories;
-                                    _applyFilter = true;
-                                    _doShuffleCards = false;
-                                  });
-                                }
-                              },
-                            ))
-                    // onTap: () async {
-                    //   await FilterListDialog.display(context,
-                    //       allTextList: allCategoryFilters,
-                    //       height: 480,
-                    //       borderRadius: 20,
-                    //       headlineText: "Catégories de carte à afficher",
-                    //       hideSearchField: true,
-                    //       selectedTextList: _categoryListFilter,
-                    //       onApplyButtonClick: (list) async {
-                    //     if (list != null) {
-                    //       final selectedCategories =
-                    //           list.map((e) => e.toString()).toList();
-                    //       final prefs = await SharedPreferences.getInstance();
-                    //       prefs.setStringList(
-                    //           CATEGORY_FILTER_PREF_KEY, selectedCategories);
-                    //       setState(() {
-                    //         _categoryListFilter = selectedCategories;
-                    //         _applyFilter = true;
-                    //         _doShuffleCards = false;
-                    //       });
-                    //     }
-                    //     Navigator.pop(context);
-                    //   });
-                    // },
-                    ),
-                SpeedDialChild(
-                  child: Icon(Icons.shuffle_outlined),
-                  backgroundColor: Category.PRIERE.color(),
-                  label: 'Mélanger les cartes',
-                  labelBackgroundColor: Category.PRIERE.color(),
-                  labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
-                  onTap: _shuffleCards,
-                ),
-                SpeedDialChild(
-                    child: Icon(Icons.find_replace_outlined),
-                    backgroundColor: Category.EVANGELISATION.color(),
-                    label: 'Choisir une carte au hasard',
-                    labelBackgroundColor: Category.EVANGELISATION.color(),
-                    labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
-                    onTap: _randomDraw),
-              ],
-            )
-          : null,
+    return ShowCaseWidget(
+      onStart: (index, key) {
+        debugPrint('onStart: $index, $key');
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          itemScrollController
+              .scrollTo(
+                  index: min(5, _allCardsData.length - 1),
+                  duration: Duration(seconds: 1),
+                  curve: Curves.easeInOutCubic)
+              .whenComplete(() async {
+            Future.delayed(
+                Duration(seconds: 1),
+                () => itemScrollController.scrollTo(
+                    index: 0,
+                    duration: Duration(seconds: 1),
+                    curve: Curves.easeInOutCubic));
+          });
+        });
+      },
+      builder: Builder(
+        builder: (ctx) {
+          myContext = ctx;
+          return Scaffold(
+            body: toDisplay,
+            floatingActionButton: (_rawCardsData != null &&
+                    _rawCardsData.isNotEmpty)
+                ? SpeedDial(
+                    animatedIcon: AnimatedIcons.menu_close,
+                    animatedIconTheme: IconThemeData(size: 22.0),
+                    overlayColor: Colors.black,
+                    overlayOpacity: 0.5,
+                    tooltip: 'Menu',
+                    heroTag: 'essentiel-speed-dial-hero-tag',
+                    elevation: 8.0,
+                    shape: CircleBorder(),
+                    foregroundColor: Colors.white,
+                    backgroundColor: Colors.lightGreen,
+                    curve: Curves.bounceIn,
+                    children: [
+                      SpeedDialChild(
+                        child: Icon(Icons.info_outline),
+                        backgroundColor: Category.SERVICE.color(),
+                        label: 'À propos',
+                        labelBackgroundColor: Category.SERVICE.color(),
+                        labelStyle:
+                            TextStyle(fontSize: 18.0, color: Colors.white),
+                        onTap: () => showAppAboutDialog(context),
+                      ),
+                      SpeedDialChild(
+                          child: Icon(Icons.filter_alt_sharp),
+                          backgroundColor: Category.FORMATION.color(),
+                          label: 'Filter les catégories de carte',
+                          labelBackgroundColor: Category.FORMATION.color(),
+                          labelStyle:
+                              TextStyle(fontSize: 18.0, color: Colors.white),
+                          onTap: () async => showDialog(
+                              context: context,
+                              barrierDismissible: false,
+                              builder: (BuildContext ctx) =>
+                                  CategorySelectorDialog(
+                                    title: Text(
+                                      'Catégories à afficher',
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 20.0),
+                                    ),
+                                    all: allCategoryFilters,
+                                    selected: _categoryListFilter,
+                                    textBackgroundColorProvider:
+                                        (String category, bool isSelected) {
+                                      return isSelected
+                                          ? chipColorFn(category)
+                                          : Colors.grey[200];
+                                    },
+                                    textColorProvider:
+                                        (String category, bool isSelected) {
+                                      return isSelected
+                                          ? Colors.white
+                                          : chipColorFn(category);
+                                    },
+                                    callback: (List<String>
+                                        selectedCategories) async {
+                                      debugPrint(
+                                          "selectedCategories: $selectedCategories");
+                                      if (selectedCategories != null &&
+                                          selectedCategories.isNotEmpty) {
+                                        final prefs = await SharedPreferences
+                                            .getInstance();
+                                        prefs.setStringList(
+                                            CATEGORY_FILTER_PREF_KEY,
+                                            selectedCategories);
+                                        setState(() {
+                                          _categoryListFilter =
+                                              selectedCategories;
+                                          _applyFilter = true;
+                                          _doShuffleCards = false;
+                                        });
+                                      }
+                                    },
+                                  ))
+                          // onTap: () async {
+                          //   await FilterListDialog.display(context,
+                          //       allTextList: allCategoryFilters,
+                          //       height: 480,
+                          //       borderRadius: 20,
+                          //       headlineText: "Catégories de carte à afficher",
+                          //       hideSearchField: true,
+                          //       selectedTextList: _categoryListFilter,
+                          //       onApplyButtonClick: (list) async {
+                          //     if (list != null) {
+                          //       final selectedCategories =
+                          //           list.map((e) => e.toString()).toList();
+                          //       final prefs = await SharedPreferences.getInstance();
+                          //       prefs.setStringList(
+                          //           CATEGORY_FILTER_PREF_KEY, selectedCategories);
+                          //       setState(() {
+                          //         _categoryListFilter = selectedCategories;
+                          //         _applyFilter = true;
+                          //         _doShuffleCards = false;
+                          //       });
+                          //     }
+                          //     Navigator.pop(context);
+                          //   });
+                          // },
+                          ),
+                      SpeedDialChild(
+                        child: Icon(Icons.shuffle_outlined),
+                        backgroundColor: Category.PRIERE.color(),
+                        label: 'Mélanger les cartes',
+                        labelBackgroundColor: Category.PRIERE.color(),
+                        labelStyle:
+                            TextStyle(fontSize: 18.0, color: Colors.white),
+                        onTap: _shuffleCards,
+                      ),
+                      SpeedDialChild(
+                          child: Icon(Icons.find_replace_outlined),
+                          backgroundColor: Category.EVANGELISATION.color(),
+                          label: 'Choisir une carte au hasard',
+                          labelBackgroundColor: Category.EVANGELISATION.color(),
+                          labelStyle:
+                              TextStyle(fontSize: 18.0, color: Colors.white),
+                          onTap: _randomDraw),
+                    ],
+                  )
+                : null,
+          );
+        },
+      ),
     );
   }
 
@@ -619,7 +676,7 @@ class _GameState extends State<Game> {
   _jumpTo(int index) => itemScrollController
           .scrollTo(
               index: max(0, index - 1),
-              duration: Duration(milliseconds: 250),
+              duration: Duration(milliseconds: 200),
               curve: Curves.easeInOutCubic)
           .whenComplete(() {
         setState(() {
@@ -668,7 +725,7 @@ class EssentielCardWidget extends StatelessWidget {
                       color: Colors.white),
                   padding: EdgeInsets.all(15),
                   height: screenHeight * 0.3,
-                  width: screenWidth * 0.3,
+                  width: screenWidth * 0.25,
                   child: Image.asset("assets/images/essentiel_logo.svg.png",
                       fit: BoxFit.fill),
                 ))

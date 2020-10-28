@@ -3,12 +3,12 @@ import 'dart:ui';
 
 import 'package:essentiel/about.dart';
 import 'package:essentiel/game/cards.dart';
+import 'package:essentiel/game/category_selector_dialog.dart';
 import 'package:essentiel/resources/category.dart';
 import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
 import 'package:essentiel/widgets/particles.dart';
-import 'package:filter_list/filter_list.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -450,12 +450,69 @@ class _GameState extends State<Game> {
               curve: Curves.bounceIn,
               children: [
                 SpeedDialChild(
-                    child: Icon(Icons.find_replace_outlined),
-                    backgroundColor: Category.EVANGELISATION.color(),
-                    label: 'Choisir une carte au hasard',
-                    labelBackgroundColor: Category.EVANGELISATION.color(),
+                  child: Icon(Icons.info_outline),
+                  backgroundColor: Category.SERVICE.color(),
+                  label: 'À propos',
+                  labelBackgroundColor: Category.SERVICE.color(),
+                  labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
+                  onTap: () => showAppAboutDialog(context),
+                ),
+                SpeedDialChild(
+                    child: Icon(Icons.filter_alt_sharp),
+                    backgroundColor: Category.FORMATION.color(),
+                    label: 'Filter les catégories de carte',
+                    labelBackgroundColor: Category.FORMATION.color(),
                     labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
-                    onTap: _randomDraw),
+                    onTap: () async => showDialog(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (BuildContext ctx) => CategorySelectorDialog(
+                              title: Text('Catégories à afficher'),
+                              all: allCategoryFilters,
+                              selected: _categoryListFilter,
+                              callback:
+                                  (List<String> selectedCategories) async {
+                                debugPrint(
+                                    "selectedCategories: $selectedCategories");
+                                if (selectedCategories != null &&
+                                    selectedCategories.isNotEmpty) {
+                                  final prefs =
+                                      await SharedPreferences.getInstance();
+                                  prefs.setStringList(CATEGORY_FILTER_PREF_KEY,
+                                      selectedCategories);
+                                  setState(() {
+                                    _categoryListFilter = selectedCategories;
+                                    _applyFilter = true;
+                                    _doShuffleCards = false;
+                                  });
+                                }
+                              },
+                            ))
+                    // onTap: () async {
+                    //   await FilterListDialog.display(context,
+                    //       allTextList: allCategoryFilters,
+                    //       height: 480,
+                    //       borderRadius: 20,
+                    //       headlineText: "Catégories de carte à afficher",
+                    //       hideSearchField: true,
+                    //       selectedTextList: _categoryListFilter,
+                    //       onApplyButtonClick: (list) async {
+                    //     if (list != null) {
+                    //       final selectedCategories =
+                    //           list.map((e) => e.toString()).toList();
+                    //       final prefs = await SharedPreferences.getInstance();
+                    //       prefs.setStringList(
+                    //           CATEGORY_FILTER_PREF_KEY, selectedCategories);
+                    //       setState(() {
+                    //         _categoryListFilter = selectedCategories;
+                    //         _applyFilter = true;
+                    //         _doShuffleCards = false;
+                    //       });
+                    //     }
+                    //     Navigator.pop(context);
+                    //   });
+                    // },
+                    ),
                 SpeedDialChild(
                   child: Icon(Icons.shuffle_outlined),
                   backgroundColor: Category.PRIERE.color(),
@@ -465,44 +522,12 @@ class _GameState extends State<Game> {
                   onTap: _shuffleCards,
                 ),
                 SpeedDialChild(
-                  child: Icon(Icons.filter_alt_sharp),
-                  backgroundColor: Category.FORMATION.color(),
-                  label: 'Filter les catégories de carte',
-                  labelBackgroundColor: Category.FORMATION.color(),
-                  labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
-                  onTap: () async {
-                    await FilterListDialog.display(context,
-                        allTextList: allCategoryFilters,
-                        height: 480,
-                        borderRadius: 20,
-                        headlineText: "Catégories de carte à afficher",
-                        hideSearchField: true,
-                        selectedTextList: _categoryListFilter,
-                        onApplyButtonClick: (list) async {
-                      if (list != null) {
-                        final selectedCategories =
-                            list.map((e) => e.toString()).toList();
-                        final prefs = await SharedPreferences.getInstance();
-                        prefs.setStringList(
-                            CATEGORY_FILTER_PREF_KEY, selectedCategories);
-                        setState(() {
-                          _categoryListFilter = selectedCategories;
-                          _applyFilter = true;
-                          _doShuffleCards = false;
-                        });
-                      }
-                      Navigator.pop(context);
-                    });
-                  },
-                ),
-                SpeedDialChild(
-                  child: Icon(Icons.info_outline),
-                  backgroundColor: Category.SERVICE.color(),
-                  label: 'À propos',
-                  labelBackgroundColor: Category.SERVICE.color(),
-                  labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
-                  onTap: () => showAppAboutDialog(context),
-                ),
+                    child: Icon(Icons.find_replace_outlined),
+                    backgroundColor: Category.EVANGELISATION.color(),
+                    label: 'Choisir une carte au hasard',
+                    labelBackgroundColor: Category.EVANGELISATION.color(),
+                    labelStyle: TextStyle(fontSize: 18.0, color: Colors.white),
+                    onTap: _randomDraw),
               ],
             )
           : null,

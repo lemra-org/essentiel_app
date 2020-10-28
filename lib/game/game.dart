@@ -66,6 +66,7 @@ class _GameState extends State<Game> {
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
       final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
+      debugPrint("Initial state for categoryListFilter: $categoryListFilter");
       final gsheets = GSheets(_credentials);
       gsheets
           .spreadsheet(_spreadsheetId)
@@ -429,9 +430,26 @@ class _GameState extends State<Game> {
       });
     }
 
-    final allCategoryFilters =
-        categoryValues.map((category) => category.title()).toList();
-    allCategoryFilters.addAll(["Familles", "Couples"]);
+    final Map<String, Category> allCategoryTitlesMap = {
+      for (var cat in categoryValues) cat.title(): cat
+    };
+
+    final allCategoryFilters = allCategoryTitlesMap.keys.toList()
+      ..addAll(["Familles", "Couples"]);
+
+    final chipColorFn = (String category) {
+      final categoryForText = allCategoryTitlesMap[category];
+      if (categoryForText != null) {
+        return categoryForText.color();
+      }
+      if (category == "Couples") {
+        return Colors.pink;
+      }
+      if (category == "Familles") {
+        return Colors.brown;
+      }
+      return null;
+    };
 
     return Scaffold(
       body: toDisplay,
@@ -467,9 +485,26 @@ class _GameState extends State<Game> {
                         context: context,
                         barrierDismissible: false,
                         builder: (BuildContext ctx) => CategorySelectorDialog(
-                              title: Text('Catégories à afficher'),
+                              title: Text(
+                                'Catégories à afficher',
+                                style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    fontSize: 20.0),
+                              ),
                               all: allCategoryFilters,
                               selected: _categoryListFilter,
+                              textBackgroundColorProvider:
+                                  (String category, bool isSelected) {
+                                return isSelected
+                                    ? chipColorFn(category)
+                                    : Colors.grey[200];
+                              },
+                              textColorProvider:
+                                  (String category, bool isSelected) {
+                                return isSelected
+                                    ? Colors.white
+                                    : chipColorFn(category);
+                              },
                               callback:
                                   (List<String> selectedCategories) async {
                                 debugPrint(

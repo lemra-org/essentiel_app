@@ -1,13 +1,21 @@
-import 'package:essentiel/resources/category.dart';
+import 'dart:collection';
+
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 
 typedef CategorySelectorDialogCallback = void Function(
     List<String> selectedCategories);
+
+typedef TextBackgroundColorProvider = Color Function(
+    String text, bool isSelected);
+typedef TextColorProvider = Color Function(String text, bool isSelected);
 
 class CategorySelectorDialog extends StatefulWidget {
   final Widget title;
   final List<String> all;
   final List<String> selected;
+  final TextBackgroundColorProvider textBackgroundColorProvider;
+  final TextColorProvider textColorProvider;
   final CategorySelectorDialogCallback callback;
 
   CategorySelectorDialog(
@@ -15,7 +23,9 @@ class CategorySelectorDialog extends StatefulWidget {
       @required this.title,
       @required this.all,
       this.selected,
-      @required this.callback})
+      @required this.callback,
+      this.textBackgroundColorProvider,
+      this.textColorProvider})
       : super(key: key);
 
   @override
@@ -23,46 +33,42 @@ class CategorySelectorDialog extends StatefulWidget {
 }
 
 class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
-  List<String> selectedItems;
+  Set<String> selectedItems;
 
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
       title: widget.title,
       content: Wrap(
-        children: widget.all.map((category) {
-          final elementsWhere =
-              Category.values.where((element) => element.title() == category);
-          Color chipColor;
-          if (elementsWhere.isNotEmpty) {
-            chipColor = elementsWhere.elementAt(0).color();
-          } else {
-            if (category == "Couples") {
-              chipColor = Colors.pink;
-            } else {
-              chipColor = Colors.brown;
-            }
-          }
-          final isSelected = selectedItems.contains(category);
+        children: widget.all.map((element) {
+          final isSelected = selectedItems?.contains(element) ?? false;
           return Padding(
               padding: const EdgeInsets.only(right: 10.0),
               child: GestureDetector(
                 onTap: () {
                   setState(() {
-                    if (selectedItems.contains(category)) {
-                      selectedItems.remove(category);
+                    if (selectedItems != null &&
+                        selectedItems.contains(element)) {
+                      selectedItems.remove(element);
                     } else {
-                      selectedItems.add(category);
+                      if (selectedItems == null) {
+                        selectedItems = LinkedHashSet();
+                      }
+                      selectedItems.add(element);
                     }
                   });
                 },
                 child: Chip(
-                  backgroundColor: isSelected ? chipColor : Colors.grey[200],
+                  backgroundColor: widget.textBackgroundColorProvider != null
+                      ? widget.textBackgroundColorProvider(element, isSelected)
+                      : null,
                   label: Text(
-                    category,
+                    element,
                     style: TextStyle(
                       fontSize: 20.0,
-                      color: isSelected ? Colors.white : chipColor,
+                      color: widget.textColorProvider != null
+                          ? widget.textColorProvider(element, isSelected)
+                          : null,
                     ),
                   ),
                 ),
@@ -70,7 +76,57 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
         }).toList(),
       ),
       actions: [
-        //TODO
+        FlatButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: Text(
+            'Annuler'.toUpperCase(),
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+          ),
+          textColor: Colors.blue,
+        ),
+        // FlatButton(
+        //   onPressed: () {
+        //     setState(() {
+        //       if (selectedItems == null) {
+        //         selectedItems = LinkedHashSet();
+        //       }
+        //       if (selectedItems.isEmpty) {
+        //         //Select all
+        //         selectedItems.addAll(widget.all);
+        //       } else {
+        //         //Deselect all
+        //         selectedItems.clear();
+        //       }
+        //     });
+        //   },
+        //   child: Text(
+        //       'Tout ${selectedItems?.isEmpty ?? true ? '' : 'dé'}sélectionner',
+        //       style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),),
+        // ),
+        FlatButton(
+          onPressed: () {
+            if (selectedItems != null && selectedItems.isEmpty) {
+              Fluttertoast.cancel();
+              Fluttertoast.showToast(
+                  msg: 'Merci de choisir au moins une catégorie !',
+                  toastLength: Toast.LENGTH_SHORT,
+                  gravity: ToastGravity.SNACKBAR,
+                  backgroundColor: Colors.red,
+                  textColor: Colors.white,
+                  fontSize: 16.0);
+            } else {
+              if (selectedItems != null && widget.callback != null) {
+                widget.callback(selectedItems.toList(growable: false));
+              }
+              Navigator.of(context).pop();
+            }
+          },
+          child: Text(
+            'Appliquer'.toUpperCase(),
+            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+          ),
+          textColor: Colors.blue,
+        ),
       ],
     );
   }
@@ -78,6 +134,7 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
   @override
   void initState() {
     super.initState();
-    this.selectedItems = [];
+    this.selectedItems =
+        widget.selected != null ? LinkedHashSet.of(widget.selected) : null;
   }
 }

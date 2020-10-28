@@ -177,6 +177,15 @@ packages:
     description: flutter
     source: sdk
     version: "0.0.0"
+  fluttertoast:
+    dependency: "direct main"
+    description:
+      path: "."
+      ref: cb70da0093d4323002c730219aae7c255a648a0a
+      resolved-ref: cb70da0093d4323002c730219aae7c255a648a0a
+      url: "https://github.com/PonnamKarthik/FlutterToast"
+    source: git
+    version: "7.1.1"
   font_awesome_flutter:
     dependency: "direct main"
     description:

@@ -281,15 +281,18 @@ class _GameState extends State<Game> {
                     ),
                   Center(
                     child: SingleChildScrollView(
-                      child: Text(
-                        cardData.question,
-                        style: TextStyle(
-                            fontSize: 30.0,
-                            color: cardData.category.color(),
-                            wordSpacing: 2.0,
-                            height: 1.75,
-                            fontWeight: FontWeight.bold),
-                        textAlign: TextAlign.center,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 35.0),
+                        child: Text(
+                          cardData.question,
+                          style: TextStyle(
+                              fontSize: 30.0,
+                              color: cardData.category.color(),
+                              wordSpacing: 2.0,
+                              height: 1.75,
+                              fontWeight: FontWeight.bold),
+                          textAlign: TextAlign.center,
+                        ),
                       ),
                     ),
                   ),

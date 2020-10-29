@@ -321,7 +321,29 @@ class _GameState extends State<Game> {
         children: [
           Expanded(
             flex: 4,
-            child: widgetToDisplay,
+            child: Stack(
+              children: [
+                widgetToDisplay,
+                if (_currentIndex != null)
+                  Positioned.fill(
+                      child: Align(
+                    alignment: Alignment.bottomRight,
+                    child: IconButton(
+                        onPressed: () {
+                          setState(() {
+                            _currentIndex = null;
+                            _doShuffleCards = false;
+                            _applyFilter = false;
+                          });
+                        },
+                        icon: FaIcon(
+                          FontAwesomeIcons.solidWindowClose,
+                          size: 45.0,
+                          color: Colors.black87,
+                        )),
+                  )),
+              ],
+            ),
           ),
           SizedBox(
             height: screenHeight * 0.05,

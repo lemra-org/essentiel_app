@@ -286,7 +286,7 @@ class _GameState extends State<Game> {
                             top: (cardData.isForFamilies ||
                                     cardData.isForInternalMood ||
                                     cardData.isForInternalMood)
-                                ? 30.0
+                                ? 40.0
                                 : 0.0,
                             bottom: 35.0),
                         child: Text(

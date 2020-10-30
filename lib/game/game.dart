@@ -352,14 +352,20 @@ class _GameState extends State<Game> {
               flex: 1,
               child: Showcase(
                 key: _cardListShowcaseKey,
+                disposeOnTap: true,
+                onTargetClick: () {},
+                // onToolTipClick: () {},
                 descTextStyle: TextStyle(
                   fontSize: 20.0,
                 ),
                 overlayOpacity: 0.6,
-                contentPadding:
-                    const EdgeInsets.only(left: 25.0, top: 5.0, bottom: 5.0),
+                contentPadding: EdgeInsets.only(
+                    left: screenWidth * 0.02,
+                    right: screenWidth * 0.02,
+                    top: 7.0,
+                    bottom: 5.0),
                 description:
-                    'Faites défiler de gauche à droite pour découvrir plus de cartes',
+                    'Faites défiler de gauche à droite \npour découvrir plus de cartes',
                 child: AnimationLimiter(
                   child: ScrollablePositionedList.builder(
                     physics: BouncingScrollPhysics(

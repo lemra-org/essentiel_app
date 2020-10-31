@@ -203,7 +203,7 @@ class _GameState extends State<Game> {
       if (_currentIndex == null) {
         widgetToDisplay = Container(
             // height: screenHeight * 0.4,
-            padding: const EdgeInsets.all(10.0),
+            padding: const EdgeInsets.all(15.0),
             child: Center(
               child: Column(
                 children: [
@@ -215,8 +215,8 @@ class _GameState extends State<Game> {
                     child: SvgPicture.asset(
                       'assets/images/phone_in_hand.svg',
                       color: Colors.white,
-                      width: screenWidth * 0.35,
-                      height: screenHeight * 0.35,
+                      width: screenWidth * 0.25,
+                      height: screenHeight * 0.25,
                       semanticsLabel:
                           'Secouer smartphone en main pour choisir une carte',
                     ),
@@ -224,10 +224,12 @@ class _GameState extends State<Game> {
                   SizedBox(
                     height: 10.0,
                   ),
-                  Text("Secouez votre téléphone pour choisir une carte.",
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                          fontSize: 24, height: 1.7, color: Colors.white))
+                  Flexible(
+                      child: Text(
+                          "Secouez votre téléphone pour choisir une carte.",
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontSize: 24, height: 1.2, color: Colors.white)))
                 ],
               ),
             ));

@@ -44,6 +44,8 @@ dependencies:
       url: https://github.com/PonnamKarthik/FlutterToast
       ref: cb70da0093d4323002c730219aae7c255a648a0a # Contains this useful PR : https://github.com/ponnamkarthik/FlutterToast/pull/231
   showcaseview: ^0.1.6
+  flutter_svg: ^0.19.1
+  animated_widgets: ^1.0.6
 
 dev_dependencies:
   flutter_test:

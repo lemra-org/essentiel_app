@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'dart:ui';
 
+import 'package:animated_widgets/animated_widgets.dart';
 import 'package:essentiel/about.dart';
 import 'package:essentiel/game/cards.dart';
 import 'package:essentiel/game/category_selector_dialog.dart';
@@ -13,6 +14,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -203,11 +205,32 @@ class _GameState extends State<Game> {
             // height: screenHeight * 0.4,
             padding: const EdgeInsets.all(10.0),
             child: Center(
-                child: Text(
-                    "Cliquez sur une carte ou choisissez-en une au hasard à l'aide du menu tout en bas.",
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: 24, height: 1.7, color: Colors.white))));
+              child: Column(
+                children: [
+                  ShakeAnimatedWidget(
+                    enabled: true,
+                    duration: Duration(milliseconds: 2000),
+                    shakeAngle: Rotation.deg(x: 50, y: 5, z: 5),
+                    curve: Curves.fastOutSlowIn,
+                    child: SvgPicture.asset(
+                      'assets/images/phone_in_hand.svg',
+                      color: Colors.white,
+                      width: screenWidth * 0.35,
+                      height: screenHeight * 0.35,
+                      semanticsLabel:
+                          'Secouer smartphone en main pour choisir une carte',
+                    ),
+                  ),
+                  SizedBox(
+                    height: 10.0,
+                  ),
+                  Text("Secouez votre téléphone pour choisir une carte.",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                          fontSize: 24, height: 1.7, color: Colors.white))
+                ],
+              ),
+            ));
       } else {
         final cardData = _allCardsData.elementAt(_currentIndex);
         widgetToDisplay = Container(

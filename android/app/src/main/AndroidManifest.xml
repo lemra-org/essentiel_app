@@ -5,7 +5,7 @@
     <!-- To fetch game cards from GSheets -->
     <uses-permission
         android:name="android.permission.INTERNET" />
-    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="true" />
+    <uses-feature android:name="android.hardware.sensor.accelerometer" android:required="false" />
 
     <!-- io.flutter.app.FlutterApplication is an android.app.Application that
          calls FlutterMain.startInitialization(this); in its onCreate method.

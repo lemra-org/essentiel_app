@@ -11,7 +11,7 @@ Future<Null> showAppAboutDialog(BuildContext context) async {
     context: context,
     applicationVersion: packageInfo.version,
     applicationIcon: Image.asset("assets/images/essentiel_logo.svg.png",
-        fit: BoxFit.scaleDown, width: 90.0),
+        fit: BoxFit.scaleDown, width: 65.0),
     applicationLegalese: '© 2020',
     children: <Widget>[
       Padding(

@@ -134,6 +134,9 @@ android {
 //            proguardFiles 'proguard-rules.pro'
 //            zipAlignEnabled true
             signingConfig signingConfigs.release
+            ndk {
+                debugSymbolLevel 'FULL'
+            }
         }
         debug {
             // Disable fabric build ID generation for debug builds

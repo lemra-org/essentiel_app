@@ -588,7 +588,7 @@ class _GameState extends State<Game> {
                       SpeedDialChild(
                           child: Icon(Icons.filter_alt_sharp),
                           backgroundColor: Category.FORMATION.color(),
-                          label: 'Filter les catégories de carte',
+                          label: 'Filtrer les catégories de carte',
                           labelBackgroundColor: Category.FORMATION.color(),
                           labelStyle:
                               TextStyle(fontSize: 18.0, color: Colors.white),

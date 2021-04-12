@@ -14,9 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
-          java-version: '8.x'
+          distribution: 'zulu'
+          java-version: '8'
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: '1.22.6'
@@ -52,9 +53,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: actions/setup-java@v1
+      - uses: actions/setup-java@v2
         with:
-          java-version: '8.x'
+          distribution: 'zulu'
+          java-version: '8'
       - uses: subosito/flutter-action@v1
         with:
           flutter-version: '1.22.6'

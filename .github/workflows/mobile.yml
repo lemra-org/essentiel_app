@@ -38,15 +38,15 @@ jobs:
       - name: Build APK
         run: |
           flutter build apk --debug
-      - name: Archive artifacts
-        uses: actions/upload-artifact@v2
-        with:
-          name: essentiel_flutter_artifacts
-          path: |
-            build/app/outputs/flutter-apk/app.apk
-            build/**/outputs/**/*.aab
-            build/**/outputs/**/mapping.txt
-            flutter_drive.log
+#       - name: Archive artifacts
+#         uses: actions/upload-artifact@v2
+#         with:
+#           name: essentiel_flutter_artifacts
+#           path: |
+#             build/app/outputs/flutter-apk/app.apk
+#             build/**/outputs/**/*.aab
+#             build/**/outputs/**/mapping.txt
+#             flutter_drive.log
 
   check_dependencies:
     name: Validate dependencies

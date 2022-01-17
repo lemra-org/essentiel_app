@@ -18,7 +18,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '8'
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2.2.0
         with:
           flutter-version: '1.22.6'
       - uses: actions/cache@v2.1.7
@@ -57,7 +57,7 @@ jobs:
         with:
           distribution: 'zulu'
           java-version: '8'
-      - uses: subosito/flutter-action@v1
+      - uses: subosito/flutter-action@v2.2.0
         with:
           flutter-version: '1.22.6'
       - uses: actions/cache@v2.1.7

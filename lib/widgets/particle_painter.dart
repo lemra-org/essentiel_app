@@ -10,18 +10,18 @@ class ParticlePainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    final categories = Category.values;
+    final categories = CategoryStore.listAllCategories();
     particles.asMap().forEach((index, particle) {
       final paint = Paint()
         ..color = categories[
                 index < categories.length ? index : index % categories.length]
-            .color()
+            .color!
             .withAlpha(100);
-      var progress = particle.animationProgress.progress(time);
-      final animation = particle.tween.transform(progress);
+      var progress = particle.animationProgress!.progress(time);
+      final animation = particle.tween!.transform(progress);
       final position =
           Offset(animation["x"] * size.width, animation["y"] * size.height);
-      canvas.drawCircle(position, size.width * 0.2 * particle.size, paint);
+      canvas.drawCircle(position, size.width * 0.2 * particle.size!, paint);
     });
   }
 

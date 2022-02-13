@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:simple_animations/simple_animations.dart';
 
 class AnimatedWave extends StatelessWidget {
-  final double height;
-  final double speed;
-  final double offset;
+  final double? height;
+  final double? speed;
+  final double? offset;
 
   AnimatedWave({this.height, this.speed, this.offset = 0.0});
 
@@ -14,18 +14,25 @@ class AnimatedWave extends StatelessWidget {
   Widget build(BuildContext context) {
     return LayoutBuilder(builder: (context, constraints) {
       return Container(
-        height: height,
-        width: constraints.biggest.width,
-        child: ControlledAnimation(
-            playback: Playback.LOOP,
-            duration: Duration(milliseconds: (5000 / speed).round()),
+          height: height,
+          width: constraints.biggest.width,
+          // child: ControlledAnimation(
+          //     playback: Playback.LOOP,
+          //     duration: Duration(milliseconds: (5000 / speed!).round()),
+          //     tween: Tween(begin: 0.0, end: 2 * pi),
+          //     builder: (BuildContext context, double value) {
+          //       return CustomPaint(
+          //         foregroundPainter: CurvePainter(value + offset!),
+          //       );
+          //     }),
+          child: LoopAnimation<double>(
+            duration: Duration(milliseconds: (5000 / speed!).round()),
             tween: Tween(begin: 0.0, end: 2 * pi),
-            builder: (context, value) {
-              return CustomPaint(
-                foregroundPainter: CurvePainter(value + offset),
-              );
-            }),
-      );
+            // child: child,
+            builder: (BuildContext context, child, value) => CustomPaint(
+              foregroundPainter: CurvePainter(value + offset!),
+            ),
+          ));
     });
   }
 }

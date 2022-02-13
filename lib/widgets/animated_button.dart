@@ -1,17 +1,17 @@
 import 'package:flutter/material.dart';
 
 class AnimatedButton extends StatefulWidget {
-  final Widget child;
-  final Function onTap;
-  final Color boxBorderColor;
-  final Color boxColor;
-  final double boxWidth;
-  final double boxHeight;
-  final double borderRadius;
-  final double borderWidth;
+  final Widget? child;
+  final Function? onTap;
+  final Color? boxBorderColor;
+  final Color? boxColor;
+  final double? boxWidth;
+  final double? boxHeight;
+  final double? borderRadius;
+  final double? borderWidth;
 
   const AnimatedButton(
-      {Key key,
+      {Key? key,
       @required this.child,
       @required this.onTap,
       @required this.boxBorderColor,
@@ -28,8 +28,8 @@ class AnimatedButton extends StatefulWidget {
 
 class _AnimatedButtonState extends State<AnimatedButton>
     with TickerProviderStateMixin {
-  double _scale;
-  AnimationController _controller;
+  double? _scale;
+  AnimationController? _controller;
 
   @override
   void initState() {
@@ -46,26 +46,28 @@ class _AnimatedButtonState extends State<AnimatedButton>
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controller?.dispose();
     super.dispose();
   }
 
   void _onTapDown(TapDownDetails details) {
-    _controller.forward();
+    _controller?.forward();
   }
 
   void _onTapUp(TapUpDetails details) {
-    _controller.reverse();
+    _controller?.reverse();
   }
 
   @override
   Widget build(BuildContext context) {
-    _scale = 1 - _controller.value;
+    _scale = 1 - _controller!.value;
 
     return GestureDetector(
       onTapDown: _onTapDown,
       onTapUp: _onTapUp,
-      onTap: widget.onTap,
+      onTap: () => {
+        if (widget.onTap != null) {widget.onTap!()}
+      },
       child: Transform.scale(
         scale: _scale,
         child: _animatedButtonUI,
@@ -76,7 +78,7 @@ class _AnimatedButtonState extends State<AnimatedButton>
   Widget get _animatedButtonUI => Container(
         decoration: BoxDecoration(
           border: Border.all(
-            color: widget.boxBorderColor,
+            color: widget.boxBorderColor!,
             style: BorderStyle.solid,
             width: widget.borderWidth ?? 2.0,
           ),

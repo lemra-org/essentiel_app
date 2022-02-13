@@ -3,8 +3,8 @@ import 'package:flip_card/flip_card.dart';
 import 'package:flutter/material.dart';
 
 class EssentielCardData {
-  final Category category;
-  final String question;
+  final QuestionCategory? category;
+  final String? question;
   final bool isForCouples;
   final bool isForFamilies;
   final bool isForInternalMood;
@@ -20,24 +20,23 @@ class EssentielCardData {
     final image = json['Image'];
     final question = json['Question'];
     return EssentielCardData(
-        category: Category.values
-            .firstWhere((element) => element.title() == json['Catégorie']),
+        category: CategoryStore.findByName(json['Catégorie']),
         question: question,
         isForInternalMood: question != null &&
             question.toString().toLowerCase().contains("météo"),
-        isForCouples: json["Pour Couples"]?.toString()?.toLowerCase() ==
+        isForCouples: json["Pour Couples"]?.toString().toLowerCase() ==
             "Oui".toLowerCase(),
-        isForFamilies: json["Pour Familles"]?.toString()?.toLowerCase() ==
+        isForFamilies: json["Pour Familles"]?.toString().toLowerCase() ==
             "Oui".toLowerCase());
   }
 }
 
 class EssentielCard extends StatefulWidget {
-  final EssentielCardData cardData;
-  final VoidCallback onFlip;
-  final int index;
+  final EssentielCardData? cardData;
+  final VoidCallback? onFlip;
+  final int? index;
 
-  const EssentielCard({Key key, this.cardData, this.onFlip, this.index})
+  const EssentielCard({Key? key, this.cardData, this.onFlip, this.index})
       : super(key: key);
 
   @override
@@ -73,10 +72,10 @@ class _EssentielCardState extends State<EssentielCard> {
               children: [
                 Center(
                   child: Text(
-                    widget.cardData.question,
+                    widget.cardData!.question!,
                     style: TextStyle(
                         fontSize: 28.0,
-                        color: widget.cardData.category.color()),
+                        color: widget.cardData!.category!.color),
                   ),
                 ),
                 Positioned.fill(
@@ -85,10 +84,10 @@ class _EssentielCardState extends State<EssentielCard> {
                   child: Container(
                     padding: const EdgeInsets.all(10.0),
                     decoration: BoxDecoration(
-                      color: widget.cardData.category.color(),
+                      color: widget.cardData!.category!.color,
                     ),
                     child: Text(
-                      widget.cardData.category.title(),
+                      widget.cardData!.category!.title!,
                       style: TextStyle(
                         fontSize: 22.0,
                         color: Colors.white,

@@ -20,8 +20,7 @@ import 'package:gsheets/gsheets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:showcaseview/showcase.dart';
-import 'package:showcaseview/showcase_widget.dart';
+import 'package:showcaseview/showcaseview.dart';
 
 const _credentials = r'''
 {
@@ -49,20 +48,21 @@ class Game extends StatefulWidget {
 }
 
 class _GameState extends State<Game> {
-  List<EssentielCardData> _rawCardsData;
-  List<EssentielCardData> _allCardsData;
-  Object _errorWhileLoadingData;
-  int _currentIndex;
-  bool _doShuffleCards;
-  bool _applyFilter;
-  List<String> _categoryListFilter;
+  List<EssentielCardData>? _rawCardsData;
+  List<EssentielCardData>? _allCardsData;
+  List<QuestionCategory>? _categoryList;
+  Object? _errorWhileLoadingData;
+  int? _currentIndex;
+  bool? _doShuffleCards;
+  bool? _applyFilter;
+  List<String>? _categoryListFilter;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
       ItemPositionsListener.create();
 
   GlobalKey _cardListShowcaseKey = GlobalKey();
-  BuildContext myContext;
+  BuildContext? myContext;
 
   @override
   void initState() {
@@ -70,45 +70,68 @@ class _GameState extends State<Game> {
     _doShuffleCards = false;
     _applyFilter = false;
 
-    WidgetsBinding.instance.addPostFrameCallback((_) async {
+    WidgetsBinding.instance?.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
       final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
       debugPrint("Initial state for categoryListFilter: $categoryListFilter");
       final gsheets = GSheets(_credentials);
+
       gsheets
           .spreadsheet(_spreadsheetId)
           .then((spreadsheet) =>
-              spreadsheet.worksheetByTitle('Questions').values.map.allRows())
-          .then((questionsListJson) => Future.value((questionsListJson == null)
-              ? <EssentielCardData>[]
-              : questionsListJson
-                  .map((questionJson) =>
-                      EssentielCardData.fromGSheet(questionJson))
-                  .where((element) =>
-                      element.category != null &&
-                      element.question != null &&
-                      element.question.trim().isNotEmpty)
-                  .toList()))
-          .then((cardData) async {
-        setState(() {
-          _errorWhileLoadingData = null;
-          _doShuffleCards = false;
-          _applyFilter = false;
-          _categoryListFilter = categoryListFilter;
-          _rawCardsData = cardData.toList(growable: false);
-          _allCardsData = _filter(_categoryListFilter);
-        });
-        await AppUtils.isFirstLaunch().then((result) {
-          if (result) {
-            if (myContext != null) {
-              ShowCaseWidget.of(myContext)
-                  .startShowCase([_cardListShowcaseKey]);
+              spreadsheet.worksheetByTitle('Categories')?.values.map.allRows())
+          .then((jsonList) => Future.value(jsonList != null
+              ? jsonList
+                  .map((json) => QuestionCategory.fromGSheet(json))
+                  .toList()
+              : <QuestionCategory>[]))
+          .then((categoryList) async {
+        gsheets
+            .spreadsheet(_spreadsheetId)
+            .then((spreadsheet) =>
+                spreadsheet.worksheetByTitle('Questions')?.values.map.allRows())
+            .then((questionsListJson) => Future.value(questionsListJson != null
+                ? questionsListJson
+                    .map((questionJson) =>
+                        EssentielCardData.fromGSheet(questionJson))
+                    .where((element) =>
+                        element.question != null &&
+                        element.question!.trim().isNotEmpty)
+                    .toList()
+                : <EssentielCardData>[]))
+            .then((cardData) async {
+          setState(() {
+            _errorWhileLoadingData = null;
+            _doShuffleCards = false;
+            _applyFilter = false;
+            _categoryListFilter = categoryListFilter;
+            _categoryList = categoryList.toList(growable: false);
+            _rawCardsData = cardData.toList(growable: false);
+            _allCardsData = _filter(categoryListFilter);
+          });
+          await AppUtils.isFirstLaunch().then((result) {
+            if (result) {
+              if (myContext != null) {
+                ShowCaseWidget.of(myContext!)
+                    ?.startShowCase([_cardListShowcaseKey]);
+              }
             }
-          }
+          });
+        }).catchError((e) {
+          setState(() {
+            _errorWhileLoadingData = e;
+            _categoryList = null;
+            _rawCardsData = null;
+            _allCardsData = null;
+            _doShuffleCards = false;
+            _applyFilter = false;
+            _categoryListFilter = categoryListFilter;
+          });
         });
       }).catchError((e) {
         setState(() {
           _errorWhileLoadingData = e;
+          _categoryList = null;
           _rawCardsData = null;
           _allCardsData = null;
           _doShuffleCards = false;
@@ -128,7 +151,8 @@ class _GameState extends State<Game> {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
-    final categoryValues = Category.values;
+    final categoryValues =
+        _categoryList != null ? _categoryList! : <QuestionCategory>[];
 
     Widget body;
     if (_errorWhileLoadingData != null) {
@@ -150,7 +174,9 @@ class _GameState extends State<Game> {
                 style:
                     TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
       ]));
-    } else if (_doShuffleCards || _applyFilter || _allCardsData == null) {
+    } else if (_doShuffleCards == true ||
+        _applyFilter == true ||
+        _allCardsData == null) {
       //Not initialized yet
       body = Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -158,19 +184,21 @@ class _GameState extends State<Game> {
           size: 100.0,
           itemBuilder: (BuildContext context, int idx) => DecoratedBox(
               decoration: BoxDecoration(
-                  color: categoryValues[idx < categoryValues.length
-                          ? idx
-                          : (idx % categoryValues.length)]
-                      .color())),
+                  color: categoryValues.isEmpty
+                      ? null
+                      : categoryValues[idx < categoryValues.length
+                              ? idx
+                              : (idx % categoryValues.length)]
+                          .color)),
         ),
         SizedBox(
           height: 20.0,
         ),
         Flexible(
             child: Text(
-                (_doShuffleCards
+                (_doShuffleCards == true
                         ? "Mélange de cartes"
-                        : _applyFilter
+                        : _applyFilter == true
                             ? "Filtrage des catégories de cartes"
                             : "Initialisation") +
                     " en cours. Merci de patienter quelques instants...",
@@ -178,7 +206,7 @@ class _GameState extends State<Game> {
                 style:
                     TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
       ]));
-    } else if (_allCardsData.isEmpty) {
+    } else if (_allCardsData != null && _allCardsData!.isEmpty) {
       //No data
       body = Center(
           child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
@@ -234,7 +262,7 @@ class _GameState extends State<Game> {
               ),
             ));
       } else {
-        final cardData = _allCardsData.elementAt(_currentIndex);
+        final cardData = _allCardsData?.elementAt(_currentIndex!);
         widgetToDisplay = Container(
             padding: const EdgeInsets.all(10.0),
             decoration: BoxDecoration(
@@ -246,7 +274,7 @@ class _GameState extends State<Game> {
               padding: const EdgeInsets.all(8.0),
               child: Stack(
                 children: [
-                  if (cardData.isForFamilies)
+                  if (cardData?.isForFamilies == true)
                     Positioned.fill(
                       child: Align(
                         alignment: Alignment.topRight,
@@ -259,7 +287,7 @@ class _GameState extends State<Game> {
                         ),
                       ),
                     ),
-                  if (cardData.isForCouples)
+                  if (cardData?.isForCouples == true)
                     Positioned.fill(
                       child: Align(
                         alignment: Alignment.topRight,
@@ -272,7 +300,7 @@ class _GameState extends State<Game> {
                         ),
                       ),
                     ),
-                  if (cardData.isForInternalMood)
+                  if (cardData?.isForInternalMood == true)
                     Positioned.fill(
                       child: Align(
                         alignment: Alignment.topCenter,
@@ -308,17 +336,17 @@ class _GameState extends State<Game> {
                     child: SingleChildScrollView(
                       child: Padding(
                         padding: EdgeInsets.only(
-                            top: (cardData.isForFamilies ||
+                            top: (cardData!.isForFamilies ||
                                     cardData.isForInternalMood ||
                                     cardData.isForInternalMood)
                                 ? 40.0
                                 : 0.0,
                             bottom: 35.0),
                         child: Text(
-                          cardData.question,
+                          cardData.question!,
                           style: TextStyle(
                               fontSize: 25.0,
-                              color: cardData.category.color(),
+                              color: cardData.category!.color,
                               wordSpacing: 2.0,
                               height: 1.75,
                               fontWeight: FontWeight.bold),
@@ -333,10 +361,10 @@ class _GameState extends State<Game> {
                     child: Container(
                       padding: const EdgeInsets.all(10.0),
                       decoration: BoxDecoration(
-                        color: cardData.category.color(),
+                        color: cardData.category!.color,
                       ),
                       child: Text(
-                        cardData.category.title(),
+                        cardData.category!.title!,
                         style: TextStyle(
                           fontSize: 22.0,
                           color: Colors.white,
@@ -406,7 +434,7 @@ class _GameState extends State<Game> {
                     itemScrollController: itemScrollController,
                     itemPositionsListener: itemPositionsListener,
                     // shrinkWrap: true,
-                    itemCount: _allCardsData.length,
+                    itemCount: _allCardsData!.length,
                     itemBuilder: (BuildContext context, int index) =>
                         AnimationConfiguration.staggeredList(
                       position: index,
@@ -424,7 +452,8 @@ class _GameState extends State<Game> {
                                       index: index,
                                       selected: _currentIndex == index,
                                       noCardSelected: _currentIndex == null,
-                                      cardData: _allCardsData.elementAt(index)),
+                                      cardData:
+                                          _allCardsData!.elementAt(index)),
                                 ),
                                 onTap: () {
                                   //TODO Animate card selection
@@ -496,29 +525,31 @@ class _GameState extends State<Game> {
       ],
     );
 
-    if (_doShuffleCards) {
+    if (_doShuffleCards == true) {
       Future.delayed(Duration(milliseconds: 500), () {
         setState(() {
           _currentIndex = null;
-          _allCardsData.shuffle();
+          _allCardsData!.shuffle();
           _doShuffleCards = false;
           _applyFilter = false;
         });
       });
-    } else if (_applyFilter) {
+    } else if (_applyFilter!) {
       Future.delayed(Duration(milliseconds: 500), () {
         setState(() {
           _currentIndex = null;
-          _allCardsData = _filter(_categoryListFilter);
+          _allCardsData = _filter(_categoryListFilter!);
           _doShuffleCards = false;
           _applyFilter = false;
         });
       });
     }
 
-    final Map<String, Category> allCategoryTitlesMap = {
-      for (var cat in categoryValues) cat.title(): cat
-    };
+    // final Map<String, Category> allCategoryTitlesMap = {
+    //   for (var cat in categoryValues) cat.title(): cat
+    // };
+    final Map<String, QuestionCategory> allCategoryTitlesMap =
+        CategoryStore.findAll();
 
     final allCategoryFilters = allCategoryTitlesMap.keys.toList()
       ..addAll(["Familles", "Couples"]);
@@ -526,7 +557,7 @@ class _GameState extends State<Game> {
     final chipColorFn = (String category) {
       final categoryForText = allCategoryTitlesMap[category];
       if (categoryForText != null) {
-        return categoryForText.color();
+        return categoryForText.color;
       }
       if (category == "Couples") {
         return Colors.pink;
@@ -540,10 +571,10 @@ class _GameState extends State<Game> {
     return ShowCaseWidget(
       onStart: (index, key) {
         debugPrint('onStart: $index, $key');
-        WidgetsBinding.instance.addPostFrameCallback((_) {
+        WidgetsBinding.instance?.addPostFrameCallback((_) {
           itemScrollController
               .scrollTo(
-                  index: min(5, _allCardsData.length - 1),
+                  index: min(5, _allCardsData!.length - 1),
                   duration: Duration(seconds: 1),
                   curve: Curves.easeInOutCubic)
               .whenComplete(() async {
@@ -562,7 +593,7 @@ class _GameState extends State<Game> {
           return Scaffold(
             body: toDisplay,
             floatingActionButton: (_rawCardsData != null &&
-                    _rawCardsData.isNotEmpty)
+                    _rawCardsData!.isNotEmpty)
                 ? SpeedDial(
                     animatedIcon: AnimatedIcons.menu_close,
                     animatedIconTheme: IconThemeData(size: 22.0),
@@ -578,18 +609,18 @@ class _GameState extends State<Game> {
                     children: [
                       SpeedDialChild(
                         child: Icon(Icons.info_outline),
-                        backgroundColor: Category.SERVICE.color(),
+                        backgroundColor: const Color(0xFF62D739),
                         label: 'À propos',
-                        labelBackgroundColor: Category.SERVICE.color(),
+                        labelBackgroundColor: const Color(0xFF62D739),
                         labelStyle:
                             TextStyle(fontSize: 18.0, color: Colors.white),
                         onTap: () => showAppAboutDialog(context),
                       ),
                       SpeedDialChild(
                           child: Icon(Icons.filter_alt_sharp),
-                          backgroundColor: Category.FORMATION.color(),
+                          backgroundColor: const Color(0xFF12A0FF),
                           label: 'Filtrer les catégories de carte',
-                          labelBackgroundColor: Category.FORMATION.color(),
+                          labelBackgroundColor: const Color(0xFF12A0FF),
                           labelStyle:
                               TextStyle(fontSize: 18.0, color: Colors.white),
                           onTap: () async => showDialog(
@@ -604,25 +635,34 @@ class _GameState extends State<Game> {
                                           fontSize: 20.0),
                                     ),
                                     all: allCategoryFilters,
-                                    selected: _categoryListFilter,
+                                    selected: _categoryListFilter != null
+                                        ? _categoryListFilter
+                                        : <String>[],
                                     textBackgroundColorProvider:
                                         (String category, bool isSelected) {
-                                      return isSelected
+                                      var color = isSelected
                                           ? chipColorFn(category)
                                           : Colors.grey[200];
+                                      if (color == null) {
+                                        return Colors.grey;
+                                      }
+                                      return color;
                                     },
                                     textColorProvider:
                                         (String category, bool isSelected) {
-                                      return isSelected
+                                      var color = isSelected
                                           ? Colors.white
                                           : chipColorFn(category);
+                                      if (color == null) {
+                                        return Colors.white;
+                                      }
+                                      return color;
                                     },
                                     callback: (List<String>
                                         selectedCategories) async {
                                       debugPrint(
                                           "selectedCategories: $selectedCategories");
-                                      if (selectedCategories != null &&
-                                          selectedCategories.isNotEmpty) {
+                                      if (selectedCategories.isNotEmpty) {
                                         final prefs = await SharedPreferences
                                             .getInstance();
                                         prefs.setStringList(
@@ -664,18 +704,18 @@ class _GameState extends State<Game> {
                           ),
                       SpeedDialChild(
                         child: Icon(Icons.shuffle_outlined),
-                        backgroundColor: Category.PRIERE.color(),
+                        backgroundColor: const Color(0xFF97205E),
                         label: 'Mélanger les cartes',
-                        labelBackgroundColor: Category.PRIERE.color(),
+                        labelBackgroundColor: const Color(0xFF97205E),
                         labelStyle:
                             TextStyle(fontSize: 18.0, color: Colors.white),
                         onTap: _shuffleCards,
                       ),
                       SpeedDialChild(
                           child: Icon(Icons.find_replace_outlined),
-                          backgroundColor: Category.EVANGELISATION.color(),
+                          backgroundColor: const Color(0xFFED2910),
                           label: 'Choisir une carte au hasard',
-                          labelBackgroundColor: Category.EVANGELISATION.color(),
+                          labelBackgroundColor: const Color(0xFFED2910),
                           labelStyle:
                               TextStyle(fontSize: 18.0, color: Colors.white),
                           onTap: _randomDraw),
@@ -688,21 +728,21 @@ class _GameState extends State<Game> {
     );
   }
 
-  List<EssentielCardData> _filter(List<String> filter) {
+  List<EssentielCardData> _filter(List<String>? filter) {
     if (filter == null) {
-      return _rawCardsData;
+      return _rawCardsData!;
     }
     if (filter.isEmpty) {
       return List.empty(growable: true);
     }
-    return _rawCardsData.where((cardData) {
-      if (_categoryListFilter.contains(cardData.category.title())) {
+    return _rawCardsData!.where((cardData) {
+      if (_categoryListFilter!.contains(cardData.category!.title)) {
         return true;
       }
-      if (_categoryListFilter.contains("Familles") && cardData.isForFamilies) {
+      if (_categoryListFilter!.contains("Familles") && cardData.isForFamilies) {
         return true;
       }
-      if (_categoryListFilter.contains("Couples") && cardData.isForCouples) {
+      if (_categoryListFilter!.contains("Couples") && cardData.isForCouples) {
         return true;
       }
       return false;
@@ -717,12 +757,12 @@ class _GameState extends State<Game> {
   }
 
   void _randomDraw() {
-    if (_allCardsData == null || _allCardsData.isEmpty) {
+    if (_allCardsData == null || _allCardsData!.isEmpty) {
       return;
     }
-    final _numberOfCards = _allCardsData.length;
+    final _numberOfCards = _allCardsData!.length;
     final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
-        0, _numberOfCards, _currentIndex);
+        0, _numberOfCards, _currentIndex!);
     debugPrint(
         "_numberOfCards=$_numberOfCards / _currentPageIndex=$_currentIndex / randomPick=$randomPick");
     _jumpTo(randomPick);
@@ -750,13 +790,13 @@ class _GameState extends State<Game> {
 }
 
 class EssentielCardWidget extends StatelessWidget {
-  final EssentielCardData cardData;
-  final bool selected;
-  final bool noCardSelected;
-  final int index;
+  final EssentielCardData? cardData;
+  final bool? selected;
+  final bool? noCardSelected;
+  final int? index;
 
   const EssentielCardWidget(
-      {Key key,
+      {Key? key,
       @required this.index,
       @required this.cardData,
       this.selected = false,
@@ -777,7 +817,7 @@ class EssentielCardWidget extends StatelessWidget {
             child: ColorFiltered(
                 colorFilter: ColorFilter.mode(
                     Colors.grey,
-                    (noCardSelected || selected)
+                    (noCardSelected! || selected!)
                         ? BlendMode.dstOver
                         : BlendMode.darken),
                 child: Container(

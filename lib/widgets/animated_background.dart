@@ -15,7 +15,7 @@ class AnimatedBackground extends StatelessWidget {
       playback: Playback.MIRROR,
       tween: tween,
       duration: tween.duration,
-      builder: (context, animation) {
+      builder: (BuildContext context, Map<String, dynamic> animation) {
         return Container(
           decoration: BoxDecoration(
               gradient: LinearGradient(

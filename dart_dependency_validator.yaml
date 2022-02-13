@@ -1,0 +1,12 @@
+# dart_dependency_validator.yaml
+
+# Exclude one or more paths from being scanned. Supports glob syntax.
+exclude:
+  - "app/**"
+# Ignore one or more packages.
+ignore:
+  - coverage
+  - dartdoc
+  - cupertino_icons
+  - flutter_launcher_icons
+  - flutter_launcher_name

@@ -111,7 +111,7 @@ android {
         // TODO: Specify your own unique Application ID (https://developer.android.com/studio/build/application-id.html).
         applicationId "app.essentiel"
         minSdkVersion 16
-        targetSdkVersion 30
+        targetSdkVersion 31
 
         // Fetch the version according to git latest tag and "how far are we from last tag"
         (versionCode, versionName) = getVersionCodeAndName("android")

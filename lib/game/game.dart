@@ -758,6 +758,7 @@ class _GameState extends State<Game> {
 
   void _randomDraw() {
     if (_allCardsData == null || _allCardsData!.isEmpty) {
+      debugPrint("_randomDraw: _allCardsData=$_allCardsData");
       return;
     }
     final _numberOfCards = _allCardsData!.length;

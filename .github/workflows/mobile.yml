@@ -24,6 +24,7 @@ jobs:
           # Builds on other branches will only read existing entries from the cache.
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           gradle-version: wrapper
+          build-root-directory: android
       - uses: subosito/flutter-action@v2.3.0
         with:
           flutter-version: '2.10.1'
@@ -61,6 +62,7 @@ jobs:
           # Builds on other branches will only read existing entries from the cache.
           cache-read-only: ${{ github.ref != 'refs/heads/main' }}
           gradle-version: wrapper
+          build-root-directory: android
       - uses: subosito/flutter-action@v2.3.0
         with:
           flutter-version: '2.10.1'

@@ -81,7 +81,7 @@ class _GameState extends State<Game> {
           .then((spreadsheet) =>
               spreadsheet.worksheetByTitle('Categories')?.values.map.allRows())
           .then((jsonList) => Future.value(jsonList != null
-              ? jsonList
+              ? (jsonList as List<Map<String, dynamic>>)
                   .map((json) => QuestionCategory.fromGSheet(json))
                   .toList()
               : <QuestionCategory>[]))
@@ -91,7 +91,7 @@ class _GameState extends State<Game> {
             .then((spreadsheet) =>
                 spreadsheet.worksheetByTitle('Questions')?.values.map.allRows())
             .then((questionsListJson) => Future.value(questionsListJson != null
-                ? questionsListJson
+                ? (questionsListJson as List<Map<String, dynamic>>)
                     .map((questionJson) =>
                         EssentielCardData.fromGSheet(questionJson))
                     .where((element) =>

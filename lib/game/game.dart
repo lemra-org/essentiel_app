@@ -762,8 +762,10 @@ class _GameState extends State<Game> {
       return;
     }
     final _numberOfCards = _allCardsData!.length;
-    final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
-        0, _numberOfCards, _currentIndex!);
+    final randomPick = _currentIndex != null
+        ? RandomUtils.getRandomValueInRangeButExcludingValue(
+            0, _numberOfCards, _currentIndex!)
+        : RandomUtils.getRandomValueInRange(0, _numberOfCards);
     debugPrint(
         "_numberOfCards=$_numberOfCards / _currentPageIndex=$_currentIndex / randomPick=$randomPick");
     _jumpTo(randomPick);

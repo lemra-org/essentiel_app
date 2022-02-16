@@ -8,7 +8,8 @@ Cette application est développée et maintenue bénévolement pour la paroisse 
 
 ## Apercu
 
-Cette application est basée sur le kit de développement [Flutter](https://flutter.dev/), dans lebut d'être multi-plateforme.
+Cette application est basée sur le kit de développement [Flutter](https://flutter.dev/),
+dans le but de faciliter le développement et d'être multi-plateforme.
 
 Les listes de questions et de catégories affichées dans le jeu
 proviennent de la feuille de calcul disponible [ici](https://docs.google.com/spreadsheets/d/1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI/edit#gid=0).
@@ -29,11 +30,20 @@ flutter --no-sound-null-safety run
 
 ### Android
 
-- Le Play Store Google recommande en général la publication d'App Bundles pour optimiser le téléchargement des apps par les utilisateurs. Pour créer un App Bundle, lancer la commande suivante:
+Le Play Store Google recommande en général la publication d'App Bundles pour optimiser le téléchargement des apps par les utilisateurs. Pour créer un App Bundle, lancer la commande suivante:
+
 ```bash
 flutter --no-sound-null-safety build appbundle
 ```
 
+À la fin de cette opération qui ne dure que quelques minutes, un fichier `build/app/outputs/bundle/release/app-release.aab` devrait être créé.
+Ce fichier devra ensuite être publié via l'interface Web du Google Play Store.
+
 ### iOS
 
 Instructions à venir...
+
+## Licence
+
+    GNU AFFERO GENERAL PUBLIC LICENSE
+    Version 3, 19 November 2007

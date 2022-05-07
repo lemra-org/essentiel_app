@@ -34,7 +34,7 @@ dependencies:
   gsheets: ^0.3.2
   flutter_staggered_animations: ^1.0.0
   scrollable_positioned_list: ^0.2.3
-  flutter_speed_dial: ^5.0.0+1
+  flutter_speed_dial: ^6.0.0
   flutter_spinkit: ^5.1.0
   shared_preferences: ^2.0.13
   package_info: ^2.0.2

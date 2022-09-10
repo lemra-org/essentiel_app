@@ -31,7 +31,7 @@ dependencies:
   flip_card: ^0.6.0
   shake: ^2.0.0
   simple_animations: ^2.2.3
-  gsheets: ^0.3.2
+  gsheets: ^0.4.2
   flutter_staggered_animations: ^1.0.0
   scrollable_positioned_list: ^0.2.3
   flutter_speed_dial: ^6.0.0

@@ -36,14 +36,14 @@ dependencies:
   scrollable_positioned_list: ^0.2.3
   flutter_speed_dial: ^6.0.0
   flutter_spinkit: ^5.1.0
-  shared_preferences: ^2.0.13
+  shared_preferences: ^2.0.15
   package_info: ^2.0.2
   font_awesome_flutter: ^10.2.1
-  fluttertoast: ^8.0.8
+  fluttertoast: ^8.0.9
 #    git:
 #      url: https://github.com/PonnamKarthik/FlutterToast
 #      ref: cb70da0093d4323002c730219aae7c255a648a0a # Contains this useful PR : https://github.com/ponnamkarthik/FlutterToast/pull/231
-  showcaseview: ^1.1.4
+  showcaseview: ^1.1.8
   flutter_svg: ^1.0.3
   animated_widgets: ^1.1.0
 

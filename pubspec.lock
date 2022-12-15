@@ -98,7 +98,7 @@ packages:
       name: dependency_validator
       url: "https://pub.dartlang.org"
     source: hosted
-    version: "3.1.2"
+    version: "3.2.2"
   fake_async:
     dependency: transitive
     description:

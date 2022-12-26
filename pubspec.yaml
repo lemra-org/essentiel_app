@@ -46,6 +46,7 @@ dependencies:
   showcaseview: ^1.1.8
   flutter_svg: ^1.0.3
   animated_widgets: ^1.1.0
+  supercharged: ^2.1.1
 
 dev_dependencies:
   flutter_test:

@@ -4,6 +4,7 @@ import 'package:essentiel/widgets/particle_model.dart';
 import 'package:essentiel/widgets/particle_painter.dart';
 import 'package:flutter/material.dart';
 import 'package:simple_animations/simple_animations.dart';
+import 'package:supercharged/supercharged.dart';
 
 class Particles extends StatefulWidget {
   final int numberOfParticles;
@@ -29,12 +30,13 @@ class _ParticlesState extends State<Particles> {
 
   @override
   Widget build(BuildContext context) {
-    return Rendering(
-      startTime: Duration(seconds: 20),
-      onTick: _simulateParticles,
-      builder: (context, time) {
+    return LoopAnimation<int>(
+      duration: Duration(seconds: 20),
+      tween: ConstantTween(1),
+      //onTick: _simulateParticles,
+      builder: (context, child, value) {
         return CustomPaint(
-          painter: ParticlePainter(particles, time),
+          painter: ParticlePainter(particles, DateTime.now().duration()),
         );
       },
     );

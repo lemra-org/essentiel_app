@@ -43,7 +43,7 @@ dependencies:
 #    git:
 #      url: https://github.com/PonnamKarthik/FlutterToast
 #      ref: cb70da0093d4323002c730219aae7c255a648a0a # Contains this useful PR : https://github.com/ponnamkarthik/FlutterToast/pull/231
-  showcaseview: ^1.1.8
+  showcaseview: ^2.0.0+1
   flutter_svg: ^1.1.6
   animated_widgets: ^1.1.0
   supercharged: ^2.1.1

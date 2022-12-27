@@ -8,7 +8,6 @@ import 'package:essentiel/resources/category.dart';
 import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
-import 'package:essentiel/widgets/particles.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -497,9 +496,6 @@ class _GameState extends State<Game> {
     final toDisplay = Stack(
       children: [
         Positioned.fill(child: AnimatedBackground()),
-        (_allCardsData != null)
-            ? Positioned.fill(child: Particles(10))
-            : Container(),
         _onBottom(AnimatedWave(
           height: 180,
           speed: 1.0,

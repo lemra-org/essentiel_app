@@ -21,23 +21,16 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
-
-const _credentials = r'''
-{
-  "type": "service_account",
-  "project_id": "essentiel-app",
-  "private_key_id": "xxx",
-  "private_key": "xxx",
-  "client_email": "xxx",
-  "client_id": "xxx",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "xxx"
-}
-''';
+import 'package:googleapis_auth/googleapis_auth.dart';
 
 const _spreadsheetId = '1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI';
+
+// These are credentials for a Serice Account that has no other access except a read-only access to the Spreadsheet.
+// Also, the spreadhseet is open to the public in a read-only mode. So any service account can actually be used.
+// => It is therefore safe to hardcode it below.
+const _saEmail = "essentiel-mobile-app-readonly@essentiel-app.iam.gserviceaccount.com";
+const _saId = "xxx";
+const _saPK = "xxx";
 
 const title = 'Jeu Essentiel';
 
@@ -74,7 +67,9 @@ class _GameState extends State<Game> {
       final prefs = await SharedPreferences.getInstance();
       final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
       debugPrint("Initial state for categoryListFilter: $categoryListFilter");
-      final gsheets = GSheets(_credentials);
+
+      final gsheets = GSheets.withServiceAccountCredentials(
+          ServiceAccountCredentials(_saEmail, ClientId(_saId), _saPK));
 
       gsheets
           .spreadsheet(_spreadsheetId)

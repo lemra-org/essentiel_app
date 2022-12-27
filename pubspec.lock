@@ -222,9 +222,11 @@ packages:
   gsheets:
     dependency: "direct main"
     description:
-      name: gsheets
-      url: "https://pub.dartlang.org"
-    source: hosted
+      path: "."
+      ref: "3943b274623b000a8e38e216e75412bf9e80b7eb"
+      resolved-ref: "3943b274623b000a8e38e216e75412bf9e80b7eb"
+      url: "https://github.com/rm3l/gsheets-dart"
+    source: git
     version: "0.4.2"
   http:
     dependency: transitive

@@ -21,23 +21,44 @@ import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 import 'package:shake/shake.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:showcaseview/showcaseview.dart';
-
-const _credentials = r'''
-{
-  "type": "service_account",
-  "project_id": "essentiel-app",
-  "private_key_id": "96abfc77058910deaa08486e5c3e26180b600710",
-  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQDRBDm/B3Urne/E\nbpb6nLdpK/tzJqA6cpvOM1oEm+6fncofyHcyyRs/SkIDJrKDyO5VVV1Icc1sbBOZ\n58hWvVHkHhVVlrHT8+okQ7dS62J/wckuSAoUf03c0f2VmM6bzCz2kt3cSkNZgrrx\nsDwfn7t88YPBeNsNg4zUsdU9yhEdnVh4W256GTDXJDOKdE7EioEvJQJoWO3xC6W5\nu+Wmr2ZfHGWps6f1EVO7J0yQsNaThL8SJswYgA10NcMUWB52KkTHa9BANMFBusdK\nhsN3JowTYmg6BX4nBvOXk9Y9POLhNeVyK+GFGpEwh1wYJMAnz9MmERx7MIMPdoU3\nulWyYdm9AgMBAAECggEAD06XagmCR7Tzy7droCPc/LtHWWoBPvaIuYOiOocu5QqZ\ntFUqgZIfyDVIe1GYrjUHW0F6qOUIrcGGd/V1AwEvX5ziZBe6ozKQOaKp6M0rM/79\nnEGTV2fxTFQmlY+QxfEgc9hSniDkKMh9p1iINqqsgNxxETioFifFpwf0/WbwdPIg\nmF/GHcZFuDf8FaY4fCYRHeSoDczKs7VmJYk8SrRPszCvWaB0ujlbfxoRD6GO2WQk\nCKsilN1ufiOhChzj/2d9Ur6FpBFp0qXZnLmclZ00bYVn7luhzQv8XeB29d21sHq7\nsv5VP+rVdMp/EWfgfcA37Ha4qjwJtAMF7dLKrGABowKBgQDocl3LwmdAOdWc/kQI\n1ZZBnnP3MdyMSbcPi2n10aqmbaOTldR1BNe8voy25Ho7YOOT8sU74MiLRtoIFl8Y\nQcJFXwI4G0HsP/qDBZDpn87WvfoOl8j9VZRocsVRRdQd5vZD6HCaZ3qEUgAyl0g1\nPv6pO2awi2b7gmyml9Nzu3WnkwKBgQDmMhUUHQt/B6CNxCbFjb2/m3pmo1UEas/j\nIDEJMq0XqLJ6UYq+n5JwzFr++tQXIiX8fObe3adGP0YQuLBzZn3843Jmv2pDfr3T\nbUyd5yRk4vODi0VE2w9Pps12GAsoH9tKgOb53h7sbrtxFuFLluCYlcu5kuMAjCxN\nk+OMljWrbwKBgQCHxJ0icXcrXVx2qVEFs/NienGTlc0TJ89DxhNq4D8DnJBpmJ8S\nhnSYKtg3zzXRzuK+PJOVSNL5/rVE+gQrP+V/7WF3cfxMSIZC1xJwUsZWSXpv4Zok\n1kKryzWTJe0iVg/LVE3I8d3uwZKZ+iDT8Op/4FE3lwTcrK5Xk+CO/ZRX/wKBgQDR\nI3NPIMxPDwjpg+qN1actK/7avU4Cg2B4Q8kJSEdGlXgB9Y+OfL+5R5Ds08pZcib8\n7CV9GfhdtCLeEk4NqnKQjbxkaUgMJlwkeMsBMv03w5HmU2QNmNCiVzOYNWP9gmPj\nnpU7Mnj56ejWaCksWdmYB5Bd+3vOBYxCtzgnhFkidQKBgEwLBHiIqNIeFRcuXhRw\n4PQ6fzHMK2l60CTpfjQZugXONLIpYOmIqU73DmFVNOjGyMEPSLvGkrbQq/NnKPU+\ny0bzWHQp2Tu9A5MFtIl0asELgZl45pGKisENdZOZm9w/a90eMzJ7x72vtOqqaggF\nl+rd+vKwhImb1oOdFlRIpM0b\n-----END PRIVATE KEY-----\n",
-  "client_email": "essentiel-mobile-app@essentiel-app.iam.gserviceaccount.com",
-  "client_id": "108214015117832858585",
-  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
-  "token_uri": "https://oauth2.googleapis.com/token",
-  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
-  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/essentiel-mobile-app%40essentiel-app.iam.gserviceaccount.com"
-}
-''';
+import 'package:googleapis_auth/googleapis_auth.dart';
 
 const _spreadsheetId = '1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI';
+
+// These are credentials for a Serice Account that has no other access except a read-only access to the Spreadsheet.
+// Also, the spreadhseet is open to the public in a read-only mode. So any service account can actually be used.
+// => It is therefore safe to hardcode it below.
+const _saEmail = "essentiel-mobile-app-readonly@essentiel-app.iam.gserviceaccount.com";
+const _saId = "100803588250222093760";
+const _saPK = r'''-----BEGIN PRIVATE KEY-----
+MIIEvQIBADANBgkqhkiG9w0BAQEFAASCBKcwggSjAgEAAoIBAQDpvXgA5spIe/gr
+9GRYCKZrivsRITYxxGhuGuFmiR9wWdI1bVAtMeq2jzVZHRfkac2Mssb0B7P/WapB
+LD5M/n2y8ag0LCLK05OB7KYtZc0AcgUlie6hDIJs40L+KQFarornTqln9isHNKC+
+mVduZuqZitGnaoz+q2FIFW+uiA3VR1SWvN/Hu+ZrFIV/X+Gwz/1q11uY0cRuRoCN
+0FV5h+szxUXzHuBZiXVxrOaoVl7QGCnB71CcxkAfWAfe2ogWq9YKNSYgWz1nWMcw
+ROtA4/vFkO7vvwShwkTmqHkrCE/cM5prW+93CeC3vft2iHVnRhSb8cB2xfUsUk6K
+MxkhfbUXAgMBAAECggEAJULqj/46rg5xNBScMHqEiS1ZM9RfDtT4LuFDIHTomaEA
+BTtdZi8IczzmLMQaDHQfa/gOBlX6CFFzdjtG3UBOqominlqQ21OaNsKShTcu1IzY
+rDDOZUcYvaIHCnxf9mRPyWr9T5DrMBVgMLJCQVvPt1VtcapnOqv4cKTWLnUK+347
+DDnwtuvVEPzpnxSTonTpC9ApiYUgHlteY2qyx6pwNhRVGrwRCU2wafompioSXGyx
+F8zdsFZ5MLtcck4SEOXuHFa1xjSRH49u2nhytQDFxXkm2HbsH8Q91QisZ1PKqT+Z
+ZChINp4ygr5y5PttOrpei0o/MbYn1CFCnv94HDG2RQKBgQD12iNvnm284h9mW6BB
+8zTdYfFfztbDrsYSDkClMmsh9MyhXM4Wl2o+IKpMDTODOMlv46HleDfJKm+OoI/Y
+sajc5tOPbxsDx92zfFZQ5LCq+mKI4kg5oG7eJzGaYM4FqlFd2cjcniZq6y2ZPWtw
+SSdDygW9wCMsEPtmH4u2ytMlfQKBgQDzY1iEg87IANp+9ewUjEE/EBwKuCmXxo8a
+a32mMqvUAKhp/2tFDPl5tFufN5kAKZ3PgVAQrulPg2gh30RRQMVlUH8ZrYF4Q1Jk
+HQUhKs1NCeMzsfMC2zB+ZjXW78MhNjoKlmjhvqXB2/pIxybwT3fLG1blJqg8kojQ
+tybGaB35IwKBgFyrZ9YH8rdSyKEtgl+5i8CyzWfesEc8Vr6xjp52Pbmj64obUDdl
+xY87gtV92F/rBMrfE8RKJ0T1cO1jCjWU6eCyRSZ4q8cmDCQ+hs6hFRKtpHySRsUp
++wBT57eYK7Ao/diRYcv+9N4yXZK4ewntGRbNTJK0nM1cbVaWJ3S0SRiFAoGAFv/P
+UI5oDuxNuWuhyHtMexoZnEW04HvJ8BQyRm9JX3pEb+fMCjVkqcSKV+xYD/TezcoJ
+d9off/0J7RF9EjSNsro9mH6V2nh6I62+W1kBF4OUrcDmFuIBniAofEwh41SNfYyj
+EpoCbeRMrW3sVw8bYd0OhA74HOk39okoJ92U34MCgYEArPNt3gnYL9/Qe7XZFrRl
+yXh06CsCbP9TSbsJPipR4KwYQIggnvTQOAk9i9S/CjaJADGbHa6TKlKyTQ3CmBzW
+p3q3nd96adgeMidNKhSBPwFC0RLtzWiM5NnYEbYvD8iFb69k0MWSsA6s8wqOQa1O
+6cW6ZTJ7EVPgJbfLqQikUKk=
+-----END PRIVATE KEY-----
+''';
 
 const title = 'Jeu Essentiel';
 
@@ -74,7 +95,9 @@ class _GameState extends State<Game> {
       final prefs = await SharedPreferences.getInstance();
       final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
       debugPrint("Initial state for categoryListFilter: $categoryListFilter");
-      final gsheets = GSheets(_credentials);
+
+      final gsheets = GSheets.withServiceAccountCredentials(
+          ServiceAccountCredentials(_saEmail, ClientId(_saId), _saPK));
 
       gsheets
           .spreadsheet(_spreadsheetId)

@@ -31,7 +31,12 @@ dependencies:
   flip_card: ^0.6.0
   shake: ^2.1.0
   simple_animations: ^3.2.0
-  gsheets: ^0.4.2
+  # gsheets: ^0.4.2
+  gsheets:
+    git:
+      # Specific fork to fix an issue with scopes not being passed when initializing a GSheets client.
+      url: https://github.com/rm3l/gsheets-dart
+      ref: 3943b274623b000a8e38e216e75412bf9e80b7eb
   flutter_staggered_animations: ^1.1.1
   scrollable_positioned_list: ^0.3.5
   flutter_speed_dial: ^6.2.0

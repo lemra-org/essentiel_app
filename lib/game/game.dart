@@ -127,8 +127,16 @@ class _GameState extends State<Game> {
             _applyFilter = false;
             _categoryListFilter = categoryListFilter;
             _categoryList = categoryList.toList(growable: false);
+            if (_categoryListFilter == null || _categoryListFilter!.length == 0) {
+              // All categories selected by default
+              _categoryListFilter = <String>["Familles", "Couples"];
+              categoryList.where((element) => element.title != null).forEach((element) {
+                _categoryListFilter!.add(element.title!);
+              });
+              debugPrint("Updated state for categoryListFilter: $_categoryListFilter");
+            }
             _rawCardsData = cardData.toList(growable: false);
-            _allCardsData = _filter(categoryListFilter);
+            _allCardsData = _filter(_categoryListFilter);
           });
           await AppUtils.isFirstLaunch().then((result) {
             if (result) {
@@ -146,6 +154,14 @@ class _GameState extends State<Game> {
             _doShuffleCards = false;
             _applyFilter = false;
             _categoryListFilter = categoryListFilter;
+            if (_categoryListFilter == null || _categoryListFilter!.length == 0) {
+              // All categories selected by default
+              _categoryListFilter = <String>["Familles", "Couples"];
+              categoryList.where((element) => element.title != null).forEach((element) {
+                _categoryListFilter!.add(element.title!);
+              });
+              debugPrint("Updated state for categoryListFilter: $_categoryListFilter");
+            }
           });
         });
       }).catchError((e) {

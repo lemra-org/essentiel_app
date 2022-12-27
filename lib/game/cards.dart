@@ -17,7 +17,6 @@ class EssentielCardData {
       this.isForFamilies = false});
 
   factory EssentielCardData.fromGSheet(Map<String, dynamic> json) {
-    final image = json['Image'];
     final question = json['Question'];
     return EssentielCardData(
         category: CategoryStore.findByName(json['Catégorie']),
@@ -46,7 +45,6 @@ class EssentielCard extends StatefulWidget {
 class _EssentielCardState extends State<EssentielCard> {
   @override
   Widget build(BuildContext context) {
-    final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
     return FlipCard(
       onFlip: this.widget.onFlip,

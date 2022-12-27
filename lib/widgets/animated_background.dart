@@ -4,24 +4,30 @@ import 'package:simple_animations/simple_animations.dart';
 class AnimatedBackground extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final tween = MultiTrackTween([
-      Track("color1").add(Duration(seconds: 3),
-          ColorTween(begin: Color(0xffD38312), end: Colors.lightBlue.shade900)),
-      Track("color2").add(Duration(seconds: 3),
-          ColorTween(begin: Color(0xffA83279), end: Colors.blue.shade600))
-    ]);
+    final tween = MultiTween<DefaultAnimationProperties>()
+      ..add(
+          DefaultAnimationProperties.color1,
+          ColorTween(begin: Color(0xffD38312), end: Colors.lightBlue.shade900),
+          Duration(seconds: 3))
+      ..add(
+          DefaultAnimationProperties.color2,
+          ColorTween(begin: Color(0xffA83279), end: Colors.blue.shade600),
+          Duration(seconds: 3));
 
-    return ControlledAnimation(
-      playback: Playback.MIRROR,
+    return MirrorAnimation(
       tween: tween,
       duration: tween.duration,
-      builder: (BuildContext context, Map<String, dynamic> animation) {
+      builder: (BuildContext context, Widget? child,
+          MultiTweenValues<DefaultAnimationProperties> values) {
         return Container(
           decoration: BoxDecoration(
               gradient: LinearGradient(
                   begin: Alignment.topCenter,
                   end: Alignment.bottomCenter,
-                  colors: [animation["color1"], animation["color2"]])),
+                  colors: [
+                values.get(DefaultAnimationProperties.color1),
+                values.get(DefaultAnimationProperties.color2)
+              ])),
         );
       },
     );

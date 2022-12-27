@@ -76,13 +76,13 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
         }).toList(),
       ),
       actions: [
-        FlatButton(
+        TextButton(
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Annuler'.toUpperCase(),
             style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
           ),
-          textColor: Colors.blue,
+          style: TextButton.styleFrom(foregroundColor: Colors.blue),
         ),
         // FlatButton(
         //   onPressed: () {
@@ -103,7 +103,7 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
         //       'Tout ${selectedItems?.isEmpty ?? true ? '' : 'dé'}sélectionner',
         //       style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),),
         // ),
-        FlatButton(
+        TextButton(
           onPressed: () {
             if (selectedItems != null && selectedItems!.isEmpty) {
               Fluttertoast.cancel();
@@ -125,7 +125,7 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
             'Appliquer'.toUpperCase(),
             style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
           ),
-          textColor: Colors.blue,
+          style: TextButton.styleFrom(foregroundColor: Colors.blue),
         ),
       ],
     );

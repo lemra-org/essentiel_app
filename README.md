@@ -18,22 +18,25 @@ TODO Add screen captures down here
 
 ## Compiler le projet
 
-- Installer Flutter, conformément aux instructions officielles disponibles sur [cette page](https://docs.flutter.dev/get-started/install)
-- Connecter un périphérique (virtuel ou physique) à l'ordinateur, puis lancer la commande `flutter run`, avec l'option `no-sound-null-safety`
-(en raison d'incompatibilités de certaines dépendances avec [cette fonctionnalité](https://dart.dev/null-safety))
+- Installer Flutter:
+  - soit conformément aux instructions officielles disponibles sur [cette page](https://docs.flutter.dev/get-started/install)
+  - soit, si vous utilisez le gestionnaire de versions [`asdf`](https://asdf-vm.com/), à l'aide de cette commande: `asdf install`
+- Installer les outils nécessaires pour Flutter (comme le SDK Android)
+- Connecter un périphérique (virtuel ou physique) à l'ordinateur, puis lancer la commande `flutter run`
 
 ```bash
-flutter --no-sound-null-safety run
+flutter run
 ```
 
 ## Publier l'application
 
 ### Android
 
-Le Play Store Google recommande en général la publication d'App Bundles pour optimiser le téléchargement des apps par les utilisateurs. Pour créer un App Bundle, lancer la commande suivante:
+Le Play Store Google recommande en général la publication d'App Bundles pour optimiser le téléchargement des apps par les utilisateurs.
+Pour créer un App Bundle, lancer la commande ci-après:
 
 ```bash
-flutter --no-sound-null-safety build appbundle
+flutter build appbundle
 ```
 
 À la fin de cette opération qui ne dure que quelques minutes, un fichier `build/app/outputs/bundle/release/app-release.aab` devrait être créé.

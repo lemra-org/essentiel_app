@@ -418,11 +418,6 @@ class _GameState extends State<Game> {
                   fontSize: 20.0,
                 ),
                 overlayOpacity: 0.6,
-                contentPadding: EdgeInsets.only(
-                    left: screenWidth * 0.02,
-                    right: screenWidth * 0.02,
-                    top: 7.0,
-                    bottom: 5.0),
                 description:
                     'Faites défiler de gauche à droite \npour découvrir plus de cartes',
                 child: AnimationLimiter(

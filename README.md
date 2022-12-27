@@ -6,9 +6,9 @@ Cette application est développée et maintenue bénévolement pour la paroisse 
 
 <a href='https://play.google.com/store/apps/details?id=app.essentiel&hl=fr&gl=FR&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Disponible sur Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png' style="height: 97px; width:250px;"/></a>
 
-<img src="deployment/google_play/screenshots/phone/screen-0.png" alt="Preview" style="height: 530px; width:212px;"/>
-
 ## Apercu
+
+<img src="deployment/google_play/screenshots/phone/screen-0.png" alt="Preview" style="height: 530px; width:212px;"/>
 
 Cette application est basée sur le kit de développement [Flutter](https://flutter.dev/),
 dans le but de faciliter le développement et d'être multi-plateforme.

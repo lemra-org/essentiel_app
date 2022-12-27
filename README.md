@@ -4,9 +4,9 @@ Application pour les [groupes de partage Essentiel](https://www.saintemadeleinev
 
 Cette application est développée et maintenue bénévolement pour la paroisse Sainte Madeleine des Charpennes de Villeurbanne.
 
-<a href='https://play.google.com/store/apps/details?id=app.essentiel&hl=fr&gl=FR&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Disponible sur Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png' style="height: 100px; width:100px;"/></a>
+<a href='https://play.google.com/store/apps/details?id=app.essentiel&hl=fr&gl=FR&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Disponible sur Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png' style="height: 250px; width:97px;"/></a>
 
-<img src="deployment/google_play/screenshots/phone/screen-0.png" alt="Preview"/>
+<img src="deployment/google_play/screenshots/phone/screen-0.png" alt="Preview" style="height: 530px; width:212px;"/>
 
 ## Apercu
 

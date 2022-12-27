@@ -1,5 +1,4 @@
 import 'dart:math';
-import 'dart:ui';
 
 import 'package:animated_widgets/animated_widgets.dart';
 import 'package:essentiel/about.dart';
@@ -91,7 +90,7 @@ class _GameState extends State<Game> {
     _doShuffleCards = false;
     _applyFilter = false;
 
-    WidgetsBinding.instance?.addPostFrameCallback((_) async {
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
       final prefs = await SharedPreferences.getInstance();
       final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
       debugPrint("Initial state for categoryListFilter: $categoryListFilter");
@@ -135,8 +134,7 @@ class _GameState extends State<Game> {
           await AppUtils.isFirstLaunch().then((result) {
             if (result) {
               if (myContext != null) {
-                ShowCaseWidget.of(myContext!)
-                    ?.startShowCase([_cardListShowcaseKey]);
+                ShowCaseWidget.of(myContext!).startShowCase([_cardListShowcaseKey]);
               }
             }
           });
@@ -419,7 +417,7 @@ class _GameState extends State<Game> {
                           });
                         },
                         icon: FaIcon(
-                          FontAwesomeIcons.solidWindowClose,
+                          FontAwesomeIcons.solidRectangleXmark,
                           size: 45.0,
                           color: Colors.black87,
                         )),
@@ -589,7 +587,7 @@ class _GameState extends State<Game> {
     return ShowCaseWidget(
       onStart: (index, key) {
         debugPrint('onStart: $index, $key');
-        WidgetsBinding.instance?.addPostFrameCallback((_) {
+        WidgetsBinding.instance.addPostFrameCallback((_) {
           itemScrollController
               .scrollTo(
                   index: min(5, _allCardsData!.length - 1),

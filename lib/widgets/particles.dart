@@ -42,7 +42,7 @@ class _ParticlesState extends State<Particles> {
     );
   }
 
-  _simulateParticles(Duration time) {
-    particles.forEach((particle) => particle.maintainRestart(time));
-  }
+  //_simulateParticles(Duration time) {
+  //  particles.forEach((particle) => particle.maintainRestart(time));
+  // }
 }

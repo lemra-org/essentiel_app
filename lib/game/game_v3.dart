@@ -2,10 +2,8 @@ import 'dart:math';
 
 import 'package:essentiel/game/cards.dart';
 import 'package:essentiel/resources/category.dart';
-import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
-import 'package:essentiel/widgets/stacked_card_carousel.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gsheets/gsheets.dart';
@@ -28,33 +26,22 @@ const _credentials = r'''
 
 const _spreadsheetId = '1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI';
 
-class GameV2 extends StatefulWidget {
-  final String title;
+const title = 'Jeu Essentiel';
 
-  const GameV2({Key key, this.title}) : super(key: key);
-
+//Inpiration from https://dribbble.com/shots/7696045-Tarot-App-Design
+class GameV3 extends StatefulWidget {
   @override
-  _GameV2State createState() => _GameV2State();
+  _GameV3State createState() => _GameV3State();
 }
 
-class _GameV2State extends State<GameV2> with SingleTickerProviderStateMixin {
-  PageController _cardsController;
-
+class _GameV3State extends State<GameV3> {
   List<EssentielCard> _allCards;
   Object _errorWhileLoadingData;
-
   int _currentIndex;
-  int _currentPageIndex = 0;
 
   @override
   void initState() {
-    _currentIndex = 0;
-
-    _cardsController = PageController(initialPage: 200);
-
-    ShakeDetector.autoStart(onPhoneShake: () {
-      _randomDraw();
-    });
+    super.initState();
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       final gsheets = GSheets(_credentials);
@@ -90,11 +77,16 @@ class _GameV2State extends State<GameV2> with SingleTickerProviderStateMixin {
       });
     });
 
-    super.initState();
+    ShakeDetector.autoStart(onPhoneShake: () {
+      _randomDraw();
+    });
   }
 
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final screenHeight = MediaQuery.of(context).size.height;
+
     Widget body;
     if (_errorWhileLoadingData != null) {
       //Oh no!
@@ -151,60 +143,96 @@ class _GameV2State extends State<GameV2> with SingleTickerProviderStateMixin {
       ]));
     } else {
       //Yeah - we have some data !
-      body = StackedCardCarousel(
-        pageController: _cardsController,
-        onPageChanged: (int pageIndex) {
-          _currentPageIndex = pageIndex;
-          // if (currentPageIndex)
-        },
-        type: StackedCardCarouselType.cardsStack,
-        items: _allCards.toList(),
+      body = Column(
+        children: [
+          Expanded(
+            flex: 5,
+            child: Container(
+                // height: screenHeight * 0.4,
+                padding: const EdgeInsets.all(10.0),
+                color: Colors.orangeAccent,
+                child: (_currentIndex == null)
+                    ? Center(
+                        child: Flexible(
+                            child: Text(
+                                "Merci de sélectionner une carte en dessous ou d'en choisir une au hasard.",
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                    fontSize: 20,
+                                    height: 1.7,
+                                    color: Colors.white))),
+                      )
+                    :
+                    //TODO
+                    Container(child: Text('TODO'))),
+          ),
+          SizedBox(
+            height: 20.0,
+          ),
+          Expanded(
+              flex: 2,
+              child: Container(
+                // height: screenHeight * 0.1,
+                color: Colors.greenAccent,
+              ))
+        ],
       );
+      //FIXME
+      // body = StackedCardCarousel(
+      //   pageController: _cardsController,
+      //   onPageChanged: (int pageIndex) {
+      //     _currentPageIndex = pageIndex;
+      //     // if (currentPageIndex)
+      //   },
+      //   type: StackedCardCarouselType.cardsStack,
+      //   items: _allCards.toList(),
+      // );
     }
 
-    final screenWidth = MediaQuery.of(context).size.width;
-    final screenHeight = MediaQuery.of(context).size.height;
-
     return Scaffold(
-      body: Stack(
-        children: [
-          Positioned.fill(child: AnimatedBackground()),
-          _onBottom(AnimatedWave(
-            height: 180,
-            speed: 1.0,
-          )),
-          _onBottom(AnimatedWave(
-            height: 120,
-            speed: 0.9,
-            offset: pi,
-          )),
-          _onBottom(AnimatedWave(
-            height: 220,
-            speed: 1.2,
-            offset: pi / 2,
-          )),
-          Align(
-            alignment: Alignment.topLeft,
-            child: Padding(
-              padding: EdgeInsets.only(
-                  top: screenHeight * 0.08, left: screenWidth * 0.03),
-              child: Text(
-                widget.title,
-                style: TextStyle(fontSize: 30.0, color: Colors.white),
+      body: SafeArea(
+        child: Stack(
+          children: [
+            Positioned.fill(child: AnimatedBackground()),
+            _onBottom(AnimatedWave(
+              height: 180,
+              speed: 1.0,
+            )),
+            _onBottom(AnimatedWave(
+              height: 120,
+              speed: 0.9,
+              offset: pi,
+            )),
+            _onBottom(AnimatedWave(
+              height: 220,
+              speed: 1.2,
+              offset: pi / 2,
+            )),
+            Align(
+              alignment: Alignment.topLeft,
+              child: Padding(
+                padding: EdgeInsets.only(top: screenHeight * 0.03, left: 10.0),
+                child: Text(
+                  title,
+                  style: TextStyle(fontSize: 30.0, color: Colors.white),
+                ),
               ),
             ),
-          ),
-          Positioned.fill(
-            child: Align(
-                alignment: Alignment.center,
-                child: Container(
-                  padding: EdgeInsets.only(
-                      left: screenWidth * 0.05, right: screenWidth * 0.05),
-                  height: screenHeight * 0.5,
-                  child: body,
-                )),
-          ),
-        ],
+            Positioned.fill(
+              child: Align(
+                  alignment: Alignment.center,
+                  child: Container(
+                    padding: EdgeInsets.only(
+                        top: screenHeight * 0.1,
+                        bottom: screenHeight * 0.1,
+                        left: 10.0,
+                        right: 10.0),
+                    // height: screenHeight * 0.5,
+                    child: body,
+                  )),
+            ),
+          ],
+        ),
       ),
       floatingActionButton: (_allCards != null && _allCards.isNotEmpty)
           ? FloatingActionButton.extended(
@@ -220,12 +248,13 @@ class _GameV2State extends State<GameV2> with SingleTickerProviderStateMixin {
   }
 
   void _randomDraw() {
+    //TODO
     final _numberOfCards = _allCards.length;
-    final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
-        0, _numberOfCards, _currentPageIndex);
-    debugPrint(
-        "_currentPageIndex=$_currentPageIndex / randomPick=$randomPick / _numberOfCards=$_numberOfCards");
-    _jumpTo(randomPick);
+    // final randomPick = RandomUtils.getRandomValueInRangeButExcludingValue(
+    //     0, _numberOfCards, _currentPageIndex);
+    // debugPrint(
+    //     "_currentPageIndex=$_currentPageIndex / randomPick=$randomPick / _numberOfCards=$_numberOfCards");
+    // _jumpTo(randomPick);
   }
 
   _onBottom(Widget child) => Positioned.fill(
@@ -236,7 +265,8 @@ class _GameV2State extends State<GameV2> with SingleTickerProviderStateMixin {
       );
 
   _jumpTo(int index) {
-    _cardsController.animateToPage(index,
-        curve: Curves.ease, duration: Duration(milliseconds: 500));
+    //TODO
+    // _cardsController.animateToPage(index,
+    //     curve: Curves.ease, duration: Duration(milliseconds: 500));
   }
 }

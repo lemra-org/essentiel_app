@@ -22,17 +22,19 @@ class EssentielCardData {
   }
 }
 
-class EssentialCard extends StatefulWidget {
+class EssentielCard extends StatefulWidget {
   final EssentielCardData cardData;
   final VoidCallback onFlip;
+  final int index;
 
-  const EssentialCard({Key key, this.cardData, this.onFlip}) : super(key: key);
+  const EssentielCard({Key key, this.cardData, this.onFlip, this.index})
+      : super(key: key);
 
   @override
-  _EssentialCardState createState() => _EssentialCardState();
+  _EssentielCardState createState() => _EssentielCardState();
 }
 
-class _EssentialCardState extends State<EssentialCard> {
+class _EssentielCardState extends State<EssentielCard> {
   @override
   Widget build(BuildContext context) {
     final screenWidth = MediaQuery.of(context).size.width;

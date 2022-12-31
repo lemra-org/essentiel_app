@@ -9,6 +9,17 @@ class EssentielCardData {
 
   const EssentielCardData(
       {@required this.category, @required this.question, this.header});
+
+  factory EssentielCardData.fromGSheet(Map<String, dynamic> json) {
+    final image = json['Image'];
+    return EssentielCardData(
+        category: Category.values
+            .firstWhere((element) => element.title() == json['Catégorie']),
+        question: json['Question'],
+        header: (image != null && image.toString().trim().isNotEmpty)
+            ? Image.network(image)
+            : null);
+  }
 }
 
 class EssentialCard extends StatefulWidget {

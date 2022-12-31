@@ -1,4 +1,3 @@
-import 'package:essentiel/game/cards.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/painting.dart';
 
@@ -41,41 +40,5 @@ extension CategoryIcon on Category {
         Category.FORMATION: Icons.ac_unit,
         Category.SERVICE: Icons.ac_unit,
         Category.ESSENTIELLES_PLUS: Icons.ac_unit
-      }[this];
-}
-
-extension EssentielCardsForCategory on Category {
-  List<EssentielCardData> essentielCards() => {
-        Category.VIE_FRATERNELLE: [
-          EssentielCardData(
-              category: this,
-              question: "Comment je vis la vie fraternelle dans ma famille?"),
-        ],
-        Category.PRIERE: [
-          EssentielCardData(
-              category: this,
-              question: "Ai-je déjà prié pour mon/mes enfant(s)?"),
-        ],
-        Category.FORMATION: [
-          EssentielCardData(
-              category: this,
-              question: "Comment je pense aider mes enfants à grandir?"),
-        ],
-        Category.SERVICE: [
-          EssentielCardData(
-              category: this,
-              question: "Quelle grâce j'aimerais recevoir pour servir mieux?"),
-        ],
-        Category.EVANGELISATION: [
-          EssentielCardData(
-              category: this,
-              question:
-                  "De quoi ai-je besoin pour oser témoigner de l'amour de Dieu autour de moi?"),
-        ],
-        Category.ESSENTIELLES_PLUS: [
-          EssentielCardData(
-              category: this,
-              question: "Je partage mon chant de louange préféré!"),
-        ]
       }[this];
 }

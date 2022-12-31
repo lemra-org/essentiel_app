@@ -2,6 +2,7 @@ import 'dart:math';
 
 import 'package:animated_widgets/animated_widgets.dart';
 import 'package:essentiel/about.dart';
+import 'package:essentiel/env.dart';
 import 'package:essentiel/game/cards.dart';
 import 'package:essentiel/game/category_selector_dialog.dart';
 import 'package:essentiel/resources/category.dart';
@@ -22,13 +23,6 @@ import 'package:showcaseview/showcaseview.dart';
 import 'package:googleapis_auth/googleapis_auth.dart';
 
 const _spreadsheetId = '1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI';
-
-// These are credentials for a Serice Account that has no other access except a read-only access to the Spreadsheet.
-// Also, the spreadhseet is open to the public in a read-only mode. So any service account can actually be used.
-// => It is therefore safe to hardcode it below.
-const _saEmail = "essentiel-mobile-app-readonly@essentiel-app.iam.gserviceaccount.com";
-const _saId = "xxx";
-const _saPK = "xxx";
 
 const title = 'Jeu Essentiel';
 
@@ -66,11 +60,12 @@ class _GameState extends State<Game> {
       final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
       debugPrint("Initial state for categoryListFilter: $categoryListFilter");
 
+      final String spreadsheetId = Env.value!.spreadsheetId ?? _spreadsheetId;
       final gsheets = GSheets.withServiceAccountCredentials(
-          ServiceAccountCredentials(_saEmail, ClientId(_saId), _saPK));
-
+          ServiceAccountCredentials(Env.value!.saEmail!,
+              ClientId(Env.value!.saId!), Env.value!.saPK!));
       gsheets
-          .spreadsheet(_spreadsheetId)
+          .spreadsheet(spreadsheetId)
           .then((spreadsheet) =>
               spreadsheet.worksheetByTitle('Categories')?.values.map.allRows())
           .then((jsonList) => Future.value(jsonList != null
@@ -80,7 +75,7 @@ class _GameState extends State<Game> {
               : <QuestionCategory>[]))
           .then((categoryList) async {
         gsheets
-            .spreadsheet(_spreadsheetId)
+            .spreadsheet(spreadsheetId)
             .then((spreadsheet) =>
                 spreadsheet.worksheetByTitle('Questions')?.values.map.allRows())
             .then((questionsListJson) => Future.value(questionsListJson != null
@@ -99,13 +94,17 @@ class _GameState extends State<Game> {
             _applyFilter = false;
             _categoryListFilter = categoryListFilter;
             _categoryList = categoryList.toList(growable: false);
-            if (_categoryListFilter == null || _categoryListFilter!.length == 0) {
+            if (_categoryListFilter == null ||
+                _categoryListFilter!.length == 0) {
               // All categories selected by default
               _categoryListFilter = <String>["Familles", "Couples"];
-              categoryList.where((element) => element.title != null).forEach((element) {
+              categoryList
+                  .where((element) => element.title != null)
+                  .forEach((element) {
                 _categoryListFilter!.add(element.title!);
               });
-              debugPrint("Updated state for categoryListFilter: $_categoryListFilter");
+              debugPrint(
+                  "Updated state for categoryListFilter: $_categoryListFilter");
             }
             _rawCardsData = cardData.toList(growable: false);
             _allCardsData = _filter(_categoryListFilter);
@@ -113,7 +112,8 @@ class _GameState extends State<Game> {
           await AppUtils.isFirstLaunch().then((result) {
             if (result) {
               if (myContext != null) {
-                ShowCaseWidget.of(myContext!).startShowCase([_cardListShowcaseKey]);
+                ShowCaseWidget.of(myContext!)
+                    .startShowCase([_cardListShowcaseKey]);
               }
             }
           });
@@ -126,13 +126,17 @@ class _GameState extends State<Game> {
             _doShuffleCards = false;
             _applyFilter = false;
             _categoryListFilter = categoryListFilter;
-            if (_categoryListFilter == null || _categoryListFilter!.length == 0) {
+            if (_categoryListFilter == null ||
+                _categoryListFilter!.length == 0) {
               // All categories selected by default
               _categoryListFilter = <String>["Familles", "Couples"];
-              categoryList.where((element) => element.title != null).forEach((element) {
+              categoryList
+                  .where((element) => element.title != null)
+                  .forEach((element) {
                 _categoryListFilter!.add(element.title!);
               });
-              debugPrint("Updated state for categoryListFilter: $_categoryListFilter");
+              debugPrint(
+                  "Updated state for categoryListFilter: $_categoryListFilter");
             }
           });
         });

@@ -1,18 +1,16 @@
+import 'package:essentiel/env.dart';
+import 'package:essentiel/environments/dev.dart';
 import 'package:essentiel/game/game.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() async {
-  WidgetsFlutterBinding.ensureInitialized();
-
-  //Force portrait-mode
-  await SystemChrome.setPreferredOrientations(
-      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
-  runApp(MyApp());
-}
+void main() => Dev();
 
 class MyApp extends StatelessWidget {
+  final Env env;
+
+  MyApp(this.env);
+
   // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {

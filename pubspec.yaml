@@ -28,7 +28,7 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.5
   google_fonts: ^4.0.3
-  flip_card: ^0.6.0
+  flip_card: ^0.7.0
   shake: ^2.2.0
   simple_animations: ^3.2.0
   # gsheets: ^0.4.2

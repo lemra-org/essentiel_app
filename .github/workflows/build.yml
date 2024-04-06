@@ -23,7 +23,7 @@ jobs:
           channel=`echo $full_version | awk -F '-' '{print $2}'`
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "channel=${channel}" >> $GITHUB_OUTPUT
-      - uses: subosito/flutter-action@v2.14.0
+      - uses: subosito/flutter-action@v2.16.0
         with:
           flutter-version: ${{ steps.get_flutter_version.outputs.version }}
           channel: ${{ steps.get_flutter_version.outputs.channel }}
@@ -47,7 +47,7 @@ jobs:
           channel=`echo $full_version | awk -F '-' '{print $2}'`
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "channel=${channel}" >> $GITHUB_OUTPUT
-      - uses: subosito/flutter-action@v2.14.0
+      - uses: subosito/flutter-action@v2.16.0
         with:
           flutter-version: ${{ steps.get_flutter_version.outputs.version }}
           channel: ${{ steps.get_flutter_version.outputs.channel }}
@@ -81,7 +81,7 @@ jobs:
           channel=`echo $full_version | awk -F '-' '{print $2}'`
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "channel=${channel}" >> $GITHUB_OUTPUT
-      - uses: subosito/flutter-action@v2.14.0
+      - uses: subosito/flutter-action@v2.16.0
         with:
           flutter-version: ${{ steps.get_flutter_version.outputs.version }}
           channel: ${{ steps.get_flutter_version.outputs.channel }}
@@ -113,7 +113,7 @@ jobs:
           channel=`echo $full_version | awk -F '-' '{print $2}'`
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "channel=${channel}" >> $GITHUB_OUTPUT
-      - uses: subosito/flutter-action@v2.14.0
+      - uses: subosito/flutter-action@v2.16.0
         with:
           flutter-version: ${{ steps.get_flutter_version.outputs.version }}
           channel: ${{ steps.get_flutter_version.outputs.channel }}

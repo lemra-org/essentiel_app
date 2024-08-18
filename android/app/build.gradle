@@ -105,7 +105,7 @@ android {
     }
 
     defaultConfig {
-        applicationId "app.essentiel"
+        applicationId "lemrapps.essentiel"
         minSdkVersion flutter.minSdkVersion
         targetSdkVersion 31
 

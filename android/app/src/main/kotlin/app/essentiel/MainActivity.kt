@@ -1,4 +1,4 @@
-package app.essentiel
+package lemrapps.essentiel
 
 import io.flutter.embedding.android.FlutterActivity
 

@@ -1,5 +1,5 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="app.essentiel">
+    package="lemrapps.essentiel">
 
     <!-- "Normal Permission" -->
     <!-- To fetch game cards from GSheets -->

@@ -591,144 +591,142 @@ class _GameState extends State<Game> {
           });
         });
       },
-      builder: Builder(
-        builder: (ctx) {
-          myContext = ctx;
-          return Scaffold(
-            body: toDisplay,
-            floatingActionButton: (_rawCardsData != null &&
-                    _rawCardsData!.isNotEmpty)
-                ? SpeedDial(
-                    animatedIcon: AnimatedIcons.menu_close,
-                    animatedIconTheme: IconThemeData(size: 22.0),
-                    overlayColor: Colors.black,
-                    overlayOpacity: 0.5,
-                    tooltip: 'Menu',
-                    heroTag: 'essentiel-speed-dial-hero-tag',
-                    elevation: 8.0,
-                    shape: CircleBorder(),
-                    foregroundColor: Colors.white,
-                    backgroundColor: Colors.lightGreen,
-                    curve: Curves.bounceIn,
-                    children: [
-                      SpeedDialChild(
-                        child: Icon(Icons.info_outline),
-                        backgroundColor: const Color(0xFF62D739),
-                        label: 'À propos',
-                        labelBackgroundColor: const Color(0xFF62D739),
+      builder: (ctx) {
+        myContext = ctx;
+        return Scaffold(
+          body: toDisplay,
+          floatingActionButton: (_rawCardsData != null &&
+                  _rawCardsData!.isNotEmpty)
+              ? SpeedDial(
+                  animatedIcon: AnimatedIcons.menu_close,
+                  animatedIconTheme: IconThemeData(size: 22.0),
+                  overlayColor: Colors.black,
+                  overlayOpacity: 0.5,
+                  tooltip: 'Menu',
+                  heroTag: 'essentiel-speed-dial-hero-tag',
+                  elevation: 8.0,
+                  shape: CircleBorder(),
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.lightGreen,
+                  curve: Curves.bounceIn,
+                  children: [
+                    SpeedDialChild(
+                      child: Icon(Icons.info_outline),
+                      backgroundColor: const Color(0xFF62D739),
+                      label: 'À propos',
+                      labelBackgroundColor: const Color(0xFF62D739),
+                      labelStyle:
+                          TextStyle(fontSize: 18.0, color: Colors.white),
+                      onTap: () => showAppAboutDialog(context),
+                    ),
+                    SpeedDialChild(
+                        child: Icon(Icons.filter_alt_sharp),
+                        backgroundColor: const Color(0xFF12A0FF),
+                        label: 'Filtrer les catégories de carte',
+                        labelBackgroundColor: const Color(0xFF12A0FF),
                         labelStyle:
                             TextStyle(fontSize: 18.0, color: Colors.white),
-                        onTap: () => showAppAboutDialog(context),
-                      ),
-                      SpeedDialChild(
-                          child: Icon(Icons.filter_alt_sharp),
-                          backgroundColor: const Color(0xFF12A0FF),
-                          label: 'Filtrer les catégories de carte',
-                          labelBackgroundColor: const Color(0xFF12A0FF),
-                          labelStyle:
-                              TextStyle(fontSize: 18.0, color: Colors.white),
-                          onTap: () async => showDialog(
-                              context: context,
-                              barrierDismissible: false,
-                              builder: (BuildContext ctx) =>
-                                  CategorySelectorDialog(
-                                    title: Text(
-                                      'Catégories à afficher',
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 20.0),
-                                    ),
-                                    all: allCategoryFilters,
-                                    selected: _categoryListFilter != null
-                                        ? _categoryListFilter
-                                        : <String>[],
-                                    textBackgroundColorProvider:
-                                        (String category, bool isSelected) {
-                                      var color = isSelected
-                                          ? chipColorFn(category)
-                                          : Colors.grey[200];
-                                      if (color == null) {
-                                        return Colors.grey;
-                                      }
-                                      return color;
-                                    },
-                                    textColorProvider:
-                                        (String category, bool isSelected) {
-                                      var color = isSelected
-                                          ? Colors.white
-                                          : chipColorFn(category);
-                                      if (color == null) {
-                                        return Colors.white;
-                                      }
-                                      return color;
-                                    },
-                                    callback: (List<String>
-                                        selectedCategories) async {
-                                      debugPrint(
-                                          "selectedCategories: $selectedCategories");
-                                      if (selectedCategories.isNotEmpty) {
-                                        final prefs = await SharedPreferences
-                                            .getInstance();
-                                        prefs.setStringList(
-                                            CATEGORY_FILTER_PREF_KEY,
-                                            selectedCategories);
-                                        setState(() {
-                                          _categoryListFilter =
-                                              selectedCategories;
-                                          _applyFilter = true;
-                                          _doShuffleCards = false;
-                                        });
-                                      }
-                                    },
-                                  ))
-                          // onTap: () async {
-                          //   await FilterListDialog.display(context,
-                          //       allTextList: allCategoryFilters,
-                          //       height: 480,
-                          //       borderRadius: 20,
-                          //       headlineText: "Catégories de carte à afficher",
-                          //       hideSearchField: true,
-                          //       selectedTextList: _categoryListFilter,
-                          //       onApplyButtonClick: (list) async {
-                          //     if (list != null) {
-                          //       final selectedCategories =
-                          //           list.map((e) => e.toString()).toList();
-                          //       final prefs = await SharedPreferences.getInstance();
-                          //       prefs.setStringList(
-                          //           CATEGORY_FILTER_PREF_KEY, selectedCategories);
-                          //       setState(() {
-                          //         _categoryListFilter = selectedCategories;
-                          //         _applyFilter = true;
-                          //         _doShuffleCards = false;
-                          //       });
-                          //     }
-                          //     Navigator.pop(context);
-                          //   });
-                          // },
-                          ),
-                      SpeedDialChild(
-                        child: Icon(Icons.shuffle_outlined),
-                        backgroundColor: const Color(0xFF97205E),
-                        label: 'Mélanger les cartes',
-                        labelBackgroundColor: const Color(0xFF97205E),
+                        onTap: () async => showDialog(
+                            context: context,
+                            barrierDismissible: false,
+                            builder: (BuildContext ctx) =>
+                                CategorySelectorDialog(
+                                  title: Text(
+                                    'Catégories à afficher',
+                                    style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        fontSize: 20.0),
+                                  ),
+                                  all: allCategoryFilters,
+                                  selected: _categoryListFilter != null
+                                      ? _categoryListFilter
+                                      : <String>[],
+                                  textBackgroundColorProvider:
+                                      (String category, bool isSelected) {
+                                    var color = isSelected
+                                        ? chipColorFn(category)
+                                        : Colors.grey[200];
+                                    if (color == null) {
+                                      return Colors.grey;
+                                    }
+                                    return color;
+                                  },
+                                  textColorProvider:
+                                      (String category, bool isSelected) {
+                                    var color = isSelected
+                                        ? Colors.white
+                                        : chipColorFn(category);
+                                    if (color == null) {
+                                      return Colors.white;
+                                    }
+                                    return color;
+                                  },
+                                  callback:
+                                      (List<String> selectedCategories) async {
+                                    debugPrint(
+                                        "selectedCategories: $selectedCategories");
+                                    if (selectedCategories.isNotEmpty) {
+                                      final prefs =
+                                          await SharedPreferences.getInstance();
+                                      prefs.setStringList(
+                                          CATEGORY_FILTER_PREF_KEY,
+                                          selectedCategories);
+                                      setState(() {
+                                        _categoryListFilter =
+                                            selectedCategories;
+                                        _applyFilter = true;
+                                        _doShuffleCards = false;
+                                      });
+                                    }
+                                  },
+                                ))
+                        // onTap: () async {
+                        //   await FilterListDialog.display(context,
+                        //       allTextList: allCategoryFilters,
+                        //       height: 480,
+                        //       borderRadius: 20,
+                        //       headlineText: "Catégories de carte à afficher",
+                        //       hideSearchField: true,
+                        //       selectedTextList: _categoryListFilter,
+                        //       onApplyButtonClick: (list) async {
+                        //     if (list != null) {
+                        //       final selectedCategories =
+                        //           list.map((e) => e.toString()).toList();
+                        //       final prefs = await SharedPreferences.getInstance();
+                        //       prefs.setStringList(
+                        //           CATEGORY_FILTER_PREF_KEY, selectedCategories);
+                        //       setState(() {
+                        //         _categoryListFilter = selectedCategories;
+                        //         _applyFilter = true;
+                        //         _doShuffleCards = false;
+                        //       });
+                        //     }
+                        //     Navigator.pop(context);
+                        //   });
+                        // },
+                        ),
+                    SpeedDialChild(
+                      child: Icon(Icons.shuffle_outlined),
+                      backgroundColor: const Color(0xFF97205E),
+                      label: 'Mélanger les cartes',
+                      labelBackgroundColor: const Color(0xFF97205E),
+                      labelStyle:
+                          TextStyle(fontSize: 18.0, color: Colors.white),
+                      onTap: _shuffleCards,
+                    ),
+                    SpeedDialChild(
+                        child: Icon(Icons.find_replace_outlined),
+                        backgroundColor: const Color(0xFFED2910),
+                        label: 'Choisir une carte au hasard',
+                        labelBackgroundColor: const Color(0xFFED2910),
                         labelStyle:
                             TextStyle(fontSize: 18.0, color: Colors.white),
-                        onTap: _shuffleCards,
-                      ),
-                      SpeedDialChild(
-                          child: Icon(Icons.find_replace_outlined),
-                          backgroundColor: const Color(0xFFED2910),
-                          label: 'Choisir une carte au hasard',
-                          labelBackgroundColor: const Color(0xFFED2910),
-                          labelStyle:
-                              TextStyle(fontSize: 18.0, color: Colors.white),
-                          onTap: _randomDraw),
-                    ],
-                  )
-                : null,
-          );
-        },
-      ),
+                        onTap: _randomDraw),
+                  ],
+                )
+              : null,
+        );
+      },
     );
   }
 

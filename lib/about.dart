@@ -20,7 +20,7 @@ Future<Null> showAppAboutDialog(BuildContext context) async {
           text: TextSpan(
             children: <TextSpan>[
               TextSpan(
-                  style: Theme.of(context).textTheme.bodyText1,
+                  style: Theme.of(context).textTheme.bodyMedium,
                   text: 'Application pour les groupes de partage Essentiel'
                       '\nDisponible sur '
                       '${defaultTargetPlatform == TargetPlatform.iOS ? 'plusieurs plateformes' : 'iOS et Android'}.')

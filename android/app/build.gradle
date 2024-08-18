@@ -107,7 +107,7 @@ android {
     defaultConfig {
         applicationId "lemrapps.essentiel"
         minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 31
+        targetSdkVersion 33
 
         // Fetch the version according to git latest tag and "how far are we from last tag"
         (versionCode, versionName) = getVersionCodeAndName("android")

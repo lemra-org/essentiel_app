@@ -71,14 +71,14 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-      - uses: gradle/actions/setup-gradle@v4
-        with:
-          # Only write to the cache for builds on the 'main' branch.
-          # Builds on other branches will only read existing entries from the cache.
-          cache-read-only: ${{ github.ref != 'refs/heads/main' }}
-          gradle-version: '7.6' # same version as in android/gradle/wrapper/gradle-wrapper.properties
-          #gradle-version: wrapper
-          #build-root-directory: android
+      #- uses: gradle/actions/setup-gradle@v4
+      #  with:
+      #    # Only write to the cache for builds on the 'main' branch.
+      #    # Builds on other branches will only read existing entries from the cache.
+      #    cache-read-only: ${{ github.ref != 'refs/heads/main' }}
+      #    gradle-version: '7.6' # same version as in android/gradle/wrapper/gradle-wrapper.properties
+      #    #gradle-version: wrapper
+      #    #build-root-directory: android
       - id: get_flutter_version
         run: |
           full_version=`grep flutter .tool-versions | awk '{print $2}'`

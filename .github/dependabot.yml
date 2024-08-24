@@ -18,6 +18,10 @@ updates:
     interval: "weekly"
     day: "saturday"
     time: '04:00'
+  reviewers:
+  - rm3l
+  labels:
+  - dependencies
 - package-ecosystem: gradle
   directory: "/android/app"
   schedule:

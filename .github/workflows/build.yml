@@ -70,7 +70,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: '21'
+          java-version: '17'
       #- uses: gradle/actions/setup-gradle@v4
       #  with:
       #    # Only write to the cache for builds on the 'main' branch.

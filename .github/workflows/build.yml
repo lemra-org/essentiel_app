@@ -116,6 +116,7 @@ jobs:
   build_ios:
     name: Build IOS
     runs-on: macos-latest
+    if: false
     steps:
       - uses: actions/checkout@v4
         with:

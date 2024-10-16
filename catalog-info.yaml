@@ -1,0 +1,10 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: essentiel_app
+  annotations:
+    github.com/project-slug: lemra-org/essentiel_app
+spec:
+  type: other
+  lifecycle: unknown
+  owner: user:default/rm3l

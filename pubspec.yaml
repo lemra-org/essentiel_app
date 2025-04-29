@@ -56,7 +56,7 @@ dependencies:
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  dependency_validator: ^3.2.2
+  dependency_validator: ^4.1.0
 #  flutter_launcher_icons: ^0.8.1
 #  flutter_launcher_name: ^0.0.1
 

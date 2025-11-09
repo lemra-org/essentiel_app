@@ -59,6 +59,7 @@ jobs:
   build_ios:
     name: Build iOS Release
     runs-on: macos-latest
+    if: false
     steps:
       - uses: actions/checkout@v5
         with:

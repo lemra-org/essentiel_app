@@ -1,0 +1,105 @@
+on:
+  release:
+    types: [created]
+
+name: Release Build
+
+jobs:
+  build_android:
+    name: Build Android Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      
+      - uses: actions/setup-java@v5
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+      
+      - id: get_flutter_version
+        run: |
+          full_version=`grep flutter .tool-versions | awk '{print $2}'`
+          version=`echo $full_version | awk -F '-' '{print $1}'`
+          channel=`echo $full_version | awk -F '-' '{print $2}'`
+          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "channel=${channel}" >> $GITHUB_OUTPUT
+      
+      - uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: ${{ steps.get_flutter_version.outputs.version }}
+          channel: ${{ steps.get_flutter_version.outputs.channel }}
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+          cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+      
+      - run: java -version
+      
+      - run: |
+          flutter doctor --verbose || true
+      
+      - run: flutter pub get
+      
+      - name: Build Android APK
+        run: flutter build apk --release
+      
+      - name: Build Android App Bundle
+        run: flutter build appbundle --release
+      
+      - name: Upload APK and AAB to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            build/app/outputs/flutter-apk/app-release.apk
+            build/app/outputs/bundle/release/app-release.aab
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  build_ios:
+    name: Build iOS Release
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          fetch-depth: 0
+      
+      - id: get_flutter_version
+        run: |
+          full_version=`grep flutter .tool-versions | awk '{print $2}'`
+          version=`echo $full_version | awk -F '-' '{print $1}'`
+          channel=`echo $full_version | awk -F '-' '{print $2}'`
+          echo "version=${version}" >> $GITHUB_OUTPUT
+          echo "channel=${channel}" >> $GITHUB_OUTPUT
+      
+      - uses: subosito/flutter-action@v2.21.0
+        with:
+          flutter-version: ${{ steps.get_flutter_version.outputs.version }}
+          channel: ${{ steps.get_flutter_version.outputs.channel }}
+          cache: true
+          cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
+          cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
+          architecture: x64
+      
+      - run: |
+          flutter doctor --verbose || true
+      
+      - run: flutter pub get
+      
+      - name: Build iOS (no codesign)
+        run: flutter build ios --release --no-codesign
+      
+      - name: Create IPA archive
+        run: |
+          mkdir -p Payload
+          cp -r build/ios/iphoneos/Runner.app Payload/
+          zip -r app-release.ipa Payload
+          rm -rf Payload
+      
+      - name: Upload IPA to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: app-release.ipa
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+

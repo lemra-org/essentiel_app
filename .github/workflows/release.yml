@@ -9,7 +9,7 @@ jobs:
     name: Build Android Release
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       
@@ -61,7 +61,7 @@ jobs:
     runs-on: macos-latest
     if: false
     steps:
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           fetch-depth: 0
       

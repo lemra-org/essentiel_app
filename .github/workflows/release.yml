@@ -35,18 +35,23 @@ jobs:
           cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
       
       - run: java -version
+
+      - run:
+          echo "${PROD_DART}" > lib/environments/prod.dart
+        env:
+          PROD_DART: ${{ secrets.PROD_DART }}
       
       - run: |
           flutter doctor --verbose || true
-      
+
       - run: flutter pub get
-      
+
       - name: Build Android APK
-        run: flutter build apk --release
-      
+        run: flutter build apk --release -t lib/environments/prod.dart
+
       - name: Build Android App Bundle
-        run: flutter build appbundle --release
-      
+        run: flutter build appbundle --release -t lib/environments/prod.dart
+
       - name: Upload APK and AAB to Release
         uses: softprops/action-gh-release@v2
         with:
@@ -81,6 +86,11 @@ jobs:
           cache-key: 'flutter-:os:-:channel:-:version:-:arch:-:hash:'
           cache-path: '${{ runner.tool_cache }}/flutter/:channel:-:version:-:arch:'
           architecture: x64
+
+      - run:
+          echo "${PROD_DART}" > lib/environments/prod.dart
+        env:
+          PROD_DART: ${{ secrets.PROD_DART }}
       
       - run: |
           flutter doctor --verbose || true

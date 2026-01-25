@@ -4,7 +4,7 @@ import 'package:essentiel/game/game.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-void main() => Dev();
+void main() => Dev().init();
 
 class MyApp extends StatelessWidget {
   final Env env;

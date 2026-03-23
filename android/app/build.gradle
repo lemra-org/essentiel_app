@@ -29,20 +29,27 @@ def getDebugSigningConfig = {
 }
 
 def getReleaseSigningConfig = {
-    if ("true".equalsIgnoreCase(System.getenv('CI')) || "true".equalsIgnoreCase(System.getenv('DEBUG'))) {
+    // Use debug signing only if explicitly requested via DEBUG env var
+    if ("true".equalsIgnoreCase(System.getenv('DEBUG'))) {
         return ['androiddebugkey', new File("${rootDir}/debug.keystore"), 'android', 'android']
     }
+
     final propsFile = new File(homePath + "/.droid/essentiel.keystore.properties")
     def storeFile = file('/dev/null')
     def keyPassword = ""
+
     if (propsFile.exists()) {
         logger.debug("[Signing] Using properties file located at ${propsFile.absolutePath}")
         final props = new Properties()
         props.load(new FileInputStream(propsFile))
         storeFile = new File(props['keystore'].toString())
         keyPassword = props['keyPassword']
+        return ['essentiel', storeFile, keyPassword, keyPassword]
+    } else {
+        // Fallback to debug signing if keystore properties not found
+        logger.warn("[Signing] Release keystore properties not found at ${propsFile.absolutePath}, using debug keystore")
+        return ['androiddebugkey', new File("${rootDir}/debug.keystore"), 'android', 'android']
     }
-    return ['essentiel', storeFile, keyPassword, keyPassword]
 }
 
 def getVersionCodeAndName = {
@@ -85,10 +92,20 @@ def getVersionCodeAndName = {
 }
 
 android {
-    compileSdkVersion 34
+    namespace "lemrapp.essentiel"
+    compileSdkVersion 35
 
     sourceSets {
         main.java.srcDirs += 'src/main/kotlin'
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = '1.8'
     }
 
     lintOptions {
@@ -105,9 +122,9 @@ android {
     }
 
     defaultConfig {
-        applicationId "lemrapps.essentiel"
+        applicationId "lemrapp.essentiel"
         minSdkVersion flutter.minSdkVersion
-        targetSdkVersion 34
+        targetSdkVersion 35
 
         // Fetch the version according to git latest tag and "how far are we from last tag"
         (versionCode, versionName) = getVersionCodeAndName("android")

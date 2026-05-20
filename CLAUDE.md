@@ -72,3 +72,8 @@ The keystore config is loaded from `~/.droid/essentiel.keystore.properties` (loc
 - **`.github/workflows/build.yml`** — Runs on push/PR: dependency check, tests, Android debug build + analyze
 - **`.github/workflows/release.yml`** — Runs on GitHub Release: builds signed APK + AAB, uploads to GitHub Release and Google Play Store (`lemrapp.essentiel`)
 - iOS builds are disabled (`if: false`) in both workflows
+
+<!-- SPECKIT START -->
+For additional context about technologies to be used, project structure,
+shell commands, and other important information, read the current plan
+<!-- SPECKIT END -->

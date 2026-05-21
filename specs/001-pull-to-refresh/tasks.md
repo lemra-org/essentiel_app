@@ -27,9 +27,9 @@
 
 **Purpose**: Environment verification and dependency check
 
-- [ ] T001 Verify Flutter dependencies are installed via `flutter pub get`
-- [ ] T002 Verify Flutter version matches .tool-versions (3.22.3-stable) via `asdf current flutter`
-- [ ] T003 Run `flutter analyze --suggestions` to ensure codebase has zero issues before modifications
+- [X] T001 Verify Flutter dependencies are installed via `flutter pub get`
+- [X] T002 Verify Flutter version matches .tool-versions (3.22.3-stable) via `asdf current flutter`
+- [X] T003 Run `flutter analyze --suggestions` to ensure codebase has zero issues before modifications
 
 ---
 
@@ -39,9 +39,9 @@
 
 **⚠️ CRITICAL**: This phase must be complete before ANY user story can be implemented
 
-- [ ] T004 Read existing fetch logic in lib/game/game.dart to understand current Google Sheets data loading implementation
-- [ ] T005 Extract Google Sheets fetch logic from initState into reusable method `_fetchQuestionsFromSheets()` in lib/game/game.dart
-- [ ] T006 Verify extracted method works by testing initial app load (no regression in existing functionality)
+- [X] T004 Read existing fetch logic in lib/game/game.dart to understand current Google Sheets data loading implementation
+- [X] T005 Extract Google Sheets fetch logic from initState into reusable method `_fetchQuestionsFromSheets()` in lib/game/game.dart
+- [X] T006 Verify extracted method works by testing initial app load (no regression in existing functionality)
 
 **Checkpoint**: Foundation ready - fetch logic is reusable for both initial load and manual refresh
 
@@ -55,12 +55,12 @@
 
 ### Implementation for User Story 1
 
-- [ ] T007 [US1] Locate the scrollable widget (ListView/GridView) in lib/game/game.dart that displays questions
-- [ ] T008 [US1] Wrap the scrollable widget with RefreshIndicator in lib/game/game.dart
-- [ ] T009 [US1] Implement `_handleRefresh()` callback method in lib/game/game.dart that returns Future<void>
-- [ ] T010 [US1] Call `_fetchQuestionsFromSheets()` from `_handleRefresh()` to fetch fresh data in lib/game/game.dart
-- [ ] T011 [US1] Update widget state after successful refresh to display new questions in lib/game/game.dart
-- [ ] T012 [US1] Test basic pull-to-refresh: pull down gesture triggers refresh, loading spinner appears, data updates
+- [X] T007 [US1] Locate the scrollable widget (ListView/GridView) in lib/game/game.dart that displays questions
+- [X] T008 [US1] Wrap the scrollable widget with RefreshIndicator in lib/game/game.dart
+- [X] T009 [US1] Implement `_handleRefresh()` callback method in lib/game/game.dart that returns Future<void>
+- [X] T010 [US1] Call `_fetchQuestionsFromSheets()` from `_handleRefresh()` to fetch fresh data in lib/game/game.dart
+- [X] T011 [US1] Update widget state after successful refresh to display new questions in lib/game/game.dart
+- [X] T012 [US1] Test basic pull-to-refresh: pull down gesture triggers refresh, loading spinner appears, data updates
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - users can pull to refresh and see updated content
 
@@ -74,15 +74,15 @@
 
 ### Implementation for User Story 2
 
-- [ ] T013 [US2] Add try-catch block around fetch logic in `_handleRefresh()` in lib/game/game.dart
-- [ ] T014 [US2] Define French error message constants at top of lib/game/game.dart or in lib/utils.dart
-- [ ] T015 [US2] Import fluttertoast package in lib/game/game.dart (already in dependencies)
-- [ ] T016 [US2] Implement error handler for SocketException (no network) in lib/game/game.dart - display "Pas de connexion réseau. Veuillez vérifier votre connexion."
-- [ ] T017 [US2] Implement error handler for timeout errors in lib/game/game.dart - display "Le chargement des questions a expiré. Réessayez plus tard."
-- [ ] T018 [US2] Implement error handler for permission/access errors in lib/game/game.dart - display "Impossible d'accéder à la feuille de calcul."
-- [ ] T019 [US2] Implement generic error handler (catch-all) in lib/game/game.dart - display "Erreur lors du chargement des questions."
-- [ ] T020 [US2] Verify cache is NOT modified on refresh failure (only update cache on successful fetch)
-- [ ] T021 [US2] Test offline scenario: airplane mode → pull-to-refresh → verify French error message and cached data preserved
+- [X] T013 [US2] Add try-catch block around fetch logic in `_handleRefresh()` in lib/game/game.dart
+- [X] T014 [US2] Define French error message constants at top of lib/game/game.dart or in lib/utils.dart
+- [X] T015 [US2] Import fluttertoast package in lib/game/game.dart (already in dependencies)
+- [X] T016 [US2] Implement error handler for SocketException (no network) in lib/game/game.dart - display "Pas de connexion réseau. Veuillez vérifier votre connexion."
+- [X] T017 [US2] Implement error handler for timeout errors in lib/game/game.dart - display "Le chargement des questions a expiré. Réessayez plus tard."
+- [X] T018 [US2] Implement error handler for permission/access errors in lib/game/game.dart - display "Impossible d'accéder à la feuille de calcul."
+- [X] T019 [US2] Implement generic error handler (catch-all) in lib/game/game.dart - display "Erreur lors du chargement des questions."
+- [X] T020 [US2] Verify cache is NOT modified on refresh failure (only update cache on successful fetch)
+- [X] T021 [US2] Test offline scenario: airplane mode → pull-to-refresh → verify French error message and cached data preserved
 
 **Checkpoint**: At this point, User Stories 1 AND 2 both work - manual refresh with robust error handling
 
@@ -96,11 +96,11 @@
 
 ### Implementation for User Story 3
 
-- [ ] T022 [US3] Add boolean field `_isRefreshing = false` to Game widget state in lib/game/game.dart
-- [ ] T023 [US3] Check `_isRefreshing` flag at start of `_handleRefresh()` - return early if true in lib/game/game.dart
-- [ ] T024 [US3] Set `_isRefreshing = true` at start of fetch operation in lib/game/game.dart
-- [ ] T025 [US3] Set `_isRefreshing = false` in finally block after fetch (success or error) in lib/game/game.dart
-- [ ] T026 [US3] Test concurrent refresh prevention: rapid pull gestures while refresh in progress → verify only one operation executes
+- [X] T022 [US3] Add boolean field `_isRefreshing = false` to Game widget state in lib/game/game.dart
+- [X] T023 [US3] Check `_isRefreshing` flag at start of `_handleRefresh()` - return early if true in lib/game/game.dart
+- [X] T024 [US3] Set `_isRefreshing = true` at start of fetch operation in lib/game/game.dart
+- [X] T025 [US3] Set `_isRefreshing = false` in finally block after fetch (success or error) in lib/game/game.dart
+- [X] T026 [US3] Test concurrent refresh prevention: rapid pull gestures while refresh in progress → verify only one operation executes
 
 **Checkpoint**: All user stories complete - full pull-to-refresh functionality with error handling and concurrency control
 
@@ -110,8 +110,8 @@
 
 **Purpose**: Final improvements, testing, and quality assurance
 
-- [ ] T027 [P] Run `flutter analyze --suggestions` to ensure zero issues
-- [ ] T028 [P] Run `flutter pub run dependency_validator` to validate dependencies
+- [X] T027 [P] Run `flutter analyze --suggestions` to ensure zero issues
+- [X] T028 [P] Run `flutter pub run dependency_validator` to validate dependencies
 - [ ] T029 Test all scenarios from quickstart.md: online refresh, offline refresh, concurrent refresh, slow network, permission errors
 - [ ] T030 [P] Manual testing on Android emulator (verify pull gesture, loading indicator, error messages)
 - [ ] T031 [P] Manual testing on real Android device (verify performance, network handling)

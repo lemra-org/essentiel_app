@@ -63,6 +63,10 @@ dev_dependencies:
 #flutter_launcher_name:
 #  name: "Essentiel"
 
+# Force newer versions of packages that support AGP 8.1.4+ namespaces
+dependency_overrides:
+  sensors_plus: ^5.0.0
+
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

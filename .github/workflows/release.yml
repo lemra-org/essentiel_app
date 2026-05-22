@@ -36,6 +36,15 @@ jobs:
       
       - run: java -version
 
+      - name: Setup release keystore
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d > ${{ runner.temp }}/release.keystore
+          mkdir -p ~/.droid
+          cat > ~/.droid/essentiel.keystore.properties <<EOF
+          keystore=${{ runner.temp }}/release.keystore
+          keyPassword=${{ secrets.KEYSTORE_PASSWORD }}
+          EOF
+
       - run:
           echo "${PROD_DART}" > lib/environments/prod.dart
         env:

@@ -47,14 +47,14 @@ This is a new Go backend service (separate repository recommended):
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete
 
-- [ ] T008 Create configuration loading in internal/config/config.go (environment variables: PORT, SERVICE_ACCOUNT_JSON, SPREADSHEET_ID, ALLOWED_ORIGIN, CACHE_TTL)
-- [ ] T009 Create Category and Question structs in internal/sheets/models.go with JSON tags
-- [ ] T010 [P] Create Google Sheets API client wrapper in internal/sheets/client.go with Service Account authentication
-- [ ] T011 [P] Create in-memory cache wrapper in internal/cache/cache.go using patrickmn/go-cache with 5-minute TTL
-- [ ] T012 Create HTTP router in internal/api/router.go with endpoint registration
-- [ ] T013 [P] Create CORS middleware in internal/api/middleware.go using rs/cors for lemra-org.github.io domain
-- [ ] T014 [P] Create logging middleware in internal/api/middleware.go for request/response logging
-- [ ] T015 Create main.go entry point in cmd/server/ with server initialization and graceful shutdown
+- [x] T008 Create configuration loading in internal/config/config.go (environment variables: PORT, SERVICE_ACCOUNT_JSON, SPREADSHEET_ID, ALLOWED_ORIGIN, CACHE_TTL)
+- [x] T009 Create Category and Question structs in internal/sheets/models.go with JSON tags
+- [x] T010 [P] Create Google Sheets API client wrapper in internal/sheets/client.go with Service Account authentication
+- [x] T011 [P] Create in-memory cache wrapper in internal/cache/cache.go using patrickmn/go-cache with 5-minute TTL
+- [x] T012 Create HTTP router in internal/api/router.go with endpoint registration
+- [x] T013 [P] Create CORS middleware in internal/api/middleware.go using rs/cors for lemra-org.github.io domain
+- [x] T014 [P] Create logging middleware in internal/api/middleware.go for request/response logging
+- [x] T015 Create main.go entry point in cmd/server/ with server initialization and graceful shutdown
 
 **Checkpoint**: Foundation ready - Google Sheets client configured, cache initialized, HTTP router with CORS/logging middleware, user story implementation can now begin
 
@@ -68,14 +68,14 @@ This is a new Go backend service (separate repository recommended):
 
 ### Implementation for User Story 1
 
-- [ ] T016 [US1] Implement FetchCategories function in internal/sheets/client.go (read Categories sheet, parse to []Category)
-- [ ] T017 [US1] Implement FetchQuestions function in internal/sheets/client.go (read Questions sheet, parse to []Question)
-- [ ] T018 [US1] Implement data validation in internal/sheets/client.go (validate category names, hex colors, question text)
-- [ ] T019 [US1] Implement GetCategories handler in internal/api/handlers.go (cache check, fetch from Sheets, return JSON)
-- [ ] T020 [US1] Implement GetQuestions handler in internal/api/handlers.go (cache check, fetch from Sheets, return JSON)
-- [ ] T021 [P] [US1] Add error handling for Google Sheets API failures in handlers (503 Service Unavailable with generic error message)
-- [ ] T022 [P] [US1] Add cache-control headers (Cache-Control: public, max-age=300) to category and question responses
-- [ ] T023 [US1] Register /api/categories and /api/questions routes in internal/api/router.go
+- [x] T016 [US1] Implement FetchCategories function in internal/sheets/client.go (read Categories sheet, parse to []Category)
+- [x] T017 [US1] Implement FetchQuestions function in internal/sheets/client.go (read Questions sheet, parse to []Question)
+- [x] T018 [US1] Implement data validation in internal/sheets/client.go (validate category names, hex colors, question text)
+- [x] T019 [US1] Implement GetCategories handler in internal/api/handlers.go (cache check, fetch from Sheets, return JSON)
+- [x] T020 [US1] Implement GetQuestions handler in internal/api/handlers.go (cache check, fetch from Sheets, return JSON)
+- [x] T021 [P] [US1] Add error handling for Google Sheets API failures in handlers (503 Service Unavailable with generic error message)
+- [x] T022 [P] [US1] Add cache-control headers (Cache-Control: public, max-age=300) to category and question responses
+- [x] T023 [US1] Register /api/categories and /api/questions routes in internal/api/router.go
 - [ ] T024 [US1] Test end-to-end flow: start server, curl /api/categories and /api/questions, verify JSON structure matches contract
 
 **Checkpoint**: At this point, User Story 1 should be fully functional - API endpoints return categories and questions, Google Sheets credentials stay server-side, data validated before caching
@@ -90,11 +90,11 @@ This is a new Go backend service (separate repository recommended):
 
 ### Implementation for User Story 2
 
-- [ ] T025 [US2] Configure CORS middleware to allow https://lemra-org.github.io origin in internal/api/middleware.go
-- [ ] T026 [US2] Add CORS allowed methods (GET, OPTIONS) to middleware configuration
-- [ ] T027 [US2] Add CORS allowed headers (Content-Type) to middleware configuration
-- [ ] T028 [US2] Set CORS preflight cache max-age to 300 seconds in middleware configuration
-- [ ] T029 [P] [US2] Apply CORS middleware to HTTP router in internal/api/router.go
+- [x] T025 [US2] Configure CORS middleware to allow https://lemra-org.github.io origin in internal/api/middleware.go
+- [x] T026 [US2] Add CORS allowed methods (GET, OPTIONS) to middleware configuration
+- [x] T027 [US2] Add CORS allowed headers (Content-Type) to middleware configuration
+- [x] T028 [US2] Set CORS preflight cache max-age to 300 seconds in middleware configuration
+- [x] T029 [P] [US2] Apply CORS middleware to HTTP router in internal/api/router.go
 - [ ] T030 [US2] Test OPTIONS preflight request to /api/categories with Origin header, verify CORS headers in response
 - [ ] T031 [US2] Test GET request from allowed origin, verify Access-Control-Allow-Origin header matches request origin
 - [ ] T032 [P] [US2] Test GET request from disallowed origin, verify no CORS headers in response (browser will block)
@@ -111,10 +111,10 @@ This is a new Go backend service (separate repository recommended):
 
 ### Implementation for User Story 3
 
-- [ ] T033 [US3] Add cache jitter (10% random variation: 4.5-5.5 minutes) to cache TTL in internal/cache/cache.go
-- [ ] T034 [US3] Implement cache-first strategy in GetCategories handler (check cache before Sheets API call)
-- [ ] T035 [US3] Implement cache-first strategy in GetQuestions handler (check cache before Sheets API call)
-- [ ] T036 [P] [US3] Add response time logging to middleware (log duration from request start to response sent)
+- [x] T033 [US3] Add cache jitter (10% random variation: 4.5-5.5 minutes) to cache TTL in internal/cache/cache.go
+- [x] T034 [US3] Implement cache-first strategy in GetCategories handler (check cache before Sheets API call)
+- [x] T035 [US3] Implement cache-first strategy in GetQuestions handler (check cache before Sheets API call)
+- [x] T036 [P] [US3] Add response time logging to middleware (log duration from request start to response sent)
 - [ ] T037 [P] [US3] Add retry logic with exponential backoff for Google Sheets API rate limits (429 errors: 1s, 4s, 9s, 16s, 25s delays)
 - [ ] T038 [US3] Test concurrent requests (simulate 100 simultaneous requests), verify all succeed without errors
 - [ ] T039 [US3] Test cache hit performance (make request, repeat within 5 min), verify second request <100ms
@@ -128,16 +128,16 @@ This is a new Go backend service (separate repository recommended):
 
 **Purpose**: Containerization and cloud deployment setup
 
-- [ ] T041 Create multi-stage Dockerfile in deployments/Dockerfile (golang:1.22-alpine builder, gcr.io/distroless/static-debian12 runtime)
-- [ ] T042 [P] Add build optimization flags in Dockerfile (CGO_ENABLED=0, -ldflags="-s -w" for binary stripping)
-- [ ] T043 [P] Configure Dockerfile to run as non-root user (USER 65532:65532) and expose port 8080
+- [x] T041 Create multi-stage Dockerfile in deployments/Dockerfile (golang:1.22-alpine builder, gcr.io/distroless/static-debian12 runtime)
+- [x] T042 [P] Add build optimization flags in Dockerfile (CGO_ENABLED=0, -ldflags="-s -w" for binary stripping)
+- [x] T043 [P] Configure Dockerfile to run as non-root user (USER 65532:65532) and expose port 8080
 - [ ] T044 Test local Docker build and run, verify server starts and endpoints respond
-- [ ] T045 Create Fly.io configuration in deployments/fly.toml (app name, region, build dockerfile path)
-- [ ] T046 [P] Configure HTTP service in fly.toml (internal_port 8080, force_https true, auto_stop_machines false)
-- [ ] T047 [P] Add health check configuration in fly.toml (interval 15s, path /healthz, timeout 5s)
-- [ ] T048 Create health check endpoint GET /healthz in internal/api/handlers.go (returns 200 OK with {"status":"healthy"})
-- [ ] T049 Create readiness check endpoint GET /readyz in internal/api/handlers.go (checks Google Sheets connectivity, returns 200/503)
-- [ ] T050 Register /healthz and /readyz routes in internal/api/router.go
+- [x] T045 Create Fly.io configuration in deployments/fly.toml (app name, region, build dockerfile path)
+- [x] T046 [P] Configure HTTP service in fly.toml (internal_port 8080, force_https true, auto_stop_machines false)
+- [x] T047 [P] Add health check configuration in fly.toml (interval 15s, path /healthz, timeout 5s)
+- [x] T048 Create health check endpoint GET /healthz in internal/api/handlers.go (returns 200 OK with {"status":"healthy"})
+- [x] T049 Create readiness check endpoint GET /readyz in internal/api/handlers.go (checks Google Sheets connectivity, returns 200/503)
+- [x] T050 Register /healthz and /readyz routes in internal/api/router.go
 
 **Checkpoint**: Deployment infrastructure configured - Docker image builds successfully, Fly.io config ready for deployment, health checks functional
 
@@ -147,15 +147,15 @@ This is a new Go backend service (separate repository recommended):
 
 **Purpose**: Automated testing and deployment pipelines
 
-- [ ] T051 Create GitHub Actions CI workflow in .github/workflows/ci.yml (trigger on push/PR)
-- [ ] T052 [P] Add Go setup step in CI workflow (actions/setup-go@v5 with go-version 1.22)
-- [ ] T053 [P] Add dependency installation step in CI workflow (go mod download)
-- [ ] T054 [P] Add test execution step in CI workflow (go test -v -cover ./...)
-- [ ] T055 [P] Add code vetting step in CI workflow (go vet ./...)
-- [ ] T056 [P] Add build verification step in CI workflow (go build ./cmd/server)
-- [ ] T057 Create GitHub Actions deploy workflow in .github/workflows/deploy.yml (trigger on push to main)
-- [ ] T058 [P] Add Fly.io deployment step in deploy workflow (superfly/flyctl-actions/setup-flyctl@master, flyctl deploy --remote-only)
-- [ ] T059 [P] Configure GitHub secrets documentation in README.md (FLY_API_TOKEN required)
+- [x] T051 Create GitHub Actions CI workflow in .github/workflows/ci.yml (trigger on push/PR)
+- [x] T052 [P] Add Go setup step in CI workflow (actions/setup-go@v5 with go-version 1.22)
+- [x] T053 [P] Add dependency installation step in CI workflow (go mod download)
+- [x] T054 [P] Add test execution step in CI workflow (go test -v -cover ./...)
+- [x] T055 [P] Add code vetting step in CI workflow (go vet ./...)
+- [x] T056 [P] Add build verification step in CI workflow (go build ./cmd/server)
+- [x] T057 Create GitHub Actions deploy workflow in .github/workflows/deploy.yml (trigger on push to main)
+- [x] T058 [P] Add Fly.io deployment step in deploy workflow (superfly/flyctl-actions/setup-flyctl@master, flyctl deploy --remote-only)
+- [x] T059 [P] Configure GitHub secrets documentation in README.md (FLY_API_TOKEN required)
 
 **Checkpoint**: CI/CD pipelines configured - tests run on push/PR, automatic deployment to Fly.io on main branch push
 

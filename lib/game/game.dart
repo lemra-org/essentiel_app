@@ -323,15 +323,22 @@ class _GameState extends State<Game> {
       }
       body = RefreshIndicator(
         onRefresh: _handleRefresh,
-        child: SingleChildScrollView(
-          physics: AlwaysScrollableScrollPhysics(),
-          child: SizedBox(
-            height: screenHeight * 0.87,
-            child: Column(
-              children: [
-                SizedBox(
-                  height: screenHeight * 0.656, // (0.87 - 0.05) * 0.8
-                  child: Stack(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            final availableHeight = constraints.maxHeight;
+            final cardListHeight = availableHeight * 0.2;
+            final spacerHeight = availableHeight * 0.05;
+            final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
+
+            return SingleChildScrollView(
+              physics: AlwaysScrollableScrollPhysics(),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(minHeight: availableHeight),
+                child: Column(
+                  children: [
+                    SizedBox(
+                      height: cardDisplayHeight,
+                      child: Stack(
               children: [
                 widgetToDisplay,
                 if (_currentIndex != null)
@@ -356,10 +363,10 @@ class _GameState extends State<Game> {
             ),
           ),
           SizedBox(
-            height: screenHeight * 0.05,
+            height: spacerHeight,
           ),
           SizedBox(
-              height: screenHeight * 0.164, // (0.87 - 0.05) * 0.2
+              height: cardListHeight,
               child: Showcase(
                 key: _cardListShowcaseKey,
                 disposeOnTap: true,
@@ -420,9 +427,11 @@ class _GameState extends State<Game> {
                   ),
                 ),
               ))
-        ],
-      ),
-          ),
+                  ],
+                ),
+              ),
+            );
+          },
         ),
       );
     }

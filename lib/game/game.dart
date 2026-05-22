@@ -1,3 +1,5 @@
+import 'dart:async';
+import 'dart:io';
 import 'dart:math';
 
 import 'package:animated_widgets/animated_widgets.dart';
@@ -14,6 +16,7 @@ import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:gsheets/gsheets.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
@@ -25,6 +28,12 @@ import 'package:googleapis_auth/googleapis_auth.dart';
 const _spreadsheetId = '1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI';
 
 const title = 'Jeu Essentiel';
+
+// French error messages for refresh failures
+const _errorNoNetwork = "Pas de connexion réseau. Veuillez vérifier votre connexion.";
+const _errorTimeout = "Le chargement des questions a expiré. Réessayez plus tard.";
+const _errorAccess = "Impossible d'accéder à la feuille de calcul.";
+const _errorGeneric = "Erreur lors du chargement des questions.";
 
 //Inpiration from https://dribbble.com/shots/7696045-Tarot-App-Design
 class Game extends StatefulWidget {
@@ -41,6 +50,7 @@ class _GameState extends State<Game> {
   bool? _doShuffleCards;
   bool? _applyFilter;
   List<String>? _categoryListFilter;
+  bool _isRefreshing = false;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -56,101 +66,24 @@ class _GameState extends State<Game> {
     _applyFilter = false;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
-      final prefs = await SharedPreferences.getInstance();
-      final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
-      debugPrint("Initial state for categoryListFilter: $categoryListFilter");
-
-      final String spreadsheetId = Env.value!.spreadsheetId ?? _spreadsheetId;
-      final gsheets = GSheets.withServiceAccountCredentials(
-          ServiceAccountCredentials(Env.value!.saEmail!,
-              ClientId(Env.value!.saId!), Env.value!.saPK!));
-      gsheets
-          .spreadsheet(spreadsheetId)
-          .then((spreadsheet) =>
-              spreadsheet.worksheetByTitle('Categories')?.values.map.allRows())
-          .then((jsonList) => Future.value(jsonList != null
-              ? (jsonList as List<Map<String, dynamic>>)
-                  .map((json) => QuestionCategory.fromGSheet(json))
-                  .toList()
-              : <QuestionCategory>[]))
-          .then((categoryList) async {
-        gsheets
-            .spreadsheet(spreadsheetId)
-            .then((spreadsheet) =>
-                spreadsheet.worksheetByTitle('Questions')?.values.map.allRows())
-            .then((questionsListJson) => Future.value(questionsListJson != null
-                ? (questionsListJson as List<Map<String, dynamic>>)
-                    .map((questionJson) =>
-                        EssentielCardData.fromGSheet(questionJson))
-                    .where((element) =>
-                        element.question != null &&
-                        element.question!.trim().isNotEmpty)
-                    .toList()
-                : <EssentielCardData>[]))
-            .then((cardData) async {
-          setState(() {
-            _errorWhileLoadingData = null;
-            _doShuffleCards = false;
-            _applyFilter = false;
-            _categoryListFilter = categoryListFilter;
-            _categoryList = categoryList.toList(growable: false);
-            if (_categoryListFilter == null ||
-                _categoryListFilter!.length == 0) {
-              // All categories selected by default
-              _categoryListFilter = <String>["Familles", "Couples"];
-              categoryList
-                  .where((element) => element.title != null)
-                  .forEach((element) {
-                _categoryListFilter!.add(element.title!);
-              });
-              debugPrint(
-                  "Updated state for categoryListFilter: $_categoryListFilter");
+      try {
+        await _fetchQuestionsFromSheets();
+        await AppUtils.isFirstLaunch().then((result) {
+          if (result) {
+            if (myContext != null) {
+              ShowCaseWidget.of(myContext!)
+                  .startShowCase([_cardListShowcaseKey]);
             }
-            _rawCardsData = cardData.toList(growable: false);
-            _allCardsData = _filter(_categoryListFilter);
-          });
-          await AppUtils.isFirstLaunch().then((result) {
-            if (result) {
-              if (myContext != null) {
-                ShowCaseWidget.of(myContext!)
-                    .startShowCase([_cardListShowcaseKey]);
-              }
-            }
-          });
-        }).catchError((e) {
-          setState(() {
-            _errorWhileLoadingData = e;
-            _categoryList = null;
-            _rawCardsData = null;
-            _allCardsData = null;
-            _doShuffleCards = false;
-            _applyFilter = false;
-            _categoryListFilter = categoryListFilter;
-            if (_categoryListFilter == null ||
-                _categoryListFilter!.length == 0) {
-              // All categories selected by default
-              _categoryListFilter = <String>["Familles", "Couples"];
-              categoryList
-                  .where((element) => element.title != null)
-                  .forEach((element) {
-                _categoryListFilter!.add(element.title!);
-              });
-              debugPrint(
-                  "Updated state for categoryListFilter: $_categoryListFilter");
-            }
-          });
+          }
         });
-      }).catchError((e) {
+      } catch (e) {
         setState(() {
           _errorWhileLoadingData = e;
           _categoryList = null;
           _rawCardsData = null;
           _allCardsData = null;
-          _doShuffleCards = false;
-          _applyFilter = false;
-          _categoryListFilter = categoryListFilter;
         });
-      });
+      }
     });
 
     ShakeDetector.autoStart(onPhoneShake: () {
@@ -388,11 +321,17 @@ class _GameState extends State<Game> {
               ),
             ));
       }
-      body = Column(
-        children: [
-          Expanded(
-            flex: 4,
-            child: Stack(
+      body = RefreshIndicator(
+        onRefresh: _handleRefresh,
+        child: SingleChildScrollView(
+          physics: AlwaysScrollableScrollPhysics(),
+          child: SizedBox(
+            height: screenHeight * 0.87,
+            child: Column(
+              children: [
+                Expanded(
+                  flex: 4,
+                  child: Stack(
               children: [
                 widgetToDisplay,
                 if (_currentIndex != null)
@@ -482,6 +421,9 @@ class _GameState extends State<Game> {
                 ),
               ))
         ],
+      ),
+          ),
+        ),
       );
     }
 
@@ -792,6 +734,96 @@ class _GameState extends State<Game> {
           _applyFilter = false;
         });
       });
+
+  Future<void> _handleRefresh() async {
+    // Prevent concurrent refresh operations
+    if (_isRefreshing) return;
+
+    _isRefreshing = true;
+    try {
+      await _fetchQuestionsFromSheets();
+    } on SocketException {
+      // No network connectivity
+      Fluttertoast.showToast(
+        msg: _errorNoNetwork,
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } on TimeoutException {
+      // Request timeout
+      Fluttertoast.showToast(
+        msg: _errorTimeout,
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.orange,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } catch (e) {
+      // Generic error (permission errors, malformed data, etc.)
+      final errorMessage = e.toString().toLowerCase().contains('permission') ||
+              e.toString().toLowerCase().contains('access')
+          ? _errorAccess
+          : _errorGeneric;
+      Fluttertoast.showToast(
+        msg: errorMessage,
+        toastLength: Toast.LENGTH_LONG,
+        gravity: ToastGravity.BOTTOM,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    } finally {
+      _isRefreshing = false;
+    }
+  }
+
+  Future<void> _fetchQuestionsFromSheets() async {
+    final prefs = await SharedPreferences.getInstance();
+    final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
+
+    final String spreadsheetId = Env.value!.spreadsheetId ?? _spreadsheetId;
+    final gsheets = GSheets.withServiceAccountCredentials(
+        ServiceAccountCredentials(Env.value!.saEmail!,
+            ClientId(Env.value!.saId!), Env.value!.saPK!));
+
+    final spreadsheet = await gsheets.spreadsheet(spreadsheetId);
+    final categoriesSheet = await spreadsheet.worksheetByTitle('Categories')?.values.map.allRows();
+    final categoryList = categoriesSheet != null
+        ? (categoriesSheet as List<Map<String, dynamic>>)
+            .map((json) => QuestionCategory.fromGSheet(json))
+            .toList()
+        : <QuestionCategory>[];
+
+    final questionsSheet = await spreadsheet.worksheetByTitle('Questions')?.values.map.allRows();
+    final cardData = questionsSheet != null
+        ? (questionsSheet as List<Map<String, dynamic>>)
+            .map((questionJson) => EssentielCardData.fromGSheet(questionJson))
+            .where((element) =>
+                element.question != null && element.question!.trim().isNotEmpty)
+            .toList()
+        : <EssentielCardData>[];
+
+    setState(() {
+      _errorWhileLoadingData = null;
+      _doShuffleCards = false;
+      _applyFilter = false;
+      _categoryListFilter = categoryListFilter;
+      _categoryList = categoryList.toList(growable: false);
+      if (_categoryListFilter == null || _categoryListFilter!.length == 0) {
+        // All categories selected by default
+        _categoryListFilter = <String>["Familles", "Couples"];
+        categoryList.where((element) => element.title != null).forEach((element) {
+          _categoryListFilter!.add(element.title!);
+        });
+      }
+      _rawCardsData = cardData.toList(growable: false);
+      _allCardsData = _filter(_categoryListFilter);
+    });
+  }
 }
 
 class EssentielCardWidget extends StatelessWidget {

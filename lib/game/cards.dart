@@ -20,8 +20,9 @@ class EssentielCardData {
 
   factory EssentielCardData.fromGSheet(Map<String, dynamic> json) {
     final question = json['Question'];
+    final categoryName = json['Catégorie'];
     return EssentielCardData(
-        category: CategoryStore.findByName(json['Catégorie']),
+        category: CategoryStore.findByName(categoryName),
         question: question,
         isForInternalMood: question != null &&
             question.toString().toLowerCase().contains("météo"),
@@ -29,8 +30,7 @@ class EssentielCardData {
             "Oui".toLowerCase(),
         isForFamilies: json["Pour Familles"]?.toString().toLowerCase() ==
             "Oui".toLowerCase(),
-        isForParentChild: json["Parent - Enfant"]?.toString().toLowerCase() ==
-            "Oui".toLowerCase());
+        isForParentChild: categoryName?.toString() == "Parent - Enfant");
   }
 }
 

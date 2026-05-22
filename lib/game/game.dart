@@ -724,9 +724,6 @@ class _GameState extends State<Game> {
       if (_categoryListFilter!.contains("Couples") && cardData.isForCouples) {
         return true;
       }
-      if (_categoryListFilter!.contains("Parent - Enfant") && cardData.isForParentChild) {
-        return true;
-      }
       return false;
     }).toList();
   }

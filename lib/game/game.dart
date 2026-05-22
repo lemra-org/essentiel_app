@@ -49,6 +49,7 @@ class _GameState extends State<Game> {
   int? _currentIndex;
   bool? _doShuffleCards;
   bool? _applyFilter;
+  bool? _isReloading;
   List<String>? _categoryListFilter;
   bool _isRefreshing = false;
 
@@ -64,6 +65,7 @@ class _GameState extends State<Game> {
     super.initState();
     _doShuffleCards = false;
     _applyFilter = false;
+    _isReloading = false;
 
     WidgetsBinding.instance.addPostFrameCallback((_) async {
       try {
@@ -121,6 +123,7 @@ class _GameState extends State<Game> {
       ]));
     } else if (_doShuffleCards == true ||
         _applyFilter == true ||
+        _isReloading == true ||
         _allCardsData == null) {
       //Not initialized yet
       body = Center(
@@ -145,7 +148,9 @@ class _GameState extends State<Game> {
                         ? "Mélange de cartes"
                         : _applyFilter == true
                             ? "Filtrage des catégories de cartes"
-                            : "Initialisation") +
+                            : _isReloading == true
+                                ? "Rechargement des cartes"
+                                : "Initialisation") +
                     " en cours. Merci de patienter quelques instants...",
                 textAlign: TextAlign.center,
                 style:
@@ -757,6 +762,13 @@ class _GameState extends State<Game> {
     // Prevent concurrent refresh operations
     if (_isRefreshing) return;
 
+    setState(() {
+      _isReloading = true;
+      _currentIndex = null;
+      _doShuffleCards = false;
+      _applyFilter = false;
+    });
+
     _isRefreshing = true;
     try {
       await _fetchQuestionsFromSheets();
@@ -795,6 +807,9 @@ class _GameState extends State<Game> {
         fontSize: 16.0,
       );
     } finally {
+      setState(() {
+        _isReloading = false;
+      });
       _isRefreshing = false;
     }
   }

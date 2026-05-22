@@ -329,8 +329,8 @@ class _GameState extends State<Game> {
             height: screenHeight * 0.87,
             child: Column(
               children: [
-                Expanded(
-                  flex: 4,
+                SizedBox(
+                  height: screenHeight * 0.656, // (0.87 - 0.05) * 0.8
                   child: Stack(
               children: [
                 widgetToDisplay,
@@ -358,8 +358,8 @@ class _GameState extends State<Game> {
           SizedBox(
             height: screenHeight * 0.05,
           ),
-          Expanded(
-              flex: 1,
+          SizedBox(
+              height: screenHeight * 0.164, // (0.87 - 0.05) * 0.2
               child: Showcase(
                 key: _cardListShowcaseKey,
                 disposeOnTap: true,

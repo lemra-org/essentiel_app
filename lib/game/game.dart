@@ -237,6 +237,17 @@ class _GameState extends State<Game> {
                         ),
                       ),
                     ),
+                  if (cardData?.isForParentChild == true)
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: FaIcon(
+                          FontAwesomeIcons.childReaching,
+                          color: const Color(0xFFF06292),
+                          size: 50.0,
+                        ),
+                      ),
+                    ),
                   if (cardData?.isForCouples == true)
                     Positioned.fill(
                       child: Align(
@@ -287,7 +298,8 @@ class _GameState extends State<Game> {
                       child: Padding(
                         padding: EdgeInsets.only(
                             top: (cardData!.isForFamilies ||
-                                    cardData.isForInternalMood ||
+                                    cardData.isForParentChild ||
+                                    cardData.isForCouples ||
                                     cardData.isForInternalMood)
                                 ? 40.0
                                 : 0.0,
@@ -710,6 +722,9 @@ class _GameState extends State<Game> {
         return true;
       }
       if (_categoryListFilter!.contains("Couples") && cardData.isForCouples) {
+        return true;
+      }
+      if (_categoryListFilter!.contains("Parent - Enfant") && cardData.isForParentChild) {
         return true;
       }
       return false;

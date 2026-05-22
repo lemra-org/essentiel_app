@@ -7,6 +7,7 @@ class EssentielCardData {
   final String? question;
   final bool isForCouples;
   final bool isForFamilies;
+  final bool isForParentChild;
   final bool isForInternalMood;
 
   const EssentielCardData(
@@ -14,7 +15,8 @@ class EssentielCardData {
       @required this.question,
       this.isForInternalMood = false,
       this.isForCouples = false,
-      this.isForFamilies = false});
+      this.isForFamilies = false,
+      this.isForParentChild = false});
 
   factory EssentielCardData.fromGSheet(Map<String, dynamic> json) {
     final question = json['Question'];
@@ -26,6 +28,8 @@ class EssentielCardData {
         isForCouples: json["Pour Couples"]?.toString().toLowerCase() ==
             "Oui".toLowerCase(),
         isForFamilies: json["Pour Familles"]?.toString().toLowerCase() ==
+            "Oui".toLowerCase(),
+        isForParentChild: json["Parent - Enfant"]?.toString().toLowerCase() ==
             "Oui".toLowerCase());
   }
 }

@@ -573,7 +573,7 @@ class _GameState extends State<Game> {
                     SpeedDialChild(
                         child: Icon(Icons.filter_alt_sharp),
                         backgroundColor: const Color(0xFF12A0FF),
-                        label: 'Filtrer les catégories de carte',
+                        label: 'Filtres',
                         labelBackgroundColor: const Color(0xFF12A0FF),
                         labelStyle:
                             TextStyle(fontSize: 18.0, color: Colors.white),
@@ -656,6 +656,15 @@ class _GameState extends State<Game> {
                         //   });
                         // },
                         ),
+                    SpeedDialChild(
+                      child: Icon(Icons.refresh),
+                      backgroundColor: const Color(0xFF9C27B0),
+                      label: 'Recharger les cartes',
+                      labelBackgroundColor: const Color(0xFF9C27B0),
+                      labelStyle:
+                          TextStyle(fontSize: 18.0, color: Colors.white),
+                      onTap: () => _handleRefresh(),
+                    ),
                     SpeedDialChild(
                       child: Icon(Icons.shuffle_outlined),
                       backgroundColor: const Color(0xFF97205E),

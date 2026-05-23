@@ -62,7 +62,7 @@ jobs:
         run: flutter build appbundle --release -t lib/environments/prod.dart
 
       - name: Upload APK and AAB to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: |
             build/app/outputs/flutter-apk/app-release.apk
@@ -127,7 +127,7 @@ jobs:
           rm -rf Payload
       
       - name: Upload IPA to Release
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           files: app-release.ipa
         env:

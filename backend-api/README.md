@@ -12,7 +12,7 @@ This service acts as a security boundary between the Essentiel web app and Googl
 - **CORS Support**: Configured for lemra-org.github.io domain
 - **Caching**: 5-minute in-memory cache with TTL to reduce Google Sheets API calls
 - **Fast Responses**: <100ms for cached data, <2s for fresh fetches
-- **Cloud Deployment**: Ready for Fly.io, Cloud Run, or Railway
+- **Docker Deployment**: Containerized with Docker Compose support
 
 ## API Endpoints
 
@@ -85,55 +85,61 @@ backend-api/
 
 ## Deployment
 
-### Fly.io Deployment
+### Docker Deployment
 
-The service is configured for deployment to Fly.io with automatic CI/CD via GitHub Actions.
+The service is containerized and can be deployed using Docker Compose.
 
-**Initial Setup:**
-
-```bash
-# Install Fly.io CLI
-brew install flyctl  # macOS
-# Or: curl -L https://fly.io/install.sh | sh
-
-# Login
-flyctl auth login
-
-# Create app (choose unique name)
-flyctl apps create essentiel-backend-api
-
-# Set secrets
-flyctl secrets set GOOGLE_SERVICE_ACCOUNT_JSON="$(cat service-account-prod.json)"
-flyctl secrets set GOOGLE_SPREADSHEET_ID=your-production-spreadsheet-id
-```
-
-**Manual Deployment:**
+**Using Docker Compose (from repository root):**
 
 ```bash
-# Deploy from local directory
-flyctl deploy
-
-# Check status
-flyctl status
+# Start all services
+docker-compose up -d
 
 # View logs
-flyctl logs
+docker-compose logs -f backend-api
+
+# Stop services
+docker-compose down
 ```
 
-**Automated Deployment:**
+**Environment Configuration:**
 
-Deployments to Fly.io are automatically triggered on push to `main` branch via GitHub Actions.
+Set environment variables in `docker-compose.yml` or create a `.env` file:
 
-**Required GitHub Secrets:**
+```env
+GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+GOOGLE_SPREADSHEET_ID=your-spreadsheet-id
+ALLOWED_ORIGIN=https://lemra-org.github.io
+CACHE_TTL_MINUTES=5
+```
 
-1. Go to repository Settings → Secrets and variables → Actions
-2. Add secret:
-   - `FLY_API_TOKEN`: Generate with `flyctl auth token`
+**Manual Docker Build:**
 
-The deploy workflow will automatically:
-- Build the Docker image
-- Deploy to Fly.io
-- Run health checks
+```bash
+# Build image
+docker build -t essentiel-backend-api -f backend-api/deployments/Dockerfile backend-api/
+
+# Run container
+docker run -p 8080:8080 \
+  -e GOOGLE_SERVICE_ACCOUNT_JSON="$(cat service-account-dev.json)" \
+  -e GOOGLE_SPREADSHEET_ID=your-spreadsheet-id \
+  essentiel-backend-api
+```
+
+**Container Registry:**
+
+The CI/CD pipeline automatically builds and pushes images to GitHub Container Registry (ghcr.io):
+
+```bash
+# Pull latest image
+docker pull ghcr.io/lemra-org/essentiel-backend-api:latest
+
+# Run pulled image
+docker run -p 8080:8080 \
+  -e GOOGLE_SERVICE_ACCOUNT_JSON="..." \
+  -e GOOGLE_SPREADSHEET_ID=your-id \
+  ghcr.io/lemra-org/essentiel-backend-api:latest
+```
 
 See [quickstart guide](../specs/004-backend-api-service/quickstart.md) for more detailed deployment instructions.
 

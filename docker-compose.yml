@@ -1,0 +1,28 @@
+version: '3.8'
+
+services:
+  backend-api:
+    build:
+      context: ./backend-api
+      dockerfile: deployments/Dockerfile
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - GOOGLE_SERVICE_ACCOUNT_JSON=${GOOGLE_SERVICE_ACCOUNT_JSON}
+      - GOOGLE_SPREADSHEET_ID=${GOOGLE_SPREADSHEET_ID}
+      - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-https://lemra-org.github.io}
+      - CACHE_TTL_MINUTES=${CACHE_TTL_MINUTES:-5}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - essentiel-network
+
+networks:
+  essentiel-network:
+    driver: bridge

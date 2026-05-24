@@ -42,3 +42,4 @@ app.*.map.json
 
 # Claude Code related
 .claude/settings.local.json
+.env

@@ -6,8 +6,8 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/lemra-org/essentiel-backend-api/internal/cache"
-	"github.com/lemra-org/essentiel-backend-api/internal/sheets"
+	"github.com/lemra-org/essentiel_app/backend-api/internal/cache"
+	"github.com/lemra-org/essentiel_app/backend-api/internal/sheets"
 )
 
 // GetCategories handles GET /api/categories

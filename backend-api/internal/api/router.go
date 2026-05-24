@@ -3,8 +3,8 @@ package api
 import (
 	"net/http"
 
-	"github.com/lemra-org/essentiel-backend-api/internal/cache"
-	"github.com/lemra-org/essentiel-backend-api/internal/sheets"
+	"github.com/lemra-org/essentiel_app/backend-api/internal/cache"
+	"github.com/lemra-org/essentiel_app/backend-api/internal/sheets"
 )
 
 // Router holds dependencies for HTTP handlers

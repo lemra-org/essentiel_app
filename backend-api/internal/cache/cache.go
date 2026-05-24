@@ -14,7 +14,7 @@ type Cache struct {
 
 // New creates a new cache with the specified TTL
 func New(ttl time.Duration) *Cache {
-	// Add 10% jitter to prevent thundering herd (4.5-5.5 min for 5 min TTL)
+	// Set cleanup interval to 110% of TTL to reduce overhead (5.5 min for 5 min TTL)
 	cleanupInterval := ttl + (ttl / 10)
 
 	return &Cache{

@@ -1,7 +1,6 @@
 package api
 
 import (
-	"context"
 	"encoding/json"
 	"log"
 	"net/http"
@@ -28,10 +27,14 @@ func GetCategories(sheetsClient *sheets.Client, cacheInstance *cache.Cache) http
 		}
 
 		// Cache miss - fetch from Google Sheets
-		categories, err := sheetsClient.FetchCategories(context.Background())
+		categories, err := sheetsClient.FetchCategories(r.Context())
 		if err != nil {
 			log.Printf("Error fetching categories: %v", err)
-			http.Error(w, `{"error":"Unable to fetch data from source"}`, http.StatusServiceUnavailable)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "Unable to fetch data from source",
+			})
 			return
 		}
 
@@ -65,10 +68,14 @@ func GetQuestions(sheetsClient *sheets.Client, cacheInstance *cache.Cache) http.
 		}
 
 		// Cache miss - fetch from Google Sheets
-		questions, err := sheetsClient.FetchQuestions(context.Background())
+		questions, err := sheetsClient.FetchQuestions(r.Context())
 		if err != nil {
 			log.Printf("Error fetching questions: %v", err)
-			http.Error(w, `{"error":"Unable to fetch data from source"}`, http.StatusServiceUnavailable)
+			w.Header().Set("Content-Type", "application/json")
+			w.WriteHeader(http.StatusServiceUnavailable)
+			json.NewEncoder(w).Encode(map[string]string{
+				"error": "Unable to fetch data from source",
+			})
 			return
 		}
 
@@ -98,9 +105,8 @@ func Healthz() http.HandlerFunc {
 // Readyz handles GET /readyz (readiness probe)
 func Readyz(sheetsClient *sheets.Client) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		// Test Google Sheets connectivity by attempting to fetch a small range
-		ctx := context.Background()
-		_, err := sheetsClient.FetchCategories(ctx)
+		// Test Google Sheets connectivity by attempting to fetch categories
+		_, err := sheetsClient.FetchCategories(r.Context())
 
 		w.Header().Set("Content-Type", "application/json")
 

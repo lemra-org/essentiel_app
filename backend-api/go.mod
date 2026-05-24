@@ -1,6 +1,6 @@
 module github.com/lemra-org/essentiel_app/backend-api
 
-go 1.26.3
+go 1.26
 
 require (
 	github.com/patrickmn/go-cache v2.1.0+incompatible

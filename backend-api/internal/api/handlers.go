@@ -10,7 +10,7 @@ import (
 )
 
 // GetCategories handles GET /api/categories
-func GetCategories(sheetsClient *sheets.Client, cacheInstance *cache.Cache) http.HandlerFunc {
+func GetCategories(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const cacheKey = "categories"
 
@@ -51,7 +51,7 @@ func GetCategories(sheetsClient *sheets.Client, cacheInstance *cache.Cache) http
 }
 
 // GetQuestions handles GET /api/questions
-func GetQuestions(sheetsClient *sheets.Client, cacheInstance *cache.Cache) http.HandlerFunc {
+func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		const cacheKey = "questions"
 
@@ -103,7 +103,7 @@ func Healthz() http.HandlerFunc {
 }
 
 // Readyz handles GET /readyz (readiness probe)
-func Readyz(sheetsClient *sheets.Client) http.HandlerFunc {
+func Readyz(sheetsClient sheets.Fetcher) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// Test Google Sheets connectivity by attempting to fetch categories
 		_, err := sheetsClient.FetchCategories(r.Context())

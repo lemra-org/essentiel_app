@@ -9,13 +9,13 @@ import (
 
 // Router holds dependencies for HTTP handlers
 type Router struct {
-	sheetsClient *sheets.Client
+	sheetsClient sheets.Fetcher
 	cache        *cache.Cache
 	mux          *http.ServeMux
 }
 
 // NewRouter creates a new HTTP router with registered endpoints
-func NewRouter(sheetsClient *sheets.Client, cache *cache.Cache) *Router {
+func NewRouter(sheetsClient sheets.Fetcher, cache *cache.Cache) *Router {
 	r := &Router{
 		sheetsClient: sheetsClient,
 		cache:        cache,

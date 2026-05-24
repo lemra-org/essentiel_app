@@ -27,10 +27,11 @@ Le projet inclut désormais une API backend qui sert de proxy sécurisé pour ac
 cp .env.example .env
 
 # Éditer .env avec vos identifiants Google Service Account
+# - BACKEND_API_IMAGE: Image Docker à utiliser (optionnel, par défaut: ghcr.io/lemra-org/essentiel-backend-api:latest)
 # - GOOGLE_SERVICE_ACCOUNT_JSON: JSON complet du compte de service
 # - GOOGLE_SPREADSHEET_ID: ID de la feuille de calcul
 
-# Démarrer tous les services
+# Démarrer tous les services (télécharge l'image depuis ghcr.io)
 docker-compose up -d
 
 # Voir les logs
@@ -39,6 +40,8 @@ docker-compose logs -f backend-api
 # Arrêter les services
 docker-compose down
 ```
+
+**Note**: Docker Compose utilise l'image pré-construite depuis GitHub Container Registry (ghcr.io), publiée automatiquement par la CI/CD. Aucune construction locale n'est nécessaire.
 
 L'API backend sera accessible sur http://localhost:8080 avec les endpoints:
 - `GET /api/categories` - Liste des catégories

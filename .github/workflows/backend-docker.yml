@@ -2,7 +2,7 @@ name: Backend API - Build and Push Docker Image
 
 on:
   push:
-    branches: [main, 'dev', '004-backend-api-service']
+    branches: [main]
     paths:
       - 'backend-api/**'
       - 'docker-compose.yml'

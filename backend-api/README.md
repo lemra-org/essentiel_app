@@ -91,8 +91,14 @@ The service is containerized and can be deployed using Docker Compose.
 
 **Using Docker Compose (from repository root):**
 
+Docker Compose pulls the pre-built image from GitHub Container Registry (no local build required):
+
 ```bash
-# Start all services
+# Copy environment template
+cp .env.example .env
+
+# Edit .env with your credentials
+# Start all services (pulls image from ghcr.io)
 docker-compose up -d
 
 # View logs
@@ -104,11 +110,17 @@ docker-compose down
 
 **Environment Configuration:**
 
-Set environment variables in `docker-compose.yml` or create a `.env` file:
+Create a `.env` file at the repository root:
 
 ```env
+# Image to use (optional, defaults to latest)
+BACKEND_API_IMAGE=ghcr.io/lemra-org/essentiel-backend-api:latest
+
+# Required configuration
 GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
 GOOGLE_SPREADSHEET_ID=your-spreadsheet-id
+
+# Optional configuration
 ALLOWED_ORIGIN=https://lemra-org.github.io
 CACHE_TTL_MINUTES=5
 ```

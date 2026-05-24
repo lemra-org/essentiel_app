@@ -2,9 +2,15 @@ name: CI
 
 on:
   push:
-    branches: [main, dev, '004-backend-api-service']
+    branches: [main]
+    paths:
+      - 'backend-api/**'
+      - '.github/workflows/backend-ci.yml'
   pull_request:
     branches: [main]
+    paths:
+      - 'backend-api/**'
+      - '.github/workflows/backend-ci.yml'
 
 jobs:
   test:

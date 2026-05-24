@@ -23,7 +23,7 @@ jobs:
           channel=`echo $full_version | awk -F '-' '{print $2}'`
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "channel=${channel}" >> $GITHUB_OUTPUT
-      - uses: subosito/flutter-action@v2.21.0
+      - uses: subosito/flutter-action@v2.23.0
         with:
           flutter-version: ${{ steps.get_flutter_version.outputs.version }}
           channel: ${{ steps.get_flutter_version.outputs.channel }}
@@ -49,7 +49,7 @@ jobs:
           channel=`echo $full_version | awk -F '-' '{print $2}'`
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "channel=${channel}" >> $GITHUB_OUTPUT
-      - uses: subosito/flutter-action@v2.21.0
+      - uses: subosito/flutter-action@v2.23.0
         with:
           flutter-version: ${{ steps.get_flutter_version.outputs.version }}
           channel: ${{ steps.get_flutter_version.outputs.channel }}
@@ -88,7 +88,7 @@ jobs:
           channel=`echo $full_version | awk -F '-' '{print $2}'`
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "channel=${channel}" >> $GITHUB_OUTPUT
-      - uses: subosito/flutter-action@v2.21.0
+      - uses: subosito/flutter-action@v2.23.0
         with:
           flutter-version: ${{ steps.get_flutter_version.outputs.version }}
           channel: ${{ steps.get_flutter_version.outputs.channel }}
@@ -104,7 +104,7 @@ jobs:
       - name: Build APK
         run: flutter build apk --debug
       - name: Upload debug APK artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: android-debug-apk
           path: build/app/outputs/flutter-apk/app-debug.apk
@@ -126,7 +126,7 @@ jobs:
           channel=`echo $full_version | awk -F '-' '{print $2}'`
           echo "version=${version}" >> $GITHUB_OUTPUT
           echo "channel=${channel}" >> $GITHUB_OUTPUT
-      - uses: subosito/flutter-action@v2.21.0
+      - uses: subosito/flutter-action@v2.23.0
         with:
           flutter-version: ${{ steps.get_flutter_version.outputs.version }}
           channel: ${{ steps.get_flutter_version.outputs.channel }}

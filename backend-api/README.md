@@ -129,7 +129,7 @@ CACHE_TTL_MINUTES=5
 
 ```bash
 # Build image
-docker build -t essentiel-backend-api -f backend-api/deployments/Dockerfile backend-api/
+docker build -t essentiel-backend-api -f backend-api/Dockerfile backend-api/
 
 # Run container
 docker run -p 8080:8080 \

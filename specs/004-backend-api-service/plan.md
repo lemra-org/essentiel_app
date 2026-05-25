@@ -16,9 +16,13 @@ Backend REST API service that provides secure Google Sheets data access for the 
 - Go standard library (`net/http`, `encoding/json`)
 - Google Sheets API Go client (`google.golang.org/api/sheets/v4`)
 - Google OAuth2 library (`golang.org/x/oauth2/google`)
-- CORS middleware (to be determined - `rs/cors` or custom)
+- CORS middleware (`rs/cors`)
+- Redis Go client (`github.com/redis/go-redis/v9`) - optional
 
-**Storage**: In-memory caching with 5-minute TTL (no persistent database needed)
+**Storage**: 
+- **Caching**: Redis (optional, recommended for production) or in-memory cache with 5-minute TTL
+- **Data Source**: Google Sheets (single source of truth)
+- No persistent database needed
 
 **Testing**: Go built-in testing framework (`go test`), integration tests with mock Google Sheets responses
 

@@ -16,15 +16,37 @@ func GetCategories(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http
 
 		// Check cache first
 		if cached, found := cacheInstance.Get(cacheKey); found {
-			if categories, ok := cached.([]sheets.Category); ok {
-				w.Header().Set("Content-Type", "application/json")
-				w.Header().Set("Cache-Control", "public, max-age=300")
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"categories": categories,
-				})
-				return
+			var categories []sheets.Category
+
+			// Handle both in-memory cache ([]sheets.Category) and Redis ([]interface{})
+			switch v := cached.(type) {
+			case []sheets.Category:
+				categories = v
+			case []interface{}:
+				// Redis returns generic slice - convert to typed slice
+				for _, item := range v {
+					if itemMap, ok := item.(map[string]interface{}); ok {
+						cat := sheets.Category{
+							Name:  itemMap["name"].(string),
+							Color: itemMap["color"].(string),
+						}
+						categories = append(categories, cat)
+					}
+				}
+			default:
+				// Invalid cache entry type, fetch fresh
+				goto fetchFresh
 			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Cache-Control", "public, max-age=300")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"categories": categories,
+			})
+			return
 		}
+
+	fetchFresh:
 
 		// Cache miss - fetch from Google Sheets
 		categories, err := sheetsClient.FetchCategories(r.Context())
@@ -57,15 +79,39 @@ func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.
 
 		// Check cache first
 		if cached, found := cacheInstance.Get(cacheKey); found {
-			if questions, ok := cached.([]sheets.Question); ok {
-				w.Header().Set("Content-Type", "application/json")
-				w.Header().Set("Cache-Control", "public, max-age=300")
-				json.NewEncoder(w).Encode(map[string]interface{}{
-					"questions": questions,
-				})
-				return
+			var questions []sheets.Question
+
+			// Handle both in-memory cache ([]sheets.Question) and Redis ([]interface{})
+			switch v := cached.(type) {
+			case []sheets.Question:
+				questions = v
+			case []interface{}:
+				// Redis returns generic slice - convert to typed slice
+				for _, item := range v {
+					if itemMap, ok := item.(map[string]interface{}); ok {
+						q := sheets.Question{
+							Question:    itemMap["question"].(string),
+							Category:    itemMap["category"].(string),
+							ForCouples:  itemMap["forCouples"].(bool),
+							ForFamilies: itemMap["forFamilies"].(bool),
+						}
+						questions = append(questions, q)
+					}
+				}
+			default:
+				// Invalid cache entry type, fetch fresh
+				goto fetchFresh
 			}
+
+			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Cache-Control", "public, max-age=300")
+			json.NewEncoder(w).Encode(map[string]interface{}{
+				"questions": questions,
+			})
+			return
 		}
+
+	fetchFresh:
 
 		// Cache miss - fetch from Google Sheets
 		questions, err := sheetsClient.FetchQuestions(r.Context())

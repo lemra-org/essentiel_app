@@ -8,11 +8,12 @@ import (
 
 // Config holds all configuration for the backend API service
 type Config struct {
-	Port                   string
-	ServiceAccountJSON     string
-	SpreadsheetID          string
-	AllowedOrigin          string
-	CacheTTL               time.Duration
+	Port               string
+	ServiceAccountJSON string
+	SpreadsheetID      string
+	AllowedOrigin      string
+	CacheTTL           time.Duration
+	RedisAddr          string
 }
 
 // Load reads configuration from environment variables
@@ -47,12 +48,16 @@ func Load() (*Config, error) {
 		return nil, &ConfigError{Field: "CACHE_TTL_MINUTES", Message: "must be a valid integer"}
 	}
 
+	redisAddr := os.Getenv("REDIS_ADDR")
+	// Redis is optional - if not set, in-memory cache will be used
+
 	return &Config{
 		Port:               port,
 		ServiceAccountJSON: serviceAccountJSON,
 		SpreadsheetID:      spreadsheetID,
 		AllowedOrigin:      allowedOrigin,
 		CacheTTL:           time.Duration(ttlMinutes) * time.Minute,
+		RedisAddr:          redisAddr,
 	}, nil
 }
 

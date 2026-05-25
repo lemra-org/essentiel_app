@@ -114,3 +114,4 @@ Users of the web application experience instant data loading with minimal wait t
 - The spreadsheet will not exceed Google Sheets API rate limits under normal usage patterns
 - Standard HTTP status codes (200, 404, 500, 503) are sufficient for error communication
 - CORS restrictions only need to support lemra-org.github.io domain (no additional domains required initially)
+- Redis cache is optional - service works with in-memory cache if Redis is not available

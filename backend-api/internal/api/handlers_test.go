@@ -40,7 +40,7 @@ func TestGetCategories_Success(t *testing.T) {
 			{Name: "Couple", Color: "#E91E63"},
 		},
 	}
-	testCache := cache.New(5 * time.Minute)
+	testCache := cache.New(5*time.Minute, "")
 
 	handler := GetCategories(mockClient, testCache)
 	req := httptest.NewRequest("GET", "/api/categories", nil)
@@ -87,7 +87,7 @@ func TestGetCategories_CacheHit(t *testing.T) {
 			{Name: "Original", Color: "#000000"},
 		},
 	}
-	testCache := cache.New(5 * time.Minute)
+	testCache := cache.New(5*time.Minute, "")
 
 	// Pre-populate cache with different data
 	cachedCategories := []sheets.Category{
@@ -114,7 +114,7 @@ func TestGetCategories_Error(t *testing.T) {
 	mockClient := &mockSheetsClient{
 		shouldFail: true,
 	}
-	testCache := cache.New(5 * time.Minute)
+	testCache := cache.New(5*time.Minute, "")
 
 	handler := GetCategories(mockClient, testCache)
 	req := httptest.NewRequest("GET", "/api/categories", nil)
@@ -158,7 +158,7 @@ func TestGetQuestions_Success(t *testing.T) {
 			},
 		},
 	}
-	testCache := cache.New(5 * time.Minute)
+	testCache := cache.New(5*time.Minute, "")
 
 	handler := GetQuestions(mockClient, testCache)
 	req := httptest.NewRequest("GET", "/api/questions", nil)

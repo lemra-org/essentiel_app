@@ -25,6 +25,11 @@ func main() {
 	log.Printf("Server starting on :%s", cfg.Port)
 	log.Printf("Caching enabled with %v TTL", cfg.CacheTTL)
 	log.Printf("CORS configured for: %s", cfg.AllowedOrigin)
+	if cfg.RedisAddr != "" {
+		log.Printf("Redis cache configured at: %s", cfg.RedisAddr)
+	} else {
+		log.Printf("Using in-memory cache (Redis not configured)")
+	}
 
 	// Initialize Google Sheets client
 	ctx := context.Background()
@@ -34,7 +39,8 @@ func main() {
 	}
 
 	// Initialize cache
-	cacheInstance := cache.New(cfg.CacheTTL)
+	cacheInstance := cache.New(cfg.CacheTTL, cfg.RedisAddr)
+	defer cacheInstance.Close()
 
 	// Create router with handlers
 	router := api.NewRouter(sheetsClient, cacheInstance)

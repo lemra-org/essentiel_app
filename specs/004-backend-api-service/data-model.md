@@ -170,13 +170,26 @@ Question ──> Category (via category name string reference)
 
 ## Caching Strategy
 
-**Cache Implementation**: In-memory using `github.com/patrickmn/go-cache`
+**Cache Implementation**: 
+- **Primary**: Redis (optional, recommended for production)
+- **Fallback**: In-memory using `github.com/patrickmn/go-cache`
+- Cache backend auto-detected at startup based on `REDIS_ADDR` configuration
+
+**Cache Selection**:
+- If `REDIS_ADDR` is set and Redis is reachable: Use Redis cache
+- If `REDIS_ADDR` is empty or Redis is unreachable: Fall back to in-memory cache
+- Fallback is automatic and transparent to the application
 
 **Cache Keys**:
 - `"categories"`: Stores `[]Category`
 - `"questions"`: Stores `[]Question`
 
-**TTL**: 5 minutes (300 seconds) with 10% jitter (4.5-5.5 minutes random)
+**TTL**: 5 minutes (300 seconds)
+
+**Redis Benefits**:
+- Shared cache across multiple backend instances (horizontal scaling)
+- Persistent cache survives backend restarts
+- Better memory management for large datasets
 
 **Invalidation**: Automatic expiration after TTL, no manual invalidation endpoint
 
@@ -187,7 +200,7 @@ Question ──> Category (via category name string reference)
 - Subsequent requests within TTL serve from cache
 
 **Cache Hit Behavior**:
-- Immediate return (sub-millisecond latency)
+- Immediate return (sub-millisecond latency for in-memory, <10ms for Redis)
 - No Google Sheets API call
 
 ---
@@ -251,10 +264,11 @@ Same as Category lifecycle above.
 
 - **Webhook-based cache invalidation**: Google Sheets triggers cache refresh on edits
 - **Partial cache updates**: Update only changed categories/questions instead of full refresh
-- **Persistent cache**: Use Redis for cache shared across multiple backend instances
 - **Cache warmup**: Pre-populate cache on service startup
 
 These enhancements are not needed for the MVP and add significant complexity.
+
+**Note**: Redis caching is now implemented as an optional feature with automatic fallback to in-memory cache.
 
 ---
 

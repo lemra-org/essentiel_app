@@ -6,7 +6,7 @@ import (
 )
 
 func TestCache_SetAndGet(t *testing.T) {
-	c := New(5 * time.Minute)
+	c := New(5*time.Minute, "")
 
 	// Test setting and getting a value
 	c.Set("key1", "value1")
@@ -22,7 +22,7 @@ func TestCache_SetAndGet(t *testing.T) {
 }
 
 func TestCache_GetNonExistent(t *testing.T) {
-	c := New(5 * time.Minute)
+	c := New(5*time.Minute, "")
 
 	_, found := c.Get("nonexistent")
 
@@ -32,7 +32,7 @@ func TestCache_GetNonExistent(t *testing.T) {
 }
 
 func TestCache_Delete(t *testing.T) {
-	c := New(5 * time.Minute)
+	c := New(5*time.Minute, "")
 
 	c.Set("key1", "value1")
 	c.Delete("key1")
@@ -44,7 +44,7 @@ func TestCache_Delete(t *testing.T) {
 }
 
 func TestCache_Clear(t *testing.T) {
-	c := New(5 * time.Minute)
+	c := New(5*time.Minute, "")
 
 	c.Set("key1", "value1")
 	c.Set("key2", "value2")
@@ -60,7 +60,7 @@ func TestCache_Clear(t *testing.T) {
 
 func TestCache_Expiration(t *testing.T) {
 	// Use a very short TTL for testing
-	c := New(100 * time.Millisecond)
+	c := New(100*time.Millisecond, "")
 
 	c.Set("key1", "value1")
 
@@ -80,7 +80,7 @@ func TestCache_Expiration(t *testing.T) {
 }
 
 func TestCache_MultipleTypes(t *testing.T) {
-	c := New(5 * time.Minute)
+	c := New(5*time.Minute, "")
 
 	// Test with different types
 	c.Set("string", "value")

@@ -16,6 +16,40 @@ dans le but de faciliter le développement et d'être multi-plateforme.
 Les listes de questions et de catégories affichées dans le jeu
 proviennent de la feuille de calcul disponible [ici](https://docs.google.com/spreadsheets/d/1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI/edit#gid=0).
 
+## Services Backend (Docker Compose)
+
+Le projet inclut désormais une API backend qui sert de proxy sécurisé pour accéder aux données Google Sheets depuis l'application web.
+
+### Démarrer les services avec Docker Compose
+
+```bash
+# Copier le fichier de configuration d'environnement
+cp .env.example .env
+
+# Éditer .env avec vos identifiants Google Service Account
+# - BACKEND_API_IMAGE: Image Docker à utiliser (optionnel, par défaut: ghcr.io/lemra-org/essentiel-backend-api:latest)
+# - GOOGLE_SERVICE_ACCOUNT_JSON: JSON complet du compte de service
+# - GOOGLE_SPREADSHEET_ID: ID de la feuille de calcul
+
+# Démarrer tous les services (télécharge l'image depuis ghcr.io)
+docker-compose up -d
+
+# Voir les logs
+docker-compose logs -f backend-api
+
+# Arrêter les services
+docker-compose down
+```
+
+**Note**: Docker Compose utilise l'image pré-construite depuis GitHub Container Registry (ghcr.io), publiée automatiquement par la CI/CD. Aucune construction locale n'est nécessaire.
+
+L'API backend sera accessible sur http://localhost:8080 avec les endpoints:
+- `GET /api/categories` - Liste des catégories
+- `GET /api/questions` - Liste des questions
+- `GET /healthz` - Vérification de santé
+
+Voir [backend-api/README.md](backend-api/README.md) pour plus de détails sur l'API backend.
+
 ## Compiler le projet
 
 - Installer Flutter:

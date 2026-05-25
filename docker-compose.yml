@@ -1,0 +1,42 @@
+services:
+  redis:
+    image: redis:7-alpine
+    command: redis-server --loglevel verbose
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+    networks:
+      - essentiel-network
+
+  backend-api:
+    image: ${BACKEND_API_IMAGE:-ghcr.io/lemra-org/essentiel-backend-api:latest}
+    ports:
+      - "8080:8080"
+    environment:
+      - PORT=8080
+      - GOOGLE_SERVICE_ACCOUNT_JSON=${GOOGLE_SERVICE_ACCOUNT_JSON}
+      - GOOGLE_SPREADSHEET_ID=${GOOGLE_SPREADSHEET_ID}
+      - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-https://lemra-org.github.io}
+      - CACHE_TTL_MINUTES=${CACHE_TTL_MINUTES:-5}
+      - REDIS_ADDR=${REDIS_ADDR:-redis:6379}
+    restart: unless-stopped
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
+      interval: 15s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    networks:
+      - essentiel-network
+
+networks:
+  essentiel-network:
+    driver: bridge

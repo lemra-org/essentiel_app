@@ -105,8 +105,8 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 			continue
 		}
 
-		questionText := toString(row[0])
-		category := toString(row[1])
+		category := toString(row[0])
+		questionText := toString(row[1])
 
 		if questionText == "" || category == "" {
 			continue

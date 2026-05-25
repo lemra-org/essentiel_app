@@ -145,11 +145,18 @@ func TestGetQuestions_Success(t *testing.T) {
 	mockClient := &mockSheetsClient{
 		questions: []sheets.Question{
 			{
-				Question:       "Test question?",
-				Category:       "Famille",
+				Category:       "Choisis la vie",
+				Question:       "Je partage une chose qui me remplit de joie",
 				ForCouples:     false,
-				ForFamilies:    true,
+				ForFamilies:    false,
 				ForParentChild: false,
+			},
+			{
+				Category:       "Parent - Enfant",
+				Question:       "Quel animal aimerais-tu être pour une journée ?",
+				ForCouples:     false,
+				ForFamilies:    false,
+				ForParentChild: true,
 			},
 		},
 	}
@@ -169,12 +176,16 @@ func TestGetQuestions_Success(t *testing.T) {
 	json.NewDecoder(w.Body).Decode(&response)
 
 	questions := response["questions"]
-	if len(questions) != 1 {
-		t.Errorf("Expected 1 question, got %d", len(questions))
+	if len(questions) != 2 {
+		t.Errorf("Expected 2 questions, got %d", len(questions))
 	}
 
-	if questions[0].Question != "Test question?" {
-		t.Errorf("Question text mismatch: got %s", questions[0].Question)
+	if questions[0].Category != "Choisis la vie" {
+		t.Errorf("Category mismatch: got %s", questions[0].Category)
+	}
+
+	if questions[1].Category != "Parent - Enfant" || !questions[1].ForParentChild {
+		t.Errorf("Parent-Enfant question mismatch: %+v", questions[1])
 	}
 }
 

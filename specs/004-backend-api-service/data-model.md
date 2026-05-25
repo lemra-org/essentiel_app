@@ -54,7 +54,6 @@ Represents a card question with category association and context flags.
 - `category: string` — Category name (must match a Category.name)
 - `forCouples: boolean` — Card suitable for couples
 - `forFamilies: boolean` — Card suitable for families
-- `forParentChild: boolean` — Card is for parent-child context (derived from category == "Parent - Enfant")
 
 **Source**: Google Sheets "Questions" sheet
 
@@ -62,16 +61,14 @@ Represents a card question with category association and context flags.
 - `question` must not be null or empty
 - `category` must reference an existing Category name
 - Boolean flags default to `false` if not specified or invalid
-- `forParentChild` is derived: `true` if `category == "Parent - Enfant"`, otherwise `false`
 
 **Go Struct Representation**:
 ```go
 type Question struct {
-    Question       string `json:"question"`
-    Category       string `json:"category"`
-    ForCouples     bool   `json:"forCouples"`
-    ForFamilies    bool   `json:"forFamilies"`
-    ForParentChild bool   `json:"forParentChild"`
+    Question    string `json:"question"`
+    Category    string `json:"category"`
+    ForCouples  bool   `json:"forCouples"`
+    ForFamilies bool   `json:"forFamilies"`
 }
 ```
 
@@ -81,8 +78,7 @@ type Question struct {
   "question": "Quelle est ta plus grande fierté cette année?",
   "category": "Famille",
   "forCouples": false,
-  "forFamilies": true,
-  "forParentChild": false
+  "forFamilies": true
 }
 ```
 
@@ -141,7 +137,6 @@ Question ──> Category (via category name string reference)
 - Header row (row 1) is skipped
 - Column mapping by index (not by header name for simplicity)
 - Boolean columns: "Oui" (case-insensitive) → `true`, anything else → `false`
-- `forParentChild` is derived from category name, not a column
 
 ---
 
@@ -270,7 +265,7 @@ These enhancements are not needed for the MVP and add significant complexity.
 **Simple Data Model**:
 - Flat structures (no nested objects)
 - String references (no foreign keys or joins)
-- Derived fields (forParentChild) computed server-side
+- Boolean flags from spreadsheet columns
 
 **Caching Strategy**:
 - 5-minute in-memory TTL

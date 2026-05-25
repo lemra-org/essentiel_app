@@ -102,22 +102,19 @@ Content-Length: 512
       "question": "Quelle est ta plus grande fierté cette année?",
       "category": "Famille",
       "forCouples": false,
-      "forFamilies": true,
-      "forParentChild": false
+      "forFamilies": true
     },
     {
       "question": "Qu'est-ce qui te fait te sentir aimé(e)?",
       "category": "Couple",
       "forCouples": true,
-      "forFamilies": false,
-      "forParentChild": false
+      "forFamilies": false
     },
     {
       "question": "Qu'as-tu appris récemment que tu aimerais partager?",
       "category": "Parent - Enfant",
       "forCouples": false,
-      "forFamilies": false,
-      "forParentChild": true
+      "forFamilies": false
     }
   ]
 }
@@ -129,7 +126,6 @@ Content-Length: 512
   - `category` (string, required): Category name (must match a category from `/api/categories`)
   - `forCouples` (boolean, required): Card suitable for couples
   - `forFamilies` (boolean, required): Card suitable for families
-  - `forParentChild` (boolean, required): Card for parent-child context (true when category is "Parent - Enfant")
 
 **Error Responses**: Same as `/api/categories`
 
@@ -339,15 +335,13 @@ curl -H "Origin: https://lemra-org.github.io" \
       "question": "Quelle est ta plus grande fierté cette année?",
       "category": "Famille",
       "forCouples": false,
-      "forFamilies": true,
-      "forParentChild": false
+      "forFamilies": true
     },
     {
       "question": "Qu'est-ce qui te fait te sentir aimé(e)?",
       "category": "Couple",
       "forCouples": true,
-      "forFamilies": false,
-      "forParentChild": false
+      "forFamilies": false
     }
   ]
 }

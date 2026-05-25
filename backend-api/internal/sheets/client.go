@@ -121,14 +121,11 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 			forFamilies = toBool(row[3])
 		}
 
-		forParentChild := (category == "Parent - Enfant")
-
 		questions = append(questions, Question{
-			Question:       questionText,
-			Category:       category,
-			ForCouples:     forCouples,
-			ForFamilies:    forFamilies,
-			ForParentChild: forParentChild,
+			Question:    questionText,
+			Category:    category,
+			ForCouples:  forCouples,
+			ForFamilies: forFamilies,
 		})
 	}
 

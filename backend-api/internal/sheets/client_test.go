@@ -113,25 +113,3 @@ func TestCategoryValidation(t *testing.T) {
 	}
 }
 
-func TestQuestionForParentChild(t *testing.T) {
-	tests := []struct {
-		category       string
-		expectedResult bool
-	}{
-		{"Parent - Enfant", true},
-		{"Famille", false},
-		{"Couple", false},
-		{"parent - enfant", false}, // Case-sensitive
-		{"", false},
-	}
-
-	for _, tt := range tests {
-		t.Run(tt.category, func(t *testing.T) {
-			result := (tt.category == "Parent - Enfant")
-			if result != tt.expectedResult {
-				t.Errorf("ForParentChild check for %q = %v, expected %v",
-					tt.category, result, tt.expectedResult)
-			}
-		})
-	}
-}

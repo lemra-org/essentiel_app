@@ -8,9 +8,8 @@ type Category struct {
 
 // Question represents a card question with category and context flags
 type Question struct {
-	Question       string `json:"question"`
-	Category       string `json:"category"`
-	ForCouples     bool   `json:"forCouples"`
-	ForFamilies    bool   `json:"forFamilies"`
-	ForParentChild bool   `json:"forParentChild"`
+	Question    string `json:"question"`
+	Category    string `json:"category"`
+	ForCouples  bool   `json:"forCouples"`
+	ForFamilies bool   `json:"forFamilies"`
 }

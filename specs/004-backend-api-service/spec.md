@@ -6,7 +6,7 @@
 
 **Status**: Draft
 
-**Input**: User description: "Backend API service in Go that provides a secure proxy to Google Sheets data for the Essentiel web app. The service should: Expose two REST endpoints: GET /api/categories and GET /api/questions; Fetch data from Google Sheets using Service Account credentials (server-side only, never exposed to clients); Return categories with name and color fields; Return questions with question text, category, and boolean flags (forCouples, forFamilies, forParentChild); Support CORS for lemra-org.github.io domain; Include caching headers (Cache-Control: public, max-age=300) to reduce Google Sheets API calls; Handle errors gracefully with appropriate HTTP status codes; Support deployment to a cloud platform (e.g., Cloud Run, Fly.io, Railway); Be lightweight and fast (target <100ms response time). The service acts as a security boundary - it's the only component that has Google Sheets credentials, ensuring zero credential exposure in the Flutter web app builds."
+**Input**: User description: "Backend API service in Go that provides a secure proxy to Google Sheets data for the Essentiel web app. The service should: Expose two REST endpoints: GET /api/categories and GET /api/questions; Fetch data from Google Sheets using Service Account credentials (server-side only, never exposed to clients); Return categories with name and color fields; Return questions with question text, category, and boolean flags (forCouples, forFamilies); Support CORS for lemra-org.github.io domain; Include caching headers (Cache-Control: public, max-age=300) to reduce Google Sheets API calls; Handle errors gracefully with appropriate HTTP status codes; Support deployment to a cloud platform (e.g., Cloud Run, Fly.io, Railway); Be lightweight and fast (target <100ms response time). The service acts as a security boundary - it's the only component that has Google Sheets credentials, ensuring zero credential exposure in the Flutter web app builds."
 
 ## User Scenarios & Testing *(mandatory)*
 
@@ -21,7 +21,7 @@ The Essentiel web application can fetch card categories and questions from a pub
 **Acceptance Scenarios**:
 
 1. **Given** the API service is deployed, **When** a web app makes a GET request to /api/categories, **Then** the service returns a JSON array of categories with name and color fields
-2. **Given** the API service is deployed, **When** a web app makes a GET request to /api/questions, **Then** the service returns a JSON array of questions with text, category, and boolean flags (forCouples, forFamilies, forParentChild)
+2. **Given** the API service is deployed, **When** a web app makes a GET request to /api/questions, **Then** the service returns a JSON array of questions with text, category, and boolean flags (forCouples, forFamilies)
 3. **Given** the API service is running, **When** inspecting the API response or source code, **Then** no Google Sheets credentials or Service Account keys are visible to the client
 4. **Given** data exists in the Google Sheets spreadsheet, **When** the API fetches categories and questions, **Then** the returned data accurately reflects the current spreadsheet contents
 
@@ -75,7 +75,7 @@ Users of the web application experience instant data loading with minimal wait t
 ### Functional Requirements
 
 - **FR-001**: System MUST expose a GET /api/categories endpoint that returns all question categories with their names and color codes
-- **FR-002**: System MUST expose a GET /api/questions endpoint that returns all questions with text, category, and boolean flags (forCouples, forFamilies, forParentChild)
+- **FR-002**: System MUST expose a GET /api/questions endpoint that returns all questions with text, category, and boolean flags (forCouples, forFamilies)
 - **FR-003**: System MUST authenticate to Google Sheets API using Service Account credentials stored securely server-side
 - **FR-004**: Service Account credentials MUST NEVER be exposed in API responses, logs accessible to clients, or any client-facing communication
 - **FR-005**: System MUST include CORS headers allowing requests from lemra-org.github.io domain

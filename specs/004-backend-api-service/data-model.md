@@ -61,6 +61,7 @@ Represents a card question with category association and context flags.
 - `question` must not be null or empty
 - `category` must reference an existing Category name
 - Boolean flags default to `false` if not specified or invalid
+- `forFamilies` is automatically set to `true` for questions in the "Parent - Enfant" category (parent-child questions are inherently family questions)
 
 **Go Struct Representation**:
 ```go
@@ -137,6 +138,7 @@ Question ──> Category (via category name string reference)
 - Header row (row 1) is skipped
 - Column mapping by index (not by header name for simplicity)
 - Boolean columns: "Oui" (case-insensitive) → `true`, anything else → `false`
+- `forFamilies` is automatically set to `true` for "Parent - Enfant" category questions
 
 ---
 

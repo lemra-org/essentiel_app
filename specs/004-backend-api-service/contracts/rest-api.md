@@ -114,7 +114,7 @@ Content-Length: 512
       "question": "Qu'as-tu appris récemment que tu aimerais partager?",
       "category": "Parent - Enfant",
       "forCouples": false,
-      "forFamilies": false
+      "forFamilies": true
     }
   ]
 }
@@ -125,7 +125,7 @@ Content-Length: 512
   - `question` (string, required): Question text
   - `category` (string, required): Category name (must match a category from `/api/categories`)
   - `forCouples` (boolean, required): Card suitable for couples
-  - `forFamilies` (boolean, required): Card suitable for families
+  - `forFamilies` (boolean, required): Card suitable for families (automatically `true` for "Parent - Enfant" category)
 
 **Error Responses**: Same as `/api/categories`
 

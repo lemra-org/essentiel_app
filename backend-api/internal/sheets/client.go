@@ -121,6 +121,11 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 			forFamilies = toBool(row[3])
 		}
 
+		// Parent-child questions are inherently family questions
+		if category == "Parent - Enfant" {
+			forFamilies = true
+		}
+
 		questions = append(questions, Question{
 			Question:    questionText,
 			Category:    category,

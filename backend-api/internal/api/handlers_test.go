@@ -154,7 +154,7 @@ func TestGetQuestions_Success(t *testing.T) {
 				Category:    "Parent - Enfant",
 				Question:    "Quel animal aimerais-tu être pour une journée ?",
 				ForCouples:  false,
-				ForFamilies: false,
+				ForFamilies: true,
 			},
 		},
 	}
@@ -182,8 +182,8 @@ func TestGetQuestions_Success(t *testing.T) {
 		t.Errorf("Category mismatch: got %s", questions[0].Category)
 	}
 
-	if questions[1].Category != "Parent - Enfant" {
-		t.Errorf("Parent-Enfant category mismatch: got %s", questions[1].Category)
+	if questions[1].Category != "Parent - Enfant" || !questions[1].ForFamilies {
+		t.Errorf("Parent-Enfant question should have forFamilies=true: %+v", questions[1])
 	}
 }
 

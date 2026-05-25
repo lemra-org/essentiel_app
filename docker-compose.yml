@@ -1,6 +1,7 @@
 services:
   redis:
     image: redis:7-alpine
+    command: redis-server --loglevel verbose
     ports:
       - "6379:6379"
     restart: unless-stopped

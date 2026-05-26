@@ -156,11 +156,12 @@ The web app uses a service worker for offline functionality and caching.
 
 ### Backend API (Essentiel Data Service)
 
-**Base URL**: Configured via environment (to be provided by team)
+**Base URL**: Configured via environment
 
-Example environments:
-- Development: `http://localhost:3000` (local backend for testing)
-- Production: `https://api.essentiel.example.com` (to be confirmed)
+Environments:
+- Development: `http://localhost:8080` (local backend via `go run` or Docker)
+- Docker Compose: `http://backend-api:8080` (when using docker-compose.yml from repo root)
+- Production: `https://api.essentiel.app` or `https://api.essentiel.soro.io` (backend will be deployed to one of these URLs)
 
 **Authentication**: None required (public read-only endpoints)
 
@@ -173,7 +174,8 @@ Fetch all question categories.
 **Request**:
 ```http
 GET /api/categories HTTP/1.1
-Host: api.essentiel.example.com
+Host: api.essentiel.app
+Origin: https://lemra-org.github.io
 ```
 
 **Response** (200 OK):
@@ -207,7 +209,8 @@ Fetch all question cards.
 **Request**:
 ```http
 GET /api/questions HTTP/1.1
-Host: api.essentiel.example.com
+Host: api.essentiel.app
+Origin: https://lemra-org.github.io
 ```
 
 **Response** (200 OK):
@@ -218,15 +221,13 @@ Host: api.essentiel.example.com
       "question": "Quelle est ta plus grande fierté cette année?",
       "category": "Famille",
       "forCouples": false,
-      "forFamilies": true,
-      "forParentChild": false
+      "forFamilies": true
     },
     {
       "question": "Qu'est-ce qui te fait te sentir aimé(e)?",
       "category": "Couple",
       "forCouples": true,
-      "forFamilies": false,
-      "forParentChild": false
+      "forFamilies": false
     }
   ]
 }
@@ -236,13 +237,22 @@ Host: api.essentiel.example.com
 - `question` (string, required): Question text
 - `category` (string, required): Category name (must match a category from `/api/categories`)
 - `forCouples` (boolean, required): Card suitable for couples
-- `forFamilies` (boolean, required): Card suitable for families  
-- `forParentChild` (boolean, required): Card for parent-child context
+- `forFamilies` (boolean, required): Card suitable for families
 
-**Note**: `isForInternalMood` is derived client-side by checking if question contains "météo" (lowercase)
+**Client-Side Derived Fields** (not in API response):
+- `isForParentChild`: Derived by checking if `category == "Parent - Enfant"`
+- `isForInternalMood`: Derived by checking if question contains "météo" (case-insensitive)
 
-**CORS Headers**: Backend must include appropriate CORS headers for lemra-org.github.io:
+**CORS Headers**: Backend must include appropriate CORS headers:
 
+Development:
+```http
+Access-Control-Allow-Origin: http://localhost:* (any localhost port)
+Access-Control-Allow-Methods: GET, OPTIONS
+Access-Control-Allow-Headers: Content-Type
+```
+
+Production:
 ```http
 Access-Control-Allow-Origin: https://lemra-org.github.io
 Access-Control-Allow-Methods: GET, OPTIONS

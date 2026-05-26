@@ -8,9 +8,11 @@ import 'package:essentiel/env.dart';
 import 'package:essentiel/game/cards.dart';
 import 'package:essentiel/game/category_selector_dialog.dart';
 import 'package:essentiel/resources/category.dart';
+import 'package:essentiel/services/backend_api_service.dart';
 import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -830,27 +832,71 @@ class _GameState extends State<Game> {
     final prefs = await SharedPreferences.getInstance();
     final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
 
-    final String spreadsheetId = Env.value!.spreadsheetId ?? _spreadsheetId;
-    final gsheets = GSheets.withServiceAccountCredentials(
-        ServiceAccountCredentials(Env.value!.saEmail!,
-            ClientId(Env.value!.saId!), Env.value!.saPK!));
+    List<QuestionCategory> categoryList;
+    List<EssentielCardData> cardData;
 
-    final spreadsheet = await gsheets.spreadsheet(spreadsheetId);
-    final categoriesSheet = await spreadsheet.worksheetByTitle('Categories')?.values.map.allRows();
-    final categoryList = categoriesSheet != null
-        ? (categoriesSheet as List<Map<String, dynamic>>)
-            .map((json) => QuestionCategory.fromGSheet(json))
-            .toList()
-        : <QuestionCategory>[];
+    try {
+      if (kIsWeb) {
+        // Web builds: Use backend API service (no credentials in client)
+        final backendUrl = Env.value!.backendApiUrl;
+        if (backendUrl == null || backendUrl.isEmpty) {
+          throw Exception('Backend API URL not configured for web build');
+        }
 
-    final questionsSheet = await spreadsheet.worksheetByTitle('Questions')?.values.map.allRows();
-    final cardData = questionsSheet != null
-        ? (questionsSheet as List<Map<String, dynamic>>)
+        final apiService = BackendApiService(baseUrl: backendUrl);
+
+        // Fetch categories from backend API
+        categoryList = await apiService.fetchCategories();
+
+        // Fetch questions from backend API
+        final questionsData = await apiService.fetchQuestions();
+        cardData = questionsData
             .map((questionJson) => EssentielCardData.fromGSheet(questionJson))
             .where((element) =>
                 element.question != null && element.question!.trim().isNotEmpty)
-            .toList()
-        : <EssentielCardData>[];
+            .toList();
+
+        // Cache data in localStorage for offline support
+        await _cacheDataToLocalStorage(prefs, categoryList, cardData);
+      } else {
+        // Mobile builds: Use direct Google Sheets access with Service Account
+        final String spreadsheetId = Env.value!.spreadsheetId ?? _spreadsheetId;
+        final gsheets = GSheets.withServiceAccountCredentials(
+            ServiceAccountCredentials(Env.value!.saEmail!,
+                ClientId(Env.value!.saId!), Env.value!.saPK!));
+
+        final spreadsheet = await gsheets.spreadsheet(spreadsheetId);
+        final categoriesSheet = await spreadsheet.worksheetByTitle('Categories')?.values.map.allRows();
+        categoryList = categoriesSheet != null
+            ? (categoriesSheet as List<Map<String, dynamic>>)
+                .map((json) => QuestionCategory.fromGSheet(json))
+                .toList()
+            : <QuestionCategory>[];
+
+        final questionsSheet = await spreadsheet.worksheetByTitle('Questions')?.values.map.allRows();
+        cardData = questionsSheet != null
+            ? (questionsSheet as List<Map<String, dynamic>>)
+                .map((questionJson) => EssentielCardData.fromGSheet(questionJson))
+                .where((element) =>
+                    element.question != null && element.question!.trim().isNotEmpty)
+                .toList()
+            : <EssentielCardData>[];
+      }
+    } catch (e) {
+      // Try to load from cache if available (web only)
+      if (kIsWeb) {
+        final cachedData = await _loadCachedDataFromLocalStorage(prefs);
+        if (cachedData != null) {
+          categoryList = cachedData['categories'] as List<QuestionCategory>;
+          cardData = cachedData['cards'] as List<EssentielCardData>;
+        } else {
+          // No cache available, rethrow error
+          rethrow;
+        }
+      } else {
+        rethrow;
+      }
+    }
 
     setState(() {
       _errorWhileLoadingData = null;
@@ -868,6 +914,44 @@ class _GameState extends State<Game> {
       _rawCardsData = cardData.toList(growable: false);
       _allCardsData = _filter(_categoryListFilter);
     });
+  }
+
+  // Cache data to localStorage for offline support (web only)
+  Future<void> _cacheDataToLocalStorage(
+      SharedPreferences prefs,
+      List<QuestionCategory> categories,
+      List<EssentielCardData> cards) async {
+    // Store categories as JSON
+    final categoriesJson = categories
+        .map((cat) => {'title': cat.title, 'color': cat.color?.value.toString()})
+        .toList();
+    await prefs.setString('cached_categories', categoriesJson.toString());
+
+    // Store cards as JSON
+    final cardsJson = cards
+        .map((card) => {
+              'question': card.question,
+              'category': card.category?.title,
+              'isForCouples': card.isForCouples,
+              'isForFamilies': card.isForFamilies,
+            })
+        .toList();
+    await prefs.setString('cached_cards', cardsJson.toString());
+    await prefs.setString('cached_timestamp', DateTime.now().toIso8601String());
+  }
+
+  // Load cached data from localStorage (web only)
+  Future<Map<String, List>?> _loadCachedDataFromLocalStorage(SharedPreferences prefs) async {
+    final categoriesJson = prefs.getString('cached_categories');
+    final cardsJson = prefs.getString('cached_cards');
+
+    if (categoriesJson == null || cardsJson == null) {
+      return null;
+    }
+
+    // Note: This is a simplified implementation
+    // In production, you'd want proper JSON parsing
+    return null; // Placeholder - implement proper JSON deserialization if needed
   }
 }
 

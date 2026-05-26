@@ -90,6 +90,9 @@ Users on desktop computers or tablets see an optimized layout that takes advanta
 No new entities are introduced by this feature. The web app uses the same data model as the existing mobile app:
 
 - **Card**: Question text, category, special flags (isForFamilies, isForCouples, isForParentChild, isForInternalMood)
+  - Note: `isForParentChild` and `isForInternalMood` are derived client-side (not returned by backend API)
+  - `isForParentChild` = `category == "Parent - Enfant"`
+  - `isForInternalMood` = question text contains "météo" (case-insensitive)
 - **Category**: Name, color code
 - **User Preferences**: Category filters, cached card data
 
@@ -110,5 +113,16 @@ No new entities are introduced by this feature. The web app uses the same data m
 - The existing Flutter codebase can be compiled to web without requiring major code refactoring
 - Users have at least a basic broadband internet connection (3G or better for mobile, broadband for desktop)
 - Browser local storage is available and enabled for caching user preferences
-- The Google Sheets API integration works in browser contexts with appropriate CORS configuration
+- The backend API service (implemented in `backend-api/`) will be deployed to production at https://api.essentiel.app or https://api.essentiel.soro.io
+- For local development, backend API runs on localhost:8080 or via Docker Compose alongside web app
 - The existing mobile UI/UX patterns (shake to shuffle, pull to refresh, speed dial menu) will translate reasonably well to web with appropriate adaptations for non-mobile contexts
+
+## Clarifications
+
+### Session 2026-05-27
+
+- Q: Should the Flutter web app derive `forParentChild` client-side, or should we modify the backend to include it? → A: Keep backend as-is: web app derives `forParentChild` by checking if category == "Parent - Enfant" (matches current backend implementation)
+- Q: What is the current deployment status of the backend API? → A: Backend code exists but NOT yet deployed remotely - use localhost for development (port 8080), production deployment URL TBD. Docker Compose option available for running both frontend and backend together locally.
+- Q: Which approach should be documented as the primary development workflow? → A: Flutter web dev server connects to localhost:8080 backend (developer runs backend separately with `go run`)
+- Q: What CORS configuration should the backend use for local development? → A: Allow all localhost origins (`http://localhost:*`) in development mode - Flutter can use any port
+- Q: Can the Flutter web app be deployed to GitHub Pages before the backend has a production URL? → A: Backend will be deployed to https://api.essentiel.app or https://api.essentiel.soro.io

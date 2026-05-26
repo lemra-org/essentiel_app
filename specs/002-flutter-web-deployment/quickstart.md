@@ -159,45 +159,62 @@ Edit `web/index.html`:
 
 ### Development (Local Testing)
 
-**Option A**: Use mock/test backend (recommended for initial development)
+The backend API service is implemented in the `backend-api/` directory of this repository. For local development, run the backend separately before starting the Flutter web app.
 
-The team will provide a test backend endpoint:
-
-```bash
-# Configure in lib/environments/dev.dart
-const API_BASE_URL = 'https://api-dev.essentiel.example.com';
-```
-
-**Option B**: Run local backend (if provided)
-
-If the team provides a local backend setup:
+**Primary Development Workflow**:
 
 ```bash
-# Start local backend (example, actual commands from team)
-cd ../essentiel-backend
-npm install
-npm run dev
+# Terminal 1: Start backend API on localhost:8080
+cd backend-api
+export GOOGLE_SERVICE_ACCOUNT_JSON=$(cat path/to/service-account-dev.json)
+export GOOGLE_SPREADSHEET_ID=your-spreadsheet-id
+go run cmd/server/main.go
 
-# Configure Flutter app to use localhost
-# In lib/environments/dev.dart:
-const API_BASE_URL = 'http://localhost:3000';
+# Backend now running on http://localhost:8080
+# CORS configured to allow all localhost origins (any port)
+
+# Terminal 2: Start Flutter web app
+cd ..  # Back to repository root
+flutter run -d chrome
+
+# Flutter web runs on random port (e.g., http://localhost:58392)
+# Backend CORS allows requests from any localhost:* origin in dev mode
+
+# Configure in lib/environments/dev.dart or lib/environments/web_dev.dart:
+const API_BASE_URL = 'http://localhost:8080';
 ```
+
+**Alternative: Docker Compose** (optional, for testing production-like setup):
+
+```bash
+# From repository root
+docker-compose up -d
+
+# Both backend and web app running in containers
+# Backend accessible at http://localhost:8080
+```
+
+See [backend-api/README.md](../../backend-api/README.md) for detailed backend setup instructions.
 
 ### Production (CI/CD)
 
+**Backend Deployment Status**: The backend will be deployed to production at `https://api.essentiel.app` or `https://api.essentiel.soro.io`.
+
 **Backend URL Configuration**:
 
-The production backend URL will be provided by the team and configured in the build:
+The production backend URL should be configured in the web app build:
 
 ```bash
 # No secrets required - backend URL is public
-# Configured in lib/environments/prod.dart or via build argument
+# Configured in lib/environments/prod.dart or lib/environments/web_prod.dart
 
-# Example:
-const API_BASE_URL = 'https://api.essentiel.example.com';
+# Production backend URL (one of the following):
+const API_BASE_URL = 'https://api.essentiel.app';
+# OR
+const API_BASE_URL = 'https://api.essentiel.soro.io';
 ```
 
-**No GitHub Secrets Needed**: Unlike the previous API key approach, the backend URL is public information and doesn't need secret management.
+**No GitHub Secrets Needed**: The backend URL is public information and doesn't need secret management (backend handles Google Service Account credentials server-side).
 
 ### Security Posture
 

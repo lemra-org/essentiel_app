@@ -33,7 +33,7 @@ Deploy the existing Flutter mobile app as a web application accessible via GitHu
 **Constraints**: 
 - Must work offline after initial load (Progressive Web App capabilities)
 - GitHub Pages hosting limits (100GB bandwidth/month, 1GB storage)
-- Backend API dependency (team provides secure data proxy, eliminates credential exposure)
+- Backend API dependency (implemented in `backend-api/`, deployed to https://api.essentiel.app or https://api.essentiel.soro.io)
 - No native mobile features (device shake may require web API alternative or fallback)
 
 **Scale/Scope**: Single-page web application, ~10 screens/views, targeting hundreds of concurrent users
@@ -62,9 +62,9 @@ Deploy the existing Flutter mobile app as a web application accessible via GitHu
 
 **Status**: COMPLIANT
 
-**Justification**: Web builds use environment separation (`lib/environments/dev.dart` vs `prod.dart`) with platform-specific data access. Research confirmed that Service Account credentials must NOT be used in web builds (Google security best practice violation). Instead, web builds use a secure backend API provided by the project team (zero credentials in client), while mobile builds continue using Service Account credentials for direct Google Sheets access. This maintains security posture while enabling web deployment.
+**Justification**: Web builds use environment separation (`lib/environments/dev.dart` vs `prod.dart`) with platform-specific data access. Research confirmed that Service Account credentials must NOT be used in web builds (Google security best practice violation). Instead, web builds use a secure backend API (implemented in `backend-api/` directory, zero credentials in client), while mobile builds continue using Service Account credentials for direct Google Sheets access. This maintains security posture while enabling web deployment.
 
-**Action**: Implement `kIsWeb` detection to load backend API URL for web, Service Account for mobile. Security model documented in [quickstart.md](./quickstart.md) and [research.md](./research.md). Backend API provided by team.
+**Action**: Implement `kIsWeb` detection to load backend API URL for web (http://localhost:8080 for dev, https://api.essentiel.app or https://api.essentiel.soro.io for prod), Service Account for mobile. Security model documented in [quickstart.md](./quickstart.md) and [research.md](./research.md).
 
 ### Principle IV: CI/CD & Release Discipline ✅
 

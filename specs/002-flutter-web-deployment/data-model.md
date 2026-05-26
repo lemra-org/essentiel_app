@@ -173,10 +173,11 @@ EssentielCardData ──> QuestionCategory
 
 **Web (new)**:
 - **Cannot access Google Sheets directly** (CORS restrictions, security violations, see [research.md](./research.md))
-- Uses **secure backend API** provided by project team
-- Backend handles Google Sheets authentication and data fetching
-- Web app calls REST API endpoints (no Google Sheets SDK or credentials needed)
-- Zero sensitive data embedded in web builds
+- Uses **secure backend API** implemented in `backend-api/` directory
+- Backend handles Google Sheets authentication and data fetching server-side
+- Web app calls REST API endpoints: `GET /api/categories` and `GET /api/questions`
+- Backend API returns JSON without `forParentChild` field - web app derives it client-side by checking `category == "Parent - Enfant"`
+- Zero sensitive data embedded in web builds (backend handles Service Account credentials)
 
 ### Local Storage Limits
 
@@ -209,4 +210,4 @@ This feature introduces **zero changes** to the data model. The web deployment r
 - Storage key names (`CATEGORY_FILTER_PREF_KEY`)
 - Parsing and validation logic
 
-**Implementation Impact**: Data layer code requires no modifications for web deployment, only environment-specific credential loading (API key vs Service Account).
+**Implementation Impact**: Data layer code requires platform detection (`kIsWeb`) to route web builds to backend API endpoints (http://localhost:8080 for dev) while mobile builds continue using Service Account for direct Google Sheets access. No changes to entity classes or storage logic.

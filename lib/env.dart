@@ -11,6 +11,9 @@ class Env {
   String? saId;
   String? saPK;
 
+  // Backend API URL for web builds (instead of Service Account credentials)
+  String? backendApiUrl;
+
   Env() {
     value = this;
   }

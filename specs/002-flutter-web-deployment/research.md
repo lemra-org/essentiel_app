@@ -18,11 +18,11 @@
 - Backend proxy provides clean security boundary: **zero credentials in web builds**
 
 **Solution**:
-- **Backend API** provided by project team handles Google Sheets authentication server-side
-- Backend exposes simple REST endpoints for categories and questions
+- **Backend API** (implemented in `backend-api/` directory) handles Google Sheets authentication server-side
+- Backend exposes REST endpoints: `GET /api/categories` and `GET /api/questions`
 - Web app calls backend API (no Google Sheets SDK or credentials needed)
 - Mobile app can optionally use same backend or continue direct Google Sheets access
-- Backend can implement caching, rate limiting, and data transformation
+- Backend implements 5-minute caching, rate limiting, and CORS support
 
 **Alternatives Considered**:
 - **API Keys in web builds**: Still exposes keys to quota abuse, requires domain restrictions
@@ -31,8 +31,9 @@
 - **Published CSV export**: Unreliable, may still hit CORS, loses API features
 
 **Implementation Impact**: 
-- Web app requires backend API endpoint configuration (URL in environment)
+- Web app requires backend API endpoint configuration (http://localhost:8080 for dev, https://api.essentiel.app or https://api.essentiel.soro.io for prod)
 - No Google Sheets SDK needed in web builds (smaller bundle size)
+- Backend implemented in Go with Docker support, deployed separately
 - Mobile app can continue using Service Account or migrate to backend for consistency
 
 ---

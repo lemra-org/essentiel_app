@@ -1,0 +1,43 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'backend-api/**'
+      - '.github/workflows/backend-ci.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'backend-api/**'
+      - '.github/workflows/backend-ci.yml'
+
+jobs:
+  test:
+    name: Test and Build
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: 'backend-api/go.mod'
+
+      - name: Install dependencies
+        run: go mod download
+        working-directory: backend-api
+
+      - name: Run tests
+        run: go test -v -cover ./...
+        working-directory: backend-api
+
+      - name: Run vet
+        run: go vet ./...
+        working-directory: backend-api
+
+      - name: Build
+        run: go build ./cmd/server
+        working-directory: backend-api

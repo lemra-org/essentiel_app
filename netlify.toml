@@ -1,0 +1,103 @@
+# Netlify configuration for Flutter web previews
+# Provides automatic preview deployments for each PR
+
+[build]
+  base = "/"
+  publish = "build/web"
+  command = """
+    flutter config --enable-web && \
+    flutter pub get && \
+    flutter build web \
+      --release \
+      --base-href="/" \
+      --pwa-strategy offline-first \
+      --tree-shake-icons \
+      -t lib/environments/web_prod.dart
+  """
+
+[build.environment]
+  FLUTTER_VERSION = "3.22.3"
+  FLUTTER_CHANNEL = "stable"
+
+# Headers for Flutter web
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
+    Referrer-Policy = "no-referrer"
+
+[[headers]]
+  for = "/flutter_service_worker.js"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/index.html"
+  [headers.values]
+    Cache-Control = "no-cache, no-store, must-revalidate"
+
+[[headers]]
+  for = "/*.js"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/*.css"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+[[headers]]
+  for = "/assets/*"
+  [headers.values]
+    Cache-Control = "public, max-age=31536000, immutable"
+
+# Redirects for Flutter web routing
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
+
+# Deploy contexts
+[context.production]
+  command = """
+    flutter config --enable-web && \
+    flutter pub get && \
+    flutter build web \
+      --release \
+      --base-href="/" \
+      --pwa-strategy offline-first \
+      --tree-shake-icons \
+      -t lib/environments/web_prod.dart
+  """
+
+[context.deploy-preview]
+  command = """
+    flutter config --enable-web && \
+    flutter pub get && \
+    flutter build web \
+      --release \
+      --base-href="/" \
+      --pwa-strategy offline-first \
+      --tree-shake-icons \
+      -t lib/environments/web_dev.dart
+  """
+
+[context.branch-deploy]
+  command = """
+    flutter config --enable-web && \
+    flutter pub get && \
+    flutter build web \
+      --release \
+      --base-href="/" \
+      --pwa-strategy offline-first \
+      --tree-shake-icons \
+      -t lib/environments/web_dev.dart
+  """
+
+# Dev server settings
+[dev]
+  command = "flutter run -d web-server --web-port=8888"
+  port = 8888
+  targetPort = 8888
+  autoLaunch = false

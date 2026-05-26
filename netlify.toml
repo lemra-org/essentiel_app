@@ -5,10 +5,14 @@
   base = "/"
   publish = "build/web"
   command = """
-    # Install Flutter
+    # Install Flutter 3.22.3 (match .tool-versions)
     if [ ! -d "$HOME/flutter" ]; then
-      git clone https://github.com/flutter/flutter.git -b stable --depth 1 $HOME/flutter
+      git clone https://github.com/flutter/flutter.git $HOME/flutter
     fi
+    cd $HOME/flutter
+    git fetch --tags
+    git checkout 3.22.3
+    cd -
     export PATH="$HOME/flutter/bin:$PATH"
     flutter doctor
     flutter config --enable-web && \
@@ -67,10 +71,14 @@
 # Deploy contexts
 [context.production]
   command = """
-    # Install Flutter
+    # Install Flutter 3.22.3 (match .tool-versions)
     if [ ! -d "$HOME/flutter" ]; then
-      git clone https://github.com/flutter/flutter.git -b stable --depth 1 $HOME/flutter
+      git clone https://github.com/flutter/flutter.git $HOME/flutter
     fi
+    cd $HOME/flutter
+    git fetch --tags
+    git checkout 3.22.3
+    cd -
     export PATH="$HOME/flutter/bin:$PATH"
     flutter doctor
     flutter config --enable-web && \
@@ -85,10 +93,14 @@
 
 [context.deploy-preview]
   command = """
-    # Install Flutter
+    # Install Flutter 3.22.3 (match .tool-versions)
     if [ ! -d "$HOME/flutter" ]; then
-      git clone https://github.com/flutter/flutter.git -b stable --depth 1 $HOME/flutter
+      git clone https://github.com/flutter/flutter.git $HOME/flutter
     fi
+    cd $HOME/flutter
+    git fetch --tags
+    git checkout 3.22.3
+    cd -
     export PATH="$HOME/flutter/bin:$PATH"
     flutter doctor
     flutter config --enable-web && \
@@ -103,10 +115,14 @@
 
 [context.branch-deploy]
   command = """
-    # Install Flutter
+    # Install Flutter 3.22.3 (match .tool-versions)
     if [ ! -d "$HOME/flutter" ]; then
-      git clone https://github.com/flutter/flutter.git -b stable --depth 1 $HOME/flutter
+      git clone https://github.com/flutter/flutter.git $HOME/flutter
     fi
+    cd $HOME/flutter
+    git fetch --tags
+    git checkout 3.22.3
+    cd -
     export PATH="$HOME/flutter/bin:$PATH"
     flutter doctor
     flutter config --enable-web && \

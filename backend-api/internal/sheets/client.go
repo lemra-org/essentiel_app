@@ -38,7 +38,7 @@ func NewClient(ctx context.Context, serviceAccountJSON string, spreadsheetID str
 // FetchCategories reads the Categories sheet and returns parsed Category objects
 // Expected columns: Catégorie, Couleur
 func (c *Client) FetchCategories(ctx context.Context) ([]Category, error) {
-	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Categories!A:B").Context(ctx).Do()
+	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Categories!A:C").Context(ctx).Do()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch categories: %w", err)
 	}

@@ -1,0 +1,74 @@
+# Render Blueprint - Full Stack Deployment
+# Deploys both frontend (Flutter web) and backend (Go API) from docker-compose
+
+services:
+  # Redis Cache
+  - type: pserv
+    name: essentiel-redis
+    runtime: docker
+    image: redis:7-alpine
+    plan: starter
+    healthCheckPath: /
+    envVars:
+      - key: REDIS_ARGS
+        value: --loglevel verbose
+
+  # Backend API (Go)
+  - type: web
+    name: essentiel-backend-api
+    runtime: docker
+    dockerfilePath: ./backend-api/Dockerfile
+    dockerContext: ./backend-api
+    plan: starter
+    healthCheckPath: /healthz
+    envVars:
+      - key: PORT
+        value: 8080
+      - key: GOOGLE_SERVICE_ACCOUNT_JSON
+        sync: false  # Set in Render dashboard (secret)
+      - key: GOOGLE_SPREADSHEET_ID
+        sync: false  # Set in Render dashboard (secret)
+      - key: ALLOWED_ORIGIN
+        value: https://essentiel-frontend.onrender.com  # Update after frontend deployed
+      - key: CACHE_TTL_MINUTES
+        value: 5
+      - key: REDIS_ADDR
+        fromService:
+          type: pserv
+          name: essentiel-redis
+          property: hostport
+    # Preview environments for PRs
+    previewsEnabled: true
+    previewsExpireAfterDays: 7
+
+  # Frontend (Flutter Web)
+  - type: web
+    name: essentiel-frontend
+    runtime: docker
+    dockerfilePath: ./Dockerfile
+    dockerContext: ./
+    plan: starter
+    healthCheckPath: /healthz
+    dockerCommand: nginx -g 'daemon off;'
+    envVars:
+      - key: BUILD_ENV
+        value: prod
+      - key: BACKEND_API_URL
+        fromService:
+          type: web
+          name: essentiel-backend-api
+          envVarKey: RENDER_EXTERNAL_URL
+    # Preview environments for PRs
+    previewsEnabled: true
+    previewsExpireAfterDays: 7
+
+# Preview environment overrides
+previewsSettings:
+  - service: essentiel-backend-api
+    envVars:
+      - key: ALLOWED_ORIGIN
+        value: "*"  # Allow all origins for previews (localhost:* for dev)
+  - service: essentiel-frontend
+    envVars:
+      - key: BUILD_ENV
+        value: dev  # Use dev environment for previews

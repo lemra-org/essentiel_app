@@ -361,26 +361,48 @@ volumes:
 
 ## Production Use
 
-⚠️ This docker-compose setup is for **local development only**.
+For production deployment on your own server:
 
-For production deployment:
-- Use Render (see `docs/RENDER_DEPLOYMENT.md`)
-- Or build production images and push to a registry:
+### 1. Build and Push Images
 
 ```bash
 # Build production images
-BUILD_ENV=prod docker-compose build
+docker compose -f compose-dev.yaml build
 
-# Tag and push
-docker tag essentiel-frontend:latest ghcr.io/lemra-org/essentiel-frontend:latest
-docker tag essentiel-backend-api:latest ghcr.io/lemra-org/essentiel-backend-api:latest
+# Tag for registry
+docker tag essentiel-frontend:dev ghcr.io/lemra-org/essentiel-frontend:latest
+docker tag essentiel-backend-api:dev ghcr.io/lemra-org/essentiel-backend-api:latest
 
+# Push to GitHub Container Registry
 docker push ghcr.io/lemra-org/essentiel-frontend:latest
 docker push ghcr.io/lemra-org/essentiel-backend-api:latest
 ```
 
+### 2. Deploy on Server
+
+```bash
+# On your production server
+git clone https://github.com/lemra-org/essentiel_app.git
+cd essentiel_app
+
+# Set up environment
+cp .env.example .env
+nano .env  # Add your credentials
+
+# Pull and run production images
+docker compose pull
+docker compose up -d
+```
+
+### 3. Set Up Reverse Proxy (Optional)
+
+Use nginx or Traefik on your server to:
+- Add HTTPS (Let's Encrypt)
+- Route domain to frontend container
+- Example: `app.yourdomain.com` → `localhost:3000`
+
 ## See Also
 
-- [Render Deployment Guide](RENDER_DEPLOYMENT.md) - Production deployment
+- [Backend Proxy Configuration](BACKEND_PROXY.md) - nginx proxy details
 - [Backend API README](../backend-api/README.md) - Backend documentation
 - [CLAUDE.md](../CLAUDE.md) - Development commands

@@ -90,17 +90,13 @@ environment:
   - BACKEND_URL=http://backend-api:8080
 ```
 
-**Render (Production):**
+**Production (Self-hosted):**
 ```yaml
-envVars:
-  - key: BACKEND_URL
-    fromService:
-      type: web
-      name: essentiel-backend-api
-      envVarKey: RENDER_INTERNAL_URL
+environment:
+  - BACKEND_URL=http://backend-api:8080
 ```
 
-Render automatically sets `RENDER_INTERNAL_URL` for each service, providing fast internal networking.
+The backend service name (`backend-api`) is resolvable within the Docker network.
 
 ## Request Flow Example
 
@@ -119,7 +115,7 @@ final response = await http.get(
 ### 2. Browser Sends Request
 
 ```
-GET https://essentiel-frontend.onrender.com/api/categories
+GET https://app.yourdomain.com/api/categories
 ```
 
 ### 3. nginx Proxies Request
@@ -127,7 +123,7 @@ GET https://essentiel-frontend.onrender.com/api/categories
 nginx receives request and proxies to backend:
 
 ```
-GET http://essentiel-backend-api-internal:8080/api/categories
+GET http://backend-api:8080/api/categories
 ```
 
 ### 4. Backend Responds
@@ -157,19 +153,18 @@ Response flows back through nginx to browser.
 
 | Environment | BACKEND_URL | How It's Set |
 |-------------|-------------|--------------|
-| **Docker Compose** | `http://backend-api:8080` | `.env` file or default |
-| **Render Production** | `http://essentiel-backend-api-internal:10000` | Render's `RENDER_INTERNAL_URL` |
-| **Render Preview** | `http://essentiel-backend-api-pr-123-internal:10000` | Render's `RENDER_INTERNAL_URL` |
+| **Docker Compose (Dev)** | `http://backend-api:8080` | `.env` file or default |
+| **Production (Self-hosted)** | `http://backend-api:8080` | `.env` file or default |
 
 ## CORS Configuration
 
 Since requests are proxied through the same origin, CORS is still needed but simplified:
 
 **Backend ALLOWED_ORIGIN:**
-- Production: `https://essentiel-frontend.onrender.com`
-- Preview: `https://essentiel-frontend-pr-123.onrender.com`
+- Local: `http://localhost:3000`
+- Production: `https://app.yourdomain.com`
 
-Render automatically sets this via `fromService` in `render.yaml`.
+Set via `ALLOWED_ORIGIN` environment variable in `.env` or compose file.
 
 ## Testing
 
@@ -188,14 +183,14 @@ curl http://localhost:3000/api/categories
 # Should proxy to backend and return JSON
 ```
 
-### Production (Render)
+### Production (Self-hosted)
 
 ```bash
 # Test frontend
-curl https://essentiel-frontend.onrender.com
+curl https://app.yourdomain.com
 
 # Test API proxy
-curl https://essentiel-frontend.onrender.com/api/categories
+curl https://app.yourdomain.com/api/categories
 
 # Should proxy to backend-api and return JSON
 ```
@@ -284,6 +279,5 @@ With nginx proxy, one build works everywhere.
 ## See Also
 
 - [nginx proxy_pass documentation](https://nginx.org/en/docs/http/ngx_http_proxy_module.html#proxy_pass)
-- [Render Internal URLs](https://render.com/docs/private-services#connecting-to-private-services)
 - [Docker Compose Guide](DOCKER_COMPOSE.md)
-- [Render Deployment Guide](RENDER_DEPLOYMENT.md)
+- [Docker Networking](https://docs.docker.com/network/)

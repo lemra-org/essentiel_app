@@ -81,4 +81,4 @@ nano .env
 ## Full Documentation
 
 - **[DOCKER_COMPOSE.md](docs/DOCKER_COMPOSE.md)** - Complete Docker Compose guide
-- **[RENDER_DEPLOYMENT.md](docs/RENDER_DEPLOYMENT.md)** - Production deployment to Render
+- **[BACKEND_PROXY.md](docs/BACKEND_PROXY.md)** - nginx proxy configuration details

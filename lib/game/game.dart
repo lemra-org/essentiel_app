@@ -90,9 +90,13 @@ class _GameState extends State<Game> {
       }
     });
 
-    ShakeDetector.autoStart(onPhoneShake: () {
-      _randomDraw();
-    });
+    // Only enable shake detection on native platforms (not web)
+    // Web browsers have limited sensor access and require HTTPS + permissions
+    if (!kIsWeb) {
+      ShakeDetector.autoStart(onPhoneShake: () {
+        _randomDraw();
+      });
+    }
   }
 
   @override
@@ -181,45 +185,52 @@ class _GameState extends State<Game> {
       //Yeah - we have some data !
       Widget widgetToDisplay;
       if (_currentIndex == null) {
+        // Show shake animation only on native platforms (not web)
+        final isWeb = kIsWeb;
+
         widgetToDisplay = Container(
-            // height: screenHeight * 0.4,
             padding: const EdgeInsets.all(15.0),
             child: Center(
-              child: Column(
-                children: [
-                  ShakeAnimatedWidget(
-                    enabled: true,
-                    duration: Duration(milliseconds: 2000),
-                    shakeAngle: Rotation.deg(x: 50, y: 5, z: 5),
-                    curve: Curves.fastOutSlowIn,
-                    child: SvgPicture.asset(
-                      'assets/images/phone_in_hand.svg',
-                      color: Colors.white,
-                      width: screenWidth * 0.25,
-                      height: screenHeight * 0.25,
-                      semanticsLabel:
-                          'Secouer smartphone en main pour choisir une carte',
-                    ),
-                  ),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  Flexible(
-                      child: Text(
-                          "Secouez votre téléphone pour choisir une carte.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 24, height: 1.2, color: Colors.white)))
-                ],
-              ),
+              child: !isWeb
+                  ? Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ShakeAnimatedWidget(
+                          enabled: true,
+                          duration: Duration(milliseconds: 2000),
+                          shakeAngle: Rotation.deg(x: 50, y: 5, z: 5),
+                          curve: Curves.fastOutSlowIn,
+                          child: SvgPicture.asset(
+                            'assets/images/phone_in_hand.svg',
+                            color: Colors.white,
+                            width: screenWidth * 0.25,
+                            height: screenHeight * 0.25,
+                            semanticsLabel:
+                                'Secouer smartphone en main pour choisir une carte',
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        Text(
+                            "Secouez votre téléphone pour choisir une carte.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 24, height: 1.2, color: Colors.white)),
+                      ],
+                    )
+                  : SizedBox.shrink(), // Empty on web - use floating button instead
             ));
       } else {
         final cardData = _allCardsData?.elementAt(_currentIndex!);
-        // Larger card for selected view: max 500px height
-        // Wider aspect ratio (0.85) to accommodate text, but cap at 90% screen width
-        final selectedCardHeight = screenHeight * 0.6 > 500 ? 500.0 : screenHeight * 0.6;
-        final calculatedWidth = selectedCardHeight * 0.85;
-        final selectedCardWidth = calculatedWidth > screenWidth * 0.9 ? screenWidth * 0.9 : calculatedWidth;
+        // Responsive card size: larger on desktop, more conservative on mobile
+        final isMobile = screenWidth < 600;
+        final heightRatio = isMobile ? 0.6 : 0.7;
+        final maxHeight = isMobile ? 500.0 : 600.0;
+        final aspectRatio = isMobile ? 0.85 : 0.9;
+        final widthCap = isMobile ? 0.9 : 0.95;
+
+        final selectedCardHeight = screenHeight * heightRatio > maxHeight ? maxHeight : screenHeight * heightRatio;
+        final calculatedWidth = selectedCardHeight * aspectRatio;
+        final selectedCardWidth = calculatedWidth > screenWidth * widthCap ? screenWidth * widthCap : calculatedWidth;
 
         widgetToDisplay = Center(
           child: Stack(
@@ -385,8 +396,9 @@ class _GameState extends State<Game> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final availableHeight = constraints.maxHeight;
-            final cardListHeight = availableHeight * 0.2;
-            final spacerHeight = availableHeight * 0.05;
+            // Balanced allocation for card list - enough room without overwhelming
+            final cardListHeight = availableHeight * 0.35;
+            final spacerHeight = availableHeight * 0.04;
             final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
 
             return SingleChildScrollView(
@@ -501,7 +513,12 @@ class _GameState extends State<Game> {
                 top: screenHeight * 0.085, left: 10.0, right: 10.0),
             child: Text(
               title,
-              style: TextStyle(fontSize: 28.0, color: Colors.white),
+              style: TextStyle(
+                fontSize: 36.0,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
         ),
@@ -612,7 +629,25 @@ class _GameState extends State<Game> {
           body: toDisplay,
           floatingActionButton: (_rawCardsData != null &&
                   _rawCardsData!.isNotEmpty)
-              ? SpeedDial(
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // "Tirer une carte" button - always visible for easy access
+                    FloatingActionButton.extended(
+                      heroTag: 'draw-card-fab',
+                      onPressed: _randomDraw,
+                      backgroundColor: const Color(0xFFED2910),
+                      foregroundColor: Colors.white,
+                      elevation: 8.0,
+                      icon: FaIcon(FontAwesomeIcons.handSparkles, size: 20),
+                      label: Text(
+                        'Tirer une carte',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    // Menu button
+                    SpeedDial(
                   animatedIcon: AnimatedIcons.menu_close,
                   animatedIconTheme: IconThemeData(size: 22.0),
                   overlayColor: Colors.black,
@@ -738,14 +773,8 @@ class _GameState extends State<Game> {
                           TextStyle(fontSize: 18.0, color: Colors.white),
                       onTap: _shuffleCards,
                     ),
-                    SpeedDialChild(
-                        child: Icon(Icons.find_replace_outlined),
-                        backgroundColor: const Color(0xFFED2910),
-                        label: 'Choisir une carte au hasard',
-                        labelBackgroundColor: const Color(0xFFED2910),
-                        labelStyle:
-                            TextStyle(fontSize: 18.0, color: Colors.white),
-                        onTap: _randomDraw),
+                  ],
+                ),
                   ],
                 )
               : null,

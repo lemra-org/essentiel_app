@@ -52,9 +52,9 @@ class _EssentielCardState extends State<EssentielCard> {
     final screenHeight = MediaQuery.of(context).size.height;
     final screenWidth = MediaQuery.of(context).size.width;
 
-    // Smaller cards for horizontal list: max 220px height
+    // Cards for horizontal list: balanced size with good spacing around logo
     // Maintain playing card aspect ratio (roughly 2.5:3.5 or 0.71)
-    final cardHeight = screenHeight * 0.25 > 220 ? 220.0 : screenHeight * 0.25;
+    final cardHeight = screenHeight * 0.38 > 380 ? 380.0 : screenHeight * 0.38;
     final cardWidth = cardHeight * 0.71;
 
     return ConstrainedBox(

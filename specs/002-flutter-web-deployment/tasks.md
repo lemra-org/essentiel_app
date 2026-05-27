@@ -81,12 +81,12 @@ Flutter project structure:
 
 ### Core Web Functionality for User Story 1
 
-- [ ] T026 [US1] Verify shuffle functionality works in web browsers using existing speed dial menu button
-- [ ] T027 [US1] Verify horizontal card scrolling works with mouse drag and trackpad gestures in web browsers
-- [ ] T028 [US1] Verify category filter dialog displays and applies filters correctly using backend API data
-- [ ] T029 [US1] Test localStorage persistence of category filters across browser sessions using shared_preferences
-- [ ] T030 [US1] Verify data refresh from backend API works via pull-to-refresh or menu action
-- [ ] T031 [US1] Test offline fallback - verify app shows cached cards when backend API is unreachable
+- [X] T026 [US1] Verify shuffle functionality works in web browsers using existing speed dial menu button
+- [X] T027 [US1] Verify horizontal card scrolling works with mouse drag and trackpad gestures in web browsers
+- [X] T028 [US1] Verify category filter dialog displays and applies filters correctly using backend API data
+- [X] T029 [US1] Test localStorage persistence of category filters across browser sessions using shared_preferences
+- [X] T030 [US1] Verify data refresh from backend API works via pull-to-refresh or menu action
+- [X] T031 [US1] Test offline fallback - verify app shows cached cards when backend API is unreachable
 
 ### Local Testing for User Story 1
 
@@ -108,22 +108,22 @@ Flutter project structure:
 
 ### Touch Interaction for User Story 2
 
-- [ ] T037 [P] [US2] Verify touch scrolling works for horizontal card list on mobile browsers
-- [ ] T038 [P] [US2] Verify card flip animation triggers correctly on touch tap
-- [ ] T039 [P] [US2] Verify speed dial menu opens and closes with touch tap gestures
-- [ ] T040 [US2] Test minimum touch target sizes (48x48 CSS pixels) for all interactive elements using Chrome DevTools device mode
+- [X] T037 [P] [US2] Verify touch scrolling works for horizontal card list on mobile browsers
+- [X] T038 [P] [US2] Verify card flip animation triggers correctly on touch tap
+- [X] T039 [P] [US2] Verify speed dial menu opens and closes with touch tap gestures
+- [X] T040 [US2] Test minimum touch target sizes (48x48 CSS pixels) for all interactive elements using Chrome DevTools device mode
 
 ### Mobile Responsive Layout for User Story 2
 
-- [ ] T041 [P] [US2] Verify viewport meta tag exists in web/index.html with width=device-width, initial-scale=1.0
-- [ ] T042 [US2] Test layout at 320px width (iPhone SE portrait) using Chrome DevTools - verify no horizontal scroll needed
-- [ ] T043 [US2] Test layout at 375px width (iPhone 8 portrait) - verify text readable without zoom
-- [ ] T044 [US2] Test layout at 414px width (iPhone Plus portrait) - verify card display optimal
-- [ ] T045 [US2] Test layout at 667px width (iPhone landscape) - verify horizontal card list works properly
+- [X] T041 [P] [US2] Verify viewport meta tag exists in web/index.html with width=device-width, initial-scale=1.0
+- [X] T042 [US2] Test layout at 320px width (iPhone SE portrait) using Chrome DevTools - verify no horizontal scroll needed
+- [X] T043 [US2] Test layout at 375px width (iPhone 8 portrait) - verify text readable without zoom
+- [X] T044 [US2] Test layout at 414px width (iPhone Plus portrait) - verify card display optimal
+- [X] T045 [US2] Test layout at 667px width (iPhone landscape) - verify horizontal card list works properly
 
 ### Progressive Enhancement for User Story 2
 
-- [ ] T046 [US2] Verify shuffle button is always visible in speed dial menu (no reliance on shake gesture for core functionality)
+- [X] T046 [US2] Verify shuffle button is always visible in speed dial menu (no reliance on shake gesture for core functionality)
 - [ ] T047 [US2] Test pull-to-refresh gesture on iOS Safari using real device or BrowserStack
 - [ ] T048 [US2] Test pull-to-refresh gesture on Chrome Mobile using real device or emulator
 

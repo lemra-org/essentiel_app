@@ -38,7 +38,7 @@ func GetCategories(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http
 				goto fetchFresh
 			}
 
-			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.Header().Set("Cache-Control", "public, max-age=300")
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"categories": categories,
@@ -52,7 +52,7 @@ func GetCategories(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http
 		categories, err := sheetsClient.FetchCategories(r.Context())
 		if err != nil {
 			log.Printf("Error fetching categories: %v", err)
-			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusServiceUnavailable)
 			json.NewEncoder(w).Encode(map[string]string{
 				"error": "Unable to fetch data from source",
@@ -64,7 +64,7 @@ func GetCategories(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http
 		cacheInstance.Set(cacheKey, categories)
 
 		// Return response
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "public, max-age=300")
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"categories": categories,
@@ -103,7 +103,7 @@ func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.
 				goto fetchFresh
 			}
 
-			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.Header().Set("Cache-Control", "public, max-age=300")
 			json.NewEncoder(w).Encode(map[string]interface{}{
 				"questions": questions,
@@ -117,7 +117,7 @@ func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.
 		questions, err := sheetsClient.FetchQuestions(r.Context())
 		if err != nil {
 			log.Printf("Error fetching questions: %v", err)
-			w.Header().Set("Content-Type", "application/json")
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusServiceUnavailable)
 			json.NewEncoder(w).Encode(map[string]string{
 				"error": "Unable to fetch data from source",
@@ -129,7 +129,7 @@ func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.
 		cacheInstance.Set(cacheKey, questions)
 
 		// Return response
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.Header().Set("Cache-Control", "public, max-age=300")
 		json.NewEncoder(w).Encode(map[string]interface{}{
 			"questions": questions,
@@ -140,7 +140,7 @@ func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.
 // Healthz handles GET /healthz (liveness probe)
 func Healthz() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		json.NewEncoder(w).Encode(map[string]string{
 			"status": "healthy",
@@ -154,7 +154,7 @@ func Readyz(sheetsClient sheets.Fetcher) http.HandlerFunc {
 		// Test Google Sheets connectivity by attempting to fetch categories
 		_, err := sheetsClient.FetchCategories(r.Context())
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 		if err != nil {
 			w.WriteHeader(http.StatusServiceUnavailable)

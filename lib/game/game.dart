@@ -226,7 +226,19 @@ class _GameState extends State<Game> {
               padding: const EdgeInsets.all(8.0),
               child: Stack(
                 children: [
-                  if (cardData?.isForFamilies == true)
+                  // Parent-Child takes precedence over Families icon
+                  if (cardData?.isForParentChild == true)
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.topRight,
+                        child: FaIcon(
+                          FontAwesomeIcons.childReaching,
+                          color: const Color(0xFFF06292),
+                          size: 50.0,
+                        ),
+                      ),
+                    )
+                  else if (cardData?.isForFamilies == true)
                     Positioned.fill(
                       child: Align(
                         alignment: Alignment.topRight,
@@ -236,17 +248,6 @@ class _GameState extends State<Game> {
                           height: 60.0,
                           width: 60.0,
                           // colorBlendMode: ,
-                        ),
-                      ),
-                    ),
-                  if (cardData?.isForParentChild == true)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: FaIcon(
-                          FontAwesomeIcons.childReaching,
-                          color: const Color(0xFFF06292),
-                          size: 50.0,
                         ),
                       ),
                     ),

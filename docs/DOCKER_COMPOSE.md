@@ -4,19 +4,20 @@ This guide explains how to run the full Essentiel stack locally using Docker Com
 
 ## Compose Files
 
-The project includes two Docker Compose configurations:
+The project uses Docker Compose's **overlay pattern**:
 
-1. **`compose.yaml`** (Production)
-   - Uses pre-built images from `ghcr.io/lemra-org/*`
-   - For running released versions
-   - Fast startup (no build step)
+- **`compose.yaml`** - Base configuration with all service definitions
+  - Uses pre-built images from `ghcr.io/lemra-org/*`
+  - For production deployment or testing released versions
 
-2. **`compose-dev.yaml`** (Development)
-   - Builds images from local source code
-   - For active development
-   - Reflects your local changes
+- **`compose-dev.yaml`** - Development overlay
+  - Overrides `image` with local `build` instructions
+  - Extends `compose.yaml` (doesn't duplicate config)
+  - For active development with local source code
 
 ## Quick Start (Development)
+
+Build from local source:
 
 ```bash
 # 1. Copy environment template
@@ -26,7 +27,7 @@ cp .env.example .env
 nano .env  # or your favorite editor
 
 # 3. Start all services (builds from source)
-docker compose -f compose-dev.yaml up --build
+docker compose -f compose.yaml -f compose-dev.yaml up --build
 
 # 4. Access the app
 # - Frontend: http://localhost:3000
@@ -36,6 +37,8 @@ docker compose -f compose-dev.yaml up --build
 
 ## Quick Start (Production Images)
 
+Use pre-built images:
+
 ```bash
 # 1. Copy environment template
 cp .env.example .env
@@ -44,7 +47,8 @@ cp .env.example .env
 nano .env
 
 # 3. Pull and start pre-built images
-docker compose up
+docker compose pull
+docker compose up -d
 
 # 4. Access the app
 # - Frontend: http://localhost:3000
@@ -101,29 +105,16 @@ BACKEND_API_URL=http://localhost:8080
 
 ```bash
 # Start services (build from source)
-docker compose -f compose-dev.yaml up --build
+docker compose -f compose.yaml -f compose-dev.yaml up --build
 
 # Start in background
-docker compose -f compose-dev.yaml up -d
-
-# View logs
-docker compose -f compose-dev.yaml logs -f
-
-# View logs for specific service
-docker compose -f compose-dev.yaml logs -f frontend
-docker compose -f compose-dev.yaml logs -f backend-api
+docker compose -f compose.yaml -f compose-dev.yaml up -d
 
 # Rebuild after code changes
-docker compose -f compose-dev.yaml up --build
+docker compose -f compose.yaml -f compose-dev.yaml up --build
 
-# Rebuild specific service
-docker compose -f compose-dev.yaml up --build frontend
-
-# Stop services
-docker compose -f compose-dev.yaml down
-
-# Stop and remove volumes
-docker compose -f compose-dev.yaml down -v
+# Rebuild specific service only
+docker compose -f compose.yaml -f compose-dev.yaml up --build frontend
 ```
 
 ### Production (Pre-built Images)
@@ -131,23 +122,31 @@ docker compose -f compose-dev.yaml down -v
 ```bash
 # Pull and start latest images
 docker compose pull
-docker compose up
-
-# Start in background
 docker compose up -d
 
-# View logs
+# Update to newer images
+docker compose pull
+docker compose up -d
+```
+
+### Common Commands (Both Modes)
+
+```bash
+# View logs (all services)
 docker compose logs -f
+
+# View logs for specific service
+docker compose logs -f frontend
+docker compose logs -f backend-api
+
+# Check service health
+docker compose ps
 
 # Stop services
 docker compose down
-```
 
-### Both Configs
-
-```bash
-# Check service health
-docker compose ps  # or: docker compose -f compose-dev.yaml ps
+# Stop and remove volumes
+docker compose down -v
 
 # Restart a service
 docker compose restart frontend
@@ -164,7 +163,7 @@ docker compose exec frontend sh
 1. Edit files in `lib/`, `web/`, or `pubspec.yaml`
 2. Rebuild frontend:
    ```bash
-   docker compose -f compose-dev.yaml up --build frontend
+   docker compose -f compose.yaml -f compose-dev.yaml up --build frontend
    ```
 3. Refresh browser at http://localhost:3000
 
@@ -173,7 +172,7 @@ docker compose exec frontend sh
 1. Edit files in `backend-api/`
 2. Rebuild backend:
    ```bash
-   docker compose -f compose-dev.yaml up --build backend-api
+   docker compose -f compose.yaml -f compose-dev.yaml up --build backend-api
    ```
 3. Backend restarts automatically
 
@@ -181,10 +180,10 @@ docker compose exec frontend sh
 
 ```bash
 # Use development environment (default)
-BUILD_ENV=dev docker compose -f compose-dev.yaml up --build frontend
+BUILD_ENV=dev docker compose -f compose.yaml -f compose-dev.yaml up --build frontend
 
 # Use production environment
-BUILD_ENV=prod docker compose -f compose-dev.yaml up --build frontend
+BUILD_ENV=prod docker compose -f compose.yaml -f compose-dev.yaml up --build frontend
 ```
 
 ### Testing Production Images Locally
@@ -194,9 +193,9 @@ BUILD_ENV=prod docker compose -f compose-dev.yaml up --build frontend
 docker compose pull
 
 # Run with production images
-docker compose up
+docker compose up -d
 
-# This is useful for testing before deployment
+# Useful for verifying images before deployment
 ```
 
 ## Health Checks
@@ -276,10 +275,10 @@ services:
 **Development:**
 ```bash
 # Remove all containers, volumes, and images
-docker compose -f compose-dev.yaml down -v --rmi all
+docker compose down -v --rmi all
 
 # Rebuild from scratch
-docker compose -f compose-dev.yaml up --build
+docker compose -f compose.yaml -f compose-dev.yaml up --build
 ```
 
 **Production:**
@@ -289,7 +288,7 @@ docker compose down -v
 
 # Pull fresh images
 docker compose pull
-docker compose up
+docker compose up -d
 ```
 
 ## Architecture
@@ -366,8 +365,8 @@ For production deployment on your own server:
 ### 1. Build and Push Images
 
 ```bash
-# Build production images
-docker compose -f compose-dev.yaml build
+# Build production images using dev overlay
+docker compose -f compose.yaml -f compose-dev.yaml build
 
 # Tag for registry
 docker tag essentiel-frontend:dev ghcr.io/lemra-org/essentiel-frontend:latest

@@ -1,31 +1,40 @@
 # Docker Compose Quick Reference
 
-## Two Compose Configurations
+## Compose Files
 
-### `compose.yaml` - Production (Pre-built Images)
+The project uses Docker Compose's **overlay pattern**:
+
+- **`compose.yaml`** - Base configuration (uses pre-built images from ghcr.io)
+- **`compose-dev.yaml`** - Development overlay (builds from local source)
+
+---
+
+## Production (Pre-built Images)
+
 Uses images from `ghcr.io/lemra-org/*`
 
 ```bash
 # Pull and run latest production images
 docker compose pull
-docker compose up
+docker compose up -d
 
 # Access: http://localhost:3000
 ```
 
 **Use when:**
-- Testing production builds locally
-- Running released versions
+- Deploying to production server
+- Testing released versions locally
 - You don't need to modify code
 
 ---
 
-### `compose-dev.yaml` - Development (Build from Source)
-Builds images from your local code
+## Development (Build from Source)
+
+Overlays `compose-dev.yaml` on top of `compose.yaml` to build from local source:
 
 ```bash
 # Build from source and run
-docker compose -f compose-dev.yaml up --build
+docker compose -f compose.yaml -f compose-dev.yaml up --build
 
 # Access: http://localhost:3000
 ```
@@ -41,13 +50,13 @@ docker compose -f compose-dev.yaml up --build
 
 | Task | Command |
 |------|---------|
-| **Dev: Start** | `docker compose -f compose-dev.yaml up --build` |
-| **Dev: Stop** | `docker compose -f compose-dev.yaml down` |
-| **Dev: Logs** | `docker compose -f compose-dev.yaml logs -f` |
-| **Dev: Rebuild** | `docker compose -f compose-dev.yaml up --build` |
-| **Prod: Start** | `docker compose up` |
+| **Dev: Start** | `docker compose -f compose.yaml -f compose-dev.yaml up --build` |
+| **Dev: Stop** | `docker compose down` |
+| **Dev: Logs** | `docker compose logs -f` |
+| **Dev: Rebuild** | `docker compose -f compose.yaml -f compose-dev.yaml up --build` |
+| **Prod: Start** | `docker compose up -d` |
 | **Prod: Stop** | `docker compose down` |
-| **Prod: Update** | `docker compose pull && docker compose up` |
+| **Prod: Update** | `docker compose pull && docker compose up -d` |
 | **Check Status** | `docker compose ps` |
 
 ---

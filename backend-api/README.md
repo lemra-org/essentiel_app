@@ -29,13 +29,16 @@ This service acts as a security boundary between the Essentiel web app and Googl
 - Google Cloud Service Account with Sheets API access
 - Google Sheets spreadsheet with Categories and Questions sheets
 
+**For Flutter Web Development**:
+The Essentiel web app requires this backend API to fetch cards and categories. Before running the Flutter web app, you must start the backend using one of the methods below.
+
 ### Installation
 
 ```bash
 # Install dependencies
 go mod download
 
-# Copy environment template
+# Copy environment template (if starting from scratch)
 cp .env.example .env
 
 # Edit .env with your configuration
@@ -43,17 +46,47 @@ cp .env.example .env
 # - Add Service Account JSON to service-account-dev.json
 ```
 
-### Running Locally
+### Running Locally (for Flutter Web Development)
+
+**Option 1: Standalone Go Server** (Recommended for active development)
 
 ```bash
+# From repository root, navigate to backend-api/
+cd backend-api
+
 # Set Service Account credentials
 export GOOGLE_SERVICE_ACCOUNT_JSON=$(cat service-account-dev.json)
+export GOOGLE_SPREADSHEET_ID=your-spreadsheet-id
 
 # Run the server
 go run cmd/server/main.go
 ```
 
 Server starts on http://localhost:8080
+
+**Option 2: Docker Compose** (Recommended for testing full stack)
+
+```bash
+# From repository root
+# Ensure .env file exists with required variables
+cp .env.example .env
+
+# Edit .env with:
+# - GOOGLE_SERVICE_ACCOUNT_JSON={"type":"service_account",...}
+# - GOOGLE_SPREADSHEET_ID=your-spreadsheet-id
+
+# Start backend + frontend together
+docker compose -f compose.yaml -f compose-dev.yaml up --build
+
+# Backend available at http://localhost:8080/api/*
+# Frontend available at http://localhost:8080
+```
+
+**Integration with Flutter Web**:
+
+When running `flutter run -d chrome`, the Flutter web dev server will attempt to connect to `http://localhost:8080/api/*` endpoints. Ensure the backend is running before starting the Flutter app.
+
+The backend automatically enables CORS for localhost origins (any port) in development mode, so the Flutter dev server (which uses random ports) can connect without issues.
 
 ### Testing
 

@@ -1,0 +1,19 @@
+# Development overlay - extends compose.yaml with local builds
+# Usage: docker compose -f compose.yaml -f compose-dev.yaml up --build
+
+services:
+  # Backend API - override to build from local source
+  backend-api:
+    build:
+      context: ./backend-api
+      dockerfile: Dockerfile
+    image: essentiel-backend-api:dev
+
+  # Frontend - override to build from local source
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        BUILD_ENV: ${BUILD_ENV:-dev}
+    image: essentiel-frontend:dev

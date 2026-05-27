@@ -6,7 +6,7 @@ Cette application est développée et maintenue bénévolement pour la paroisse 
 
 <a href='https://play.google.com/store/apps/details?id=lemrapp.essentiel&hl=fr&gl=FR&pcampaignid=pcampaignidMKT-Other-global-all-co-prtnr-py-PartBadge-Mar2515-1'><img alt='Disponible sur Google Play' src='https://play.google.com/intl/en_us/badges/static/images/badges/fr_badge_web_generic.png' style="height: 97px; width:250px;"/></a>
 
-## Apercu
+## Aperçu
 
 <img src="deployment/google_play/screenshots/phone/screen-0.png" alt="Preview" style="height: 530px; width:212px;"/>
 
@@ -15,6 +15,44 @@ dans le but de faciliter le développement et d'être multi-plateforme.
 
 Les listes de questions et de catégories affichées dans le jeu
 proviennent de la feuille de calcul disponible [ici](https://docs.google.com/spreadsheets/d/1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI/edit#gid=0).
+
+## Application Web
+
+L'application est également disponible en version web, accessible directement depuis votre navigateur sans installation :
+
+**Plateformes supportées:**
+- **Mobile** : iOS Safari 17.2+, Chrome Mobile, Firefox Mobile
+- **Desktop** : Chrome 120+, Firefox 121+, Safari 17.2+, Edge 120+
+- **Tablette** : Optimisé pour les tailles d'écran intermédiaires
+
+**Fonctionnalités:**
+- ✅ Toutes les fonctionnalités de l'application mobile
+- ✅ Responsive design adapté aux mobiles, tablettes et ordinateurs
+- ✅ Support des gestes tactiles sur mobile (swipe, tap, pull-to-refresh)
+- ✅ Support de la souris et du clavier sur desktop
+- ✅ Mode hors ligne avec mise en cache des cartes
+- ✅ Installation en tant que PWA (Progressive Web App)
+
+**Déploiement local:**
+
+Pour tester l'application web en local avec le backend API :
+
+```bash
+# 1. Démarrer les services backend et frontend avec Docker Compose
+docker compose -f compose.yaml -f compose-dev.yaml up --build
+
+# L'application web sera accessible sur http://localhost:8080
+```
+
+**Configuration:**
+- Frontend : Nginx servant l'application Flutter web compilée
+- Backend API : Serveur Go sur port interne, proxyfié par Nginx
+- Redis : Cache pour les données Google Sheets
+
+**Pour les développeurs:**
+- Guide de test web : [docs/testing-web.md](docs/testing-web.md)
+- Documentation backend API : [backend-api/README.md](backend-api/README.md)
+- Configuration environnement : Voir `.env.example` pour les variables requises
 
 ## Services Backend (Docker Compose)
 

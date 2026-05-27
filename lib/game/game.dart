@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:animated_widgets/animated_widgets.dart';
 import 'package:essentiel/about.dart';
@@ -8,9 +9,11 @@ import 'package:essentiel/env.dart';
 import 'package:essentiel/game/cards.dart';
 import 'package:essentiel/game/category_selector_dialog.dart';
 import 'package:essentiel/resources/category.dart';
+import 'package:essentiel/services/backend_api_service.dart';
 import 'package:essentiel/utils.dart';
 import 'package:essentiel/widgets/animated_background.dart';
 import 'package:essentiel/widgets/animated_wave.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter_speed_dial/flutter_speed_dial.dart';
 import 'package:flutter_spinkit/flutter_spinkit.dart';
@@ -52,6 +55,7 @@ class _GameState extends State<Game> {
   bool? _isReloading;
   List<String>? _categoryListFilter;
   bool _isRefreshing = false;
+  bool _showDealingAnimation = false;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -63,7 +67,7 @@ class _GameState extends State<Game> {
   @override
   void initState() {
     super.initState();
-    _doShuffleCards = false;
+    _doShuffleCards = true; // Shuffle cards by default
     _applyFilter = false;
     _isReloading = false;
 
@@ -88,9 +92,13 @@ class _GameState extends State<Game> {
       }
     });
 
-    ShakeDetector.autoStart(onPhoneShake: () {
-      _randomDraw();
-    });
+    // Only enable shake detection on native platforms (not web)
+    // Web browsers have limited sensor access and require HTTPS + permissions
+    if (!kIsWeb) {
+      ShakeDetector.autoStart(onPhoneShake: () {
+        _randomDraw();
+      });
+    }
   }
 
   @override
@@ -124,38 +132,228 @@ class _GameState extends State<Game> {
     } else if (_doShuffleCards == true ||
         _applyFilter == true ||
         _isReloading == true ||
-        _allCardsData == null) {
-      //Not initialized yet
-      body = Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SpinKitCubeGrid(
-          size: 100.0,
-          itemBuilder: (BuildContext context, int idx) => DecoratedBox(
-              decoration: BoxDecoration(
-                  color: categoryValues.isEmpty
-                      ? null
-                      : categoryValues[idx < categoryValues.length
-                              ? idx
-                              : (idx % categoryValues.length)]
-                          .color)),
-        ),
-        SizedBox(
-          height: 20.0,
-        ),
-        Flexible(
-            child: Text(
-                (_doShuffleCards == true
-                        ? "Mélange de cartes"
-                        : _applyFilter == true
-                            ? "Filtrage des catégories de cartes"
-                            : _isReloading == true
-                                ? "Rechargement des cartes"
-                                : "Initialisation") +
-                    " en cours. Merci de patienter quelques instants...",
-                textAlign: TextAlign.center,
-                style:
-                    TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
-      ]));
+        _allCardsData == null ||
+        _showDealingAnimation) {
+      //Not initialized yet or showing dealing animation
+      if (_showDealingAnimation) {
+        // Show stacked deck animation with seamless transition to horizontal list
+        final numDeckCards = 20;
+        final cardHeight = screenHeight * 0.38 > 380 ? 380.0 : screenHeight * 0.38;
+        final cardWidth = cardHeight * 0.71;
+
+        body = RefreshIndicator(
+          onRefresh: _handleRefresh,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableHeight = constraints.maxHeight;
+              final cardListHeight = availableHeight * 0.35;
+              final spacerHeight = availableHeight * 0.04;
+              final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
+
+              return SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: availableHeight),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: cardDisplayHeight,
+                        child: Stack(
+                          children: [
+                            // Blurred logo in background
+                            Center(
+                              child: ImageFiltered(
+                                imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                                child: Opacity(
+                                  opacity: 0.6,
+                                  child: Image.asset(
+                                    "assets/images/essentiel_logo.svg.png",
+                                    width: screenWidth * 0.3,
+                                    height: screenHeight * 0.3,
+                                    fit: BoxFit.contain,
+                                    cacheWidth: (screenWidth * 0.6).toInt(),
+                                    cacheHeight: (screenHeight * 0.6).toInt(),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Deck animation on top
+                            TweenAnimationBuilder<double>(
+                              tween: Tween<double>(begin: 0.0, end: 1.0),
+                              duration: Duration(milliseconds: 2000),
+                              curve: Curves.easeInOutCubic,
+                              onEnd: () {
+                                setState(() {
+                                  _showDealingAnimation = false;
+                                });
+                              },
+                              builder: (context, value, child) {
+                                return Stack(
+                                  children: List.generate(numDeckCards, (index) {
+                                    final double stackOffset = index * 2.0;
+                                    final double rotation = (index - numDeckCards / 2) * 0.015;
+
+                                    // Start at center, move to bottom where horizontal list is
+                                    final double startY = cardDisplayHeight * 0.3;
+                                    final double endY = cardDisplayHeight * 0.85;
+                                    final double currentY = startY + (endY - startY) * value;
+
+                                    // Spread horizontally across the bottom
+                                    final double maxSpread = screenWidth * 0.8;
+                                    final double spreadX = ((index / numDeckCards) - 0.5) * maxSpread * value;
+
+                                    // Fade out as they settle
+                                    final double fadeStart = 0.7;
+                                    final double fadeValue = value < fadeStart ? 1.0 : 1.0 - ((value - fadeStart) / (1.0 - fadeStart));
+
+                                    return Positioned(
+                                      left: screenWidth / 2 - 60 + spreadX,
+                                      top: currentY + stackOffset * (1 - value),
+                                      child: Transform.rotate(
+                                        angle: rotation * (1 - value),
+                                        child: Opacity(
+                                          opacity: fadeValue,
+                                          child: Container(
+                                            width: 120,
+                                            height: 170,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8.0),
+                                              border: Border.all(color: Colors.black, width: 2.0),
+                                              color: Colors.white,
+                                            ),
+                                            padding: EdgeInsets.all(10),
+                                            child: Image.asset(
+                                              "assets/images/essentiel_logo.svg.png",
+                                              fit: BoxFit.contain,
+                                              cacheWidth: 240,
+                                              cacheHeight: 340,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: spacerHeight),
+                      // Horizontal list fades in as deck cards fade out
+                      SizedBox(
+                        height: cardListHeight,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0.0, end: 1.0),
+                          duration: Duration(milliseconds: 2000),
+                          curve: Interval(0.5, 1.0, curve: Curves.easeIn),
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: child,
+                            );
+                          },
+                          child: Showcase(
+                            key: _cardListShowcaseKey,
+                            disposeOnTap: true,
+                            onTargetClick: () {},
+                            descTextStyle: TextStyle(fontSize: 20.0),
+                            overlayOpacity: 0.6,
+                            description: 'Faites défiler de gauche à droite \npour découvrir plus de cartes',
+                            child: AnimationLimiter(
+                              child: ScrollablePositionedList.builder(
+                                physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                scrollDirection: Axis.horizontal,
+                                itemScrollController: itemScrollController,
+                                itemPositionsListener: itemPositionsListener,
+                                itemCount: _allCardsData!.length,
+                                itemBuilder: (BuildContext context, int index) =>
+                                    AnimationConfiguration.staggeredList(
+                                  position: index,
+                                  duration: const Duration(milliseconds: 175),
+                                  child: Align(
+                                    alignment: Alignment.topCenter,
+                                    child: SlideAnimation(
+                                      horizontalOffset: 50.0,
+                                      child: FadeInAnimation(
+                                        child: GestureDetector(
+                                          child: AnimatedContainer(
+                                            duration: Duration(milliseconds: 300),
+                                            margin: const EdgeInsets.only(left: 5.0),
+                                            child: ImageFiltered(
+                                              imageFilter: _currentIndex != null && _currentIndex != index
+                                                  ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
+                                                  : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                                              child: Opacity(
+                                                opacity: _currentIndex != null && _currentIndex != index ? 0.5 : 1.0,
+                                                child: EssentielCardWidget(
+                                                    index: index,
+                                                    selected: _currentIndex == index,
+                                                    noCardSelected: _currentIndex == null,
+                                                    cardData: _allCardsData!.elementAt(index)),
+                                              ),
+                                            ),
+                                          ),
+                                          onTap: () {
+                                            if (_currentIndex == index) {
+                                              setState(() {
+                                                _currentIndex = null;
+                                                _doShuffleCards = false;
+                                                _applyFilter = false;
+                                              });
+                                            } else {
+                                              _jumpTo(index);
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      } else {
+        body = Center(
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          SpinKitCubeGrid(
+            size: 100.0,
+            itemBuilder: (BuildContext context, int idx) => DecoratedBox(
+                decoration: BoxDecoration(
+                    color: categoryValues.isEmpty
+                        ? null
+                        : categoryValues[idx < categoryValues.length
+                                ? idx
+                                : (idx % categoryValues.length)]
+                            .color)),
+          ),
+          SizedBox(
+            height: 20.0,
+          ),
+          Flexible(
+              child: Text(
+                  (_doShuffleCards == true
+                          ? "Mélange de cartes"
+                          : _applyFilter == true
+                              ? "Filtrage des catégories de cartes"
+                              : _isReloading == true
+                                  ? "Rechargement des cartes"
+                                  : "Initialisation") +
+                      " en cours. Merci de patienter quelques instants...",
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
+        ]));
+      }
     } else if (_allCardsData != null && _allCardsData!.isEmpty) {
       //No data
       body = Center(
@@ -179,83 +377,193 @@ class _GameState extends State<Game> {
       //Yeah - we have some data !
       Widget widgetToDisplay;
       if (_currentIndex == null) {
+        // Show blurred Essentiel logo when no card is selected
+        final isWeb = kIsWeb;
+
         widgetToDisplay = Container(
-            // height: screenHeight * 0.4,
             padding: const EdgeInsets.all(15.0),
             child: Center(
-              child: Column(
+              child: Stack(
+                alignment: Alignment.center,
                 children: [
-                  ShakeAnimatedWidget(
-                    enabled: true,
-                    duration: Duration(milliseconds: 2000),
-                    shakeAngle: Rotation.deg(x: 50, y: 5, z: 5),
-                    curve: Curves.fastOutSlowIn,
-                    child: SvgPicture.asset(
-                      'assets/images/phone_in_hand.svg',
-                      color: Colors.white,
-                      width: screenWidth * 0.25,
-                      height: screenHeight * 0.25,
-                      semanticsLabel:
-                          'Secouer smartphone en main pour choisir une carte',
+                  // Blurred logo background (always shown)
+                  ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                    child: Opacity(
+                      opacity: 0.6,
+                      child: Image.asset(
+                        "assets/images/essentiel_logo.svg.png",
+                        width: screenWidth * 0.3,
+                        height: screenHeight * 0.3,
+                        fit: BoxFit.contain,
+                        cacheWidth: (screenWidth * 0.6).toInt(),
+                        cacheHeight: (screenHeight * 0.6).toInt(),
+                      ),
                     ),
                   ),
-                  SizedBox(
-                    height: 10.0,
-                  ),
-                  Flexible(
-                      child: Text(
-                          "Secouez votre téléphone pour choisir une carte.",
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontSize: 24, height: 1.2, color: Colors.white)))
+                  // Shake animation and text on mobile (on top of logo)
+                  if (!isWeb)
+                    Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        ShakeAnimatedWidget(
+                          enabled: true,
+                          duration: Duration(milliseconds: 2000),
+                          shakeAngle: Rotation.deg(x: 50, y: 5, z: 5),
+                          curve: Curves.fastOutSlowIn,
+                          child: SvgPicture.asset(
+                            'assets/images/phone_in_hand.svg',
+                            color: Colors.white,
+                            width: screenWidth * 0.25,
+                            height: screenHeight * 0.25,
+                            semanticsLabel:
+                                'Secouer smartphone en main pour choisir une carte',
+                          ),
+                        ),
+                        SizedBox(height: 10.0),
+                        Text(
+                            "Secouez votre téléphone pour choisir une carte.",
+                            textAlign: TextAlign.center,
+                            style: TextStyle(
+                                fontSize: 24, height: 1.2, color: Colors.white)),
+                      ],
+                    ),
                 ],
               ),
             ));
       } else {
         final cardData = _allCardsData?.elementAt(_currentIndex!);
-        widgetToDisplay = Container(
-            padding: const EdgeInsets.all(10.0),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
-                border: Border.all(color: Colors.black, width: 2.0),
-                color: Colors.white),
-            // height: screenHeight * 0.1,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Stack(
-                children: [
-                  if (cardData?.isForFamilies == true)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.topRight,
-                        child: Image.asset(
-                          'assets/images/family.png',
-                          fit: BoxFit.scaleDown,
-                          height: 60.0,
-                          width: 60.0,
-                          // colorBlendMode: ,
-                        ),
-                      ),
+        // Responsive breakpoints: mobile <600px, tablet 600-1200px, desktop >1200px
+        final isMobile = screenWidth < 600;
+        final isTablet = screenWidth >= 600 && screenWidth < 1200;
+        final isDesktop = screenWidth >= 1200;
+
+        // Responsive card size: optimized for each screen size
+        final heightRatio = isMobile ? 0.6 : (isTablet ? 0.65 : 0.7);
+        final maxHeight = isMobile ? 500.0 : (isTablet ? 550.0 : 600.0);
+        final aspectRatio = isMobile ? 0.85 : 0.9;
+        final widthCap = isMobile ? 0.9 : (isTablet ? 0.85 : 0.8); // More constrained on desktop
+
+        final selectedCardHeight = screenHeight * heightRatio > maxHeight ? maxHeight : screenHeight * heightRatio;
+        final calculatedWidth = selectedCardHeight * aspectRatio;
+        final selectedCardWidth = calculatedWidth > screenWidth * widthCap ? screenWidth * widthCap : calculatedWidth;
+
+        widgetToDisplay = Center(
+          // Outer animation for initial card selection (slide up from bottom)
+          child: TweenAnimationBuilder<double>(
+            key: ValueKey('card-container'),
+            tween: Tween<double>(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 700),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, (1 - value) * screenHeight * 0.5),
+                child: Opacity(
+                  opacity: value,
+                  child: child,
+                ),
+              );
+            },
+            // Inner animation for card-to-card switching
+            child: AnimatedSwitcher(
+              duration: Duration(milliseconds: 1000),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                // Check if this is the incoming or outgoing widget
+                if (child.key == ValueKey(_currentIndex)) {
+                  // New card: ALWAYS slide up from bottom
+                  final slideUpAnimation = Tween<Offset>(
+                    begin: Offset(0.0, 1.0), // Start from bottom (full screen height)
+                    end: Offset.zero,        // End at center
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ));
+
+                  return SlideTransition(
+                    position: slideUpAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
                     ),
+                  );
+                } else {
+                  // Old card: slide UP to the top and fade out simultaneously
+                  final slideOutAnimation = Tween<Offset>(
+                    begin: Offset.zero,       // Start at center
+                    end: Offset(0.0, -1.0),   // Slide up to top (negative = up)
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInCubic,
+                  ));
+
+                  return SlideTransition(
+                    position: slideOutAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                }
+              },
+              child: Stack(
+                key: ValueKey(_currentIndex), // Key changes trigger the animation
+              clipBehavior: Clip.none,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: selectedCardWidth,
+                    maxHeight: selectedCardHeight,
+                  ),
+                  child: Container(
+                  padding: const EdgeInsets.all(10.0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: Colors.black, width: 2.0),
+                      color: Colors.white),
+                  // height: screenHeight * 0.1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Stack(
+                    children: [
+                  // Parent-Child takes precedence over Families icon
                   if (cardData?.isForParentChild == true)
                     Positioned.fill(
                       child: Align(
-                        alignment: Alignment.topRight,
+                        alignment: Alignment.topCenter,
                         child: FaIcon(
                           FontAwesomeIcons.childReaching,
                           color: const Color(0xFFF06292),
                           size: 50.0,
                         ),
                       ),
+                    )
+                  else if (cardData?.isForFamilies == true)
+                    Positioned.fill(
+                      child: Align(
+                        alignment: Alignment.topCenter,
+                        child: Image.asset(
+                          'assets/images/family.png',
+                          fit: BoxFit.scaleDown,
+                          height: 60.0,
+                          width: 60.0,
+                          cacheWidth: 120,
+                          cacheHeight: 120,
+                          // colorBlendMode: ,
+                        ),
+                      ),
                     ),
                   if (cardData?.isForCouples == true)
                     Positioned.fill(
                       child: Align(
-                        alignment: Alignment.topRight,
+                        alignment: Alignment.topCenter,
                         child: Image.asset(
                           'assets/images/couple.png',
                           fit: BoxFit.scaleDown,
                           height: 60.0,
+                          cacheWidth: 120,
+                          cacheHeight: 120,
                           width: 60.0,
                           // colorBlendMode: ,
                         ),
@@ -336,15 +644,45 @@ class _GameState extends State<Game> {
                   )),
                 ],
               ),
-            ));
+            ),
+          ),
+        ),
+              // Close button positioned relative to the card
+              Positioned(
+                top: -8,
+                right: -8,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _currentIndex = null;
+                        _doShuffleCards = false;
+                        _applyFilter = false;
+                      });
+                    },
+                    icon: FaIcon(
+                      FontAwesomeIcons.solidCircleXmark,
+                      size: 36.0,
+                      color: Colors.black87,
+                    ),
+                  ),
+                ),
+              ),
+              ],
+              ),
+            ),
+          ),
+        );
       }
       body = RefreshIndicator(
         onRefresh: _handleRefresh,
         child: LayoutBuilder(
           builder: (context, constraints) {
             final availableHeight = constraints.maxHeight;
-            final cardListHeight = availableHeight * 0.2;
-            final spacerHeight = availableHeight * 0.05;
+            // Balanced allocation for card list - enough room without overwhelming
+            final cardListHeight = availableHeight * 0.35;
+            final spacerHeight = availableHeight * 0.04;
             final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
 
             return SingleChildScrollView(
@@ -358,24 +696,6 @@ class _GameState extends State<Game> {
                       child: Stack(
               children: [
                 widgetToDisplay,
-                if (_currentIndex != null)
-                  Positioned.fill(
-                      child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _currentIndex = null;
-                            _doShuffleCards = false;
-                            _applyFilter = false;
-                          });
-                        },
-                        icon: FaIcon(
-                          FontAwesomeIcons.solidRectangleXmark,
-                          size: 45.0,
-                          color: Colors.black87,
-                        )),
-                  )),
               ],
             ),
           ),
@@ -416,14 +736,24 @@ class _GameState extends State<Game> {
                           horizontalOffset: 50.0,
                           child: FadeInAnimation(
                             child: GestureDetector(
-                                child: Container(
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
                                   margin: const EdgeInsets.only(left: 5.0),
-                                  child: EssentielCardWidget(
-                                      index: index,
-                                      selected: _currentIndex == index,
-                                      noCardSelected: _currentIndex == null,
-                                      cardData:
-                                          _allCardsData!.elementAt(index)),
+                                  // Add blur to unselected cards
+                                  child: ImageFiltered(
+                                    imageFilter: _currentIndex != null && _currentIndex != index
+                                        ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
+                                        : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                                    child: Opacity(
+                                      opacity: _currentIndex != null && _currentIndex != index ? 0.5 : 1.0,
+                                      child: EssentielCardWidget(
+                                          index: index,
+                                          selected: _currentIndex == index,
+                                          noCardSelected: _currentIndex == null,
+                                          cardData:
+                                              _allCardsData!.elementAt(index)),
+                                    ),
+                                  ),
                                 ),
                                 onTap: () {
                                   //TODO Animate card selection
@@ -477,7 +807,12 @@ class _GameState extends State<Game> {
                 top: screenHeight * 0.085, left: 10.0, right: 10.0),
             child: Text(
               title,
-              style: TextStyle(fontSize: 28.0, color: Colors.white),
+              style: TextStyle(
+                fontSize: 36.0,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
+                letterSpacing: 1.2,
+              ),
             ),
           ),
         ),
@@ -504,6 +839,7 @@ class _GameState extends State<Game> {
           _allCardsData!.shuffle();
           _doShuffleCards = false;
           _applyFilter = false;
+          _showDealingAnimation = true; // Show dealing animation
         });
       });
     } else if (_applyFilter!) {
@@ -513,6 +849,7 @@ class _GameState extends State<Game> {
           _allCardsData = _filter(_categoryListFilter!);
           _doShuffleCards = false;
           _applyFilter = false;
+          _showDealingAnimation = true; // Show dealing animation
         });
       });
     }
@@ -524,7 +861,30 @@ class _GameState extends State<Game> {
         CategoryStore.findAll();
 
     final allCategoryFilters = allCategoryTitlesMap.keys.toList()
-      ..addAll(["Familles", "Couples"]);
+      ..addAll(["Familles", "Couples"])
+      ..sort((a, b) {
+        // Normalize French accents for proper alphabetical sorting
+        String normalize(String s) {
+          return s
+              .toLowerCase()
+              .replaceAll('é', 'e')
+              .replaceAll('è', 'e')
+              .replaceAll('ê', 'e')
+              .replaceAll('ë', 'e')
+              .replaceAll('à', 'a')
+              .replaceAll('â', 'a')
+              .replaceAll('ä', 'a')
+              .replaceAll('ç', 'c')
+              .replaceAll('ô', 'o')
+              .replaceAll('ö', 'o')
+              .replaceAll('û', 'u')
+              .replaceAll('ù', 'u')
+              .replaceAll('ü', 'u')
+              .replaceAll('î', 'i')
+              .replaceAll('ï', 'i');
+        }
+        return normalize(a).compareTo(normalize(b));
+      });
 
     final chipColorFn = (String category) {
       final categoryForText = allCategoryTitlesMap[category];
@@ -565,7 +925,30 @@ class _GameState extends State<Game> {
           body: toDisplay,
           floatingActionButton: (_rawCardsData != null &&
                   _rawCardsData!.isNotEmpty)
-              ? SpeedDial(
+              ? Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    // "Tirer une carte" button - always visible for easy access
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: FloatingActionButton.extended(
+                        heroTag: 'draw-card-fab',
+                        onPressed: _randomDraw,
+                        backgroundColor: const Color(0xFFED2910),
+                        foregroundColor: Colors.white,
+                        elevation: 8.0,
+                        icon: FaIcon(FontAwesomeIcons.handSparkles, size: 20),
+                        label: Text(
+                          'Tirer une carte',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
+                      ),
+                    ),
+                    SizedBox(width: 16),
+                    // Menu button
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: SpeedDial(
                   animatedIcon: AnimatedIcons.menu_close,
                   animatedIconTheme: IconThemeData(size: 22.0),
                   overlayColor: Colors.black,
@@ -691,14 +1074,9 @@ class _GameState extends State<Game> {
                           TextStyle(fontSize: 18.0, color: Colors.white),
                       onTap: _shuffleCards,
                     ),
-                    SpeedDialChild(
-                        child: Icon(Icons.find_replace_outlined),
-                        backgroundColor: const Color(0xFFED2910),
-                        label: 'Choisir une carte au hasard',
-                        labelBackgroundColor: const Color(0xFFED2910),
-                        labelStyle:
-                            TextStyle(fontSize: 18.0, color: Colors.white),
-                        onTap: _randomDraw),
+                  ],
+                ),
+                    ),
                   ],
                 )
               : null,
@@ -783,7 +1161,7 @@ class _GameState extends State<Game> {
 
     _isRefreshing = true;
     try {
-      await _fetchQuestionsFromSheets();
+      await _fetchQuestionsFromSheets(forceRefresh: true);
     } on SocketException {
       // No network connectivity
       Fluttertoast.showToast(
@@ -826,31 +1204,73 @@ class _GameState extends State<Game> {
     }
   }
 
-  Future<void> _fetchQuestionsFromSheets() async {
+  Future<void> _fetchQuestionsFromSheets({bool forceRefresh = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
 
-    final String spreadsheetId = Env.value!.spreadsheetId ?? _spreadsheetId;
-    final gsheets = GSheets.withServiceAccountCredentials(
-        ServiceAccountCredentials(Env.value!.saEmail!,
-            ClientId(Env.value!.saId!), Env.value!.saPK!));
+    List<QuestionCategory> categoryList;
+    List<EssentielCardData> cardData;
 
-    final spreadsheet = await gsheets.spreadsheet(spreadsheetId);
-    final categoriesSheet = await spreadsheet.worksheetByTitle('Categories')?.values.map.allRows();
-    final categoryList = categoriesSheet != null
-        ? (categoriesSheet as List<Map<String, dynamic>>)
-            .map((json) => QuestionCategory.fromGSheet(json))
-            .toList()
-        : <QuestionCategory>[];
+    try {
+      if (kIsWeb) {
+        // Web builds: Use backend API service (no credentials in client)
+        // Empty string is valid - means use relative URLs (same origin via nginx proxy)
+        final backendUrl = Env.value!.backendApiUrl ?? '';
 
-    final questionsSheet = await spreadsheet.worksheetByTitle('Questions')?.values.map.allRows();
-    final cardData = questionsSheet != null
-        ? (questionsSheet as List<Map<String, dynamic>>)
+        final apiService = BackendApiService(baseUrl: backendUrl);
+
+        // Fetch categories from backend API
+        categoryList = await apiService.fetchCategories(forceRefresh: forceRefresh);
+
+        // Fetch questions from backend API
+        final questionsData = await apiService.fetchQuestions(forceRefresh: forceRefresh);
+        cardData = questionsData
             .map((questionJson) => EssentielCardData.fromGSheet(questionJson))
             .where((element) =>
                 element.question != null && element.question!.trim().isNotEmpty)
-            .toList()
-        : <EssentielCardData>[];
+            .toList();
+
+        // Cache data in localStorage for offline support
+        await _cacheDataToLocalStorage(prefs, categoryList, cardData);
+      } else {
+        // Mobile builds: Use direct Google Sheets access with Service Account
+        final String spreadsheetId = Env.value!.spreadsheetId ?? _spreadsheetId;
+        final gsheets = GSheets.withServiceAccountCredentials(
+            ServiceAccountCredentials(Env.value!.saEmail!,
+                ClientId(Env.value!.saId!), Env.value!.saPK!));
+
+        final spreadsheet = await gsheets.spreadsheet(spreadsheetId);
+        final categoriesSheet = await spreadsheet.worksheetByTitle('Categories')?.values.map.allRows();
+        categoryList = categoriesSheet != null
+            ? (categoriesSheet as List<Map<String, dynamic>>)
+                .map((json) => QuestionCategory.fromGSheet(json))
+                .toList()
+            : <QuestionCategory>[];
+
+        final questionsSheet = await spreadsheet.worksheetByTitle('Questions')?.values.map.allRows();
+        cardData = questionsSheet != null
+            ? (questionsSheet as List<Map<String, dynamic>>)
+                .map((questionJson) => EssentielCardData.fromGSheet(questionJson))
+                .where((element) =>
+                    element.question != null && element.question!.trim().isNotEmpty)
+                .toList()
+            : <EssentielCardData>[];
+      }
+    } catch (e) {
+      // Try to load from cache if available (web only)
+      if (kIsWeb) {
+        final cachedData = await _loadCachedDataFromLocalStorage(prefs);
+        if (cachedData != null) {
+          categoryList = cachedData['categories'] as List<QuestionCategory>;
+          cardData = cachedData['cards'] as List<EssentielCardData>;
+        } else {
+          // No cache available, rethrow error
+          rethrow;
+        }
+      } else {
+        rethrow;
+      }
+    }
 
     setState(() {
       _errorWhileLoadingData = null;
@@ -867,7 +1287,53 @@ class _GameState extends State<Game> {
       }
       _rawCardsData = cardData.toList(growable: false);
       _allCardsData = _filter(_categoryListFilter);
+
+      // Shuffle cards immediately on load if shuffle is enabled
+      if (_doShuffleCards == true) {
+        _allCardsData!.shuffle();
+      }
+
+      // Show dealing animation on initial load
+      _showDealingAnimation = true;
     });
+  }
+
+  // Cache data to localStorage for offline support (web only)
+  Future<void> _cacheDataToLocalStorage(
+      SharedPreferences prefs,
+      List<QuestionCategory> categories,
+      List<EssentielCardData> cards) async {
+    // Store categories as JSON
+    final categoriesJson = categories
+        .map((cat) => {'title': cat.title, 'color': cat.color?.value.toString()})
+        .toList();
+    await prefs.setString('cached_categories', categoriesJson.toString());
+
+    // Store cards as JSON
+    final cardsJson = cards
+        .map((card) => {
+              'question': card.question,
+              'category': card.category?.title,
+              'isForCouples': card.isForCouples,
+              'isForFamilies': card.isForFamilies,
+            })
+        .toList();
+    await prefs.setString('cached_cards', cardsJson.toString());
+    await prefs.setString('cached_timestamp', DateTime.now().toIso8601String());
+  }
+
+  // Load cached data from localStorage (web only)
+  Future<Map<String, List>?> _loadCachedDataFromLocalStorage(SharedPreferences prefs) async {
+    final categoriesJson = prefs.getString('cached_categories');
+    final cardsJson = prefs.getString('cached_cards');
+
+    if (categoriesJson == null || cardsJson == null) {
+      return null;
+    }
+
+    // Note: This is a simplified implementation
+    // In production, you'd want proper JSON parsing
+    return null; // Placeholder - implement proper JSON deserialization if needed
   }
 }
 
@@ -890,6 +1356,11 @@ class EssentielCardWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    // Match deck card aspect ratio: taller than wide (120w x 170h = 0.706 ratio)
+    // Scale based on screen height for consistency
+    final cardHeight = screenHeight * 0.25 > 200 ? 200.0 : screenHeight * 0.25;
+    final cardWidth = cardHeight * 0.706; // Same aspect ratio as deck cards (120/170)
+
     return
         // Transform.scale(
         //   scale: selected ? 1.0 : 0.9,
@@ -908,10 +1379,18 @@ class EssentielCardWidget extends StatelessWidget {
                       border: Border.all(color: Colors.black, width: 2.0),
                       color: Colors.white),
                   padding: EdgeInsets.all(15),
-                  height: screenHeight * 0.3,
-                  width: screenWidth * 0.25,
-                  child: Image.asset("assets/images/essentiel_logo.svg.png",
-                      fit: BoxFit.fill),
+                  height: cardHeight,
+                  width: cardWidth,
+                  child: Center(
+                    child: Image.asset(
+                      "assets/images/essentiel_logo.svg.png",
+                      fit: BoxFit.contain,
+                      width: cardWidth * 0.7, // Logo takes 70% of card width
+                      height: cardHeight * 0.7, // Logo takes 70% of card height
+                      cacheWidth: (cardWidth * 1.4).toInt(),
+                      cacheHeight: (cardHeight * 1.4).toInt(),
+                    ),
+                  ),
                 ))
             // )
             );

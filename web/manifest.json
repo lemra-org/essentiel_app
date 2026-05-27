@@ -1,0 +1,25 @@
+{
+    "name": "Essentiel - Questions pour Partages",
+    "short_name": "Essentiel",
+    "start_url": "/essentiel_app/",
+    "display": "standalone",
+    "background_color": "#FFFFFF",
+    "theme_color": "#009688",
+    "description": "Jeu de cartes de questions pour groupes de partage Essentiel",
+    "orientation": "portrait-primary",
+    "prefer_related_applications": false,
+    "icons": [
+        {
+            "src": "icons/icon-192.png",
+            "sizes": "192x192",
+            "type": "image/png",
+            "purpose": "any maskable"
+        },
+        {
+            "src": "icons/icon-512.png",
+            "sizes": "512x512",
+            "type": "image/png",
+            "purpose": "any maskable"
+        }
+    ]
+}

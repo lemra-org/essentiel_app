@@ -1,4 +1,8 @@
+# Production Docker Compose - uses pre-built images from ghcr.io
+# For local development, use: docker compose -f compose-dev.yaml up
+
 services:
+  # Redis cache for backend
   redis:
     image: redis:7-alpine
     command: redis-server --loglevel verbose
@@ -13,6 +17,7 @@ services:
     networks:
       - essentiel-network
 
+  # Backend API (Go) - uses pre-built image
   backend-api:
     image: ${BACKEND_API_IMAGE:-ghcr.io/lemra-org/essentiel-backend-api:latest}
     ports:
@@ -21,19 +26,33 @@ services:
       - PORT=8080
       - GOOGLE_SERVICE_ACCOUNT_JSON=${GOOGLE_SERVICE_ACCOUNT_JSON}
       - GOOGLE_SPREADSHEET_ID=${GOOGLE_SPREADSHEET_ID}
-      - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-https://lemra-org.github.io}
+      - ALLOWED_ORIGIN=${ALLOWED_ORIGIN:-http://localhost:3000}
       - CACHE_TTL_MINUTES=${CACHE_TTL_MINUTES:-5}
       - REDIS_ADDR=${REDIS_ADDR:-redis:6379}
     restart: unless-stopped
     depends_on:
       redis:
         condition: service_healthy
+    networks:
+      - essentiel-network
+
+  # Frontend (Flutter web) - uses pre-built image
+  frontend:
+    image: ${FRONTEND_IMAGE:-ghcr.io/lemra-org/essentiel-frontend:latest}
+    ports:
+      - "3000:80"
+    environment:
+      - BACKEND_URL=${BACKEND_URL:-http://backend-api:8080}
+    restart: unless-stopped
+    depends_on:
+      backend-api:
+        condition: service_started
     healthcheck:
-      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:8080/healthz"]
-      interval: 15s
-      timeout: 5s
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 3s
       retries: 3
-      start_period: 10s
+      start_period: 5s
     networks:
       - essentiel-network
 

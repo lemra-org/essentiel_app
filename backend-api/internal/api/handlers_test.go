@@ -53,8 +53,8 @@ func TestGetCategories_Success(t *testing.T) {
 	}
 
 	contentType := w.Header().Get("Content-Type")
-	if contentType != "application/json" {
-		t.Errorf("Expected Content-Type application/json, got %s", contentType)
+	if contentType != "application/json; charset=utf-8" {
+		t.Errorf("Expected Content-Type application/json; charset=utf-8, got %s", contentType)
 	}
 
 	cacheControl := w.Header().Get("Cache-Control")
@@ -127,8 +127,8 @@ func TestGetCategories_Error(t *testing.T) {
 	}
 
 	contentType := w.Header().Get("Content-Type")
-	if contentType != "application/json" {
-		t.Errorf("Expected Content-Type application/json, got %s", contentType)
+	if contentType != "application/json; charset=utf-8" {
+		t.Errorf("Expected Content-Type application/json; charset=utf-8, got %s", contentType)
 	}
 
 	var response map[string]string

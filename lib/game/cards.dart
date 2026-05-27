@@ -50,24 +50,39 @@ class _EssentielCardState extends State<EssentielCard> {
   @override
   Widget build(BuildContext context) {
     final screenHeight = MediaQuery.of(context).size.height;
-    return FlipCard(
-      onFlip: this.widget.onFlip,
-      front: Container(
-        decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(8.0),
-            border: Border.all(color: Colors.black, width: 2.0),
-            color: Colors.white),
-        padding: EdgeInsets.all(18),
-        height: screenHeight * 0.3,
-        child: Image.asset("assets/images/essentiel_logo.svg.png",
-            fit: BoxFit.fill),
+    final screenWidth = MediaQuery.of(context).size.width;
+
+    // Cards for horizontal list: balanced size with good spacing around logo
+    // Maintain playing card aspect ratio (roughly 2.5:3.5 or 0.71)
+    final cardHeight = screenHeight * 0.38 > 380 ? 380.0 : screenHeight * 0.38;
+    final cardWidth = cardHeight * 0.71;
+
+    return ConstrainedBox(
+      constraints: BoxConstraints(
+        maxWidth: cardWidth,
+        maxHeight: cardHeight,
       ),
-      back: Container(
+      child: FlipCard(
+        onFlip: this.widget.onFlip,
+        front: Container(
           decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(8.0),
               border: Border.all(color: Colors.black, width: 2.0),
               color: Colors.white),
-          height: screenHeight * 0.3,
+          padding: EdgeInsets.all(18),
+          height: cardHeight,
+          width: cardWidth,
+          child: Image.asset("assets/images/essentiel_logo.svg.png",
+              fit: BoxFit.fill,
+              cacheWidth: (cardWidth * 2).toInt()),
+        ),
+        back: Container(
+            decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8.0),
+                border: Border.all(color: Colors.black, width: 2.0),
+                color: Colors.white),
+            height: cardHeight,
+            width: cardWidth,
           child: Padding(
             padding: const EdgeInsets.all(8.0),
             child: Stack(
@@ -100,6 +115,7 @@ class _EssentielCardState extends State<EssentielCard> {
               ],
             ),
           )),
+      ),
     );
   }
 }

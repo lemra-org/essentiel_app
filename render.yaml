@@ -29,7 +29,10 @@ services:
       - key: GOOGLE_SPREADSHEET_ID
         sync: false  # Set in Render dashboard (secret)
       - key: ALLOWED_ORIGIN
-        value: https://essentiel-frontend.onrender.com  # Update after frontend deployed
+        fromService:
+          type: web
+          name: essentiel-frontend
+          envVarKey: RENDER_EXTERNAL_URL
       - key: CACHE_TTL_MINUTES
         value: 5
       - key: REDIS_ADDR
@@ -49,15 +52,14 @@ services:
     dockerContext: ./
     plan: starter
     healthCheckPath: /healthz
-    dockerCommand: nginx -g 'daemon off;'
     envVars:
       - key: BUILD_ENV
         value: prod
-      - key: BACKEND_API_URL
+      - key: BACKEND_URL
         fromService:
           type: web
           name: essentiel-backend-api
-          envVarKey: RENDER_EXTERNAL_URL
+          envVarKey: RENDER_INTERNAL_URL
     # Preview environments for PRs
     previewsEnabled: true
     previewsExpireAfterDays: 7

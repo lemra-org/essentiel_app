@@ -7,7 +7,11 @@ void main() {
 class WebDev extends Env {
   // Web builds use backend API instead of direct Google Sheets access
   // Backend API handles Service Account credentials server-side
-  final String backendApiUrl = 'http://localhost:8080';
+  //
+  // Uses relative URL (empty string) to call same origin
+  // nginx proxies /api/* requests to the backend service
+  // This works both in docker-compose and when testing locally
+  final String backendApiUrl = '';
 
   // Service Account credentials not needed for web builds
   // (backend API handles authentication)

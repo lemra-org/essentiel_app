@@ -7,10 +7,10 @@ void main() {
 class WebProd extends Env {
   // Web builds use backend API instead of direct Google Sheets access
   // Backend API handles Service Account credentials server-side
-  // Production backend URL (to be deployed to one of these URLs)
-  final String backendApiUrl = 'https://api.essentiel.app';
-
-  // Alternative production URL: 'https://api.essentiel.soro.io'
+  //
+  // Uses relative URL (empty string) to call same origin
+  // nginx proxies /api/* requests to the backend service
+  final String backendApiUrl = '';
 
   // Service Account credentials not needed for web builds
   // (backend API handles authentication)

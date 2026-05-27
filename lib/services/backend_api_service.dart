@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 import 'package:http/http.dart' as http;
 import 'package:essentiel/resources/category.dart';
 
@@ -26,7 +27,8 @@ class BackendApiService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        // Explicitly decode as UTF-8 to handle French accents correctly
+        final data = json.decode(utf8.decode(response.bodyBytes));
         final categoriesJson = data['categories'] as List;
 
         // Convert API response to QuestionCategory objects
@@ -68,7 +70,8 @@ class BackendApiService {
       );
 
       if (response.statusCode == 200) {
-        final data = json.decode(response.body);
+        // Explicitly decode as UTF-8 to handle French accents correctly
+        final data = json.decode(utf8.decode(response.bodyBytes));
         final questionsJson = data['questions'] as List;
 
         // Convert API response to format compatible with EssentielCardData.fromGSheet

@@ -65,7 +65,7 @@ class _GameState extends State<Game> {
   @override
   void initState() {
     super.initState();
-    _doShuffleCards = false;
+    _doShuffleCards = true; // Shuffle cards by default
     _applyFilter = false;
     _isReloading = false;
 
@@ -527,7 +527,30 @@ class _GameState extends State<Game> {
         CategoryStore.findAll();
 
     final allCategoryFilters = allCategoryTitlesMap.keys.toList()
-      ..addAll(["Familles", "Couples"]);
+      ..addAll(["Familles", "Couples"])
+      ..sort((a, b) {
+        // Normalize French accents for proper alphabetical sorting
+        String normalize(String s) {
+          return s
+              .toLowerCase()
+              .replaceAll('é', 'e')
+              .replaceAll('è', 'e')
+              .replaceAll('ê', 'e')
+              .replaceAll('ë', 'e')
+              .replaceAll('à', 'a')
+              .replaceAll('â', 'a')
+              .replaceAll('ä', 'a')
+              .replaceAll('ç', 'c')
+              .replaceAll('ô', 'o')
+              .replaceAll('ö', 'o')
+              .replaceAll('û', 'u')
+              .replaceAll('ù', 'u')
+              .replaceAll('ü', 'u')
+              .replaceAll('î', 'i')
+              .replaceAll('ï', 'i');
+        }
+        return normalize(a).compareTo(normalize(b));
+      });
 
     final chipColorFn = (String category) {
       final categoryForText = allCategoryTitlesMap[category];
@@ -912,6 +935,11 @@ class _GameState extends State<Game> {
       }
       _rawCardsData = cardData.toList(growable: false);
       _allCardsData = _filter(_categoryListFilter);
+
+      // Shuffle cards immediately on load if shuffle is enabled
+      if (_doShuffleCards == true) {
+        _allCardsData!.shuffle();
+      }
     });
   }
 

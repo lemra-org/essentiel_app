@@ -39,41 +39,104 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: widget.title,
-      content: Wrap(
-        spacing: 8.0,
-        runSpacing: 8.0,
-        children: widget.all!.map((element) {
-          final isSelected = selectedItems?.contains(element) ?? false;
-          return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (selectedItems != null &&
-                        selectedItems!.contains(element)) {
-                      selectedItems!.remove(element);
-                    } else {
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          // Select All / Deselect All action buttons
+          Container(
+            padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[100],
+              borderRadius: BorderRadius.circular(8.0),
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
                       if (selectedItems == null) {
                         selectedItems = LinkedHashSet();
                       }
-                      selectedItems!.add(element);
-                    }
-                  });
-                },
-                child: Chip(
-                  backgroundColor: widget.textBackgroundColorProvider != null
-                      ? widget.textBackgroundColorProvider!(element, isSelected)
-                      : null,
+                      selectedItems!.clear();
+                      selectedItems!.addAll(widget.all!);
+                    });
+                  },
+                  icon: Icon(Icons.check_box, size: 20.0),
                   label: Text(
-                    element,
-                    style: TextStyle(
-                      fontSize: 20.0,
-                      color: widget.textColorProvider != null
-                          ? widget.textColorProvider!(element, isSelected)
-                          : null,
-                    ),
+                    'Toutes',
+                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.green[700],
                   ),
                 ),
-              );
-        }).toList(),
+                Container(
+                  width: 1.0,
+                  height: 24.0,
+                  color: Colors.grey[300],
+                ),
+                TextButton.icon(
+                  onPressed: () {
+                    setState(() {
+                      if (selectedItems == null) {
+                        selectedItems = LinkedHashSet();
+                      }
+                      selectedItems!.clear();
+                    });
+                  },
+                  icon: Icon(Icons.clear, size: 20.0),
+                  label: Text(
+                    'Aucune',
+                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                  ),
+                  style: TextButton.styleFrom(
+                    foregroundColor: Colors.red[700],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          SizedBox(height: 16.0),
+          // Category chips
+          Wrap(
+            spacing: 8.0,
+            runSpacing: 8.0,
+            children: widget.all!.map((element) {
+              final isSelected = selectedItems?.contains(element) ?? false;
+              return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (selectedItems != null &&
+                            selectedItems!.contains(element)) {
+                          selectedItems!.remove(element);
+                        } else {
+                          if (selectedItems == null) {
+                            selectedItems = LinkedHashSet();
+                          }
+                          selectedItems!.add(element);
+                        }
+                      });
+                    },
+                    child: Chip(
+                      backgroundColor: widget.textBackgroundColorProvider != null
+                          ? widget.textBackgroundColorProvider!(element, isSelected)
+                          : null,
+                      label: Text(
+                        element,
+                        style: TextStyle(
+                          fontSize: 20.0,
+                          color: widget.textColorProvider != null
+                              ? widget.textColorProvider!(element, isSelected)
+                              : null,
+                        ),
+                      ),
+                    ),
+                  );
+            }).toList(),
+          ),
+        ],
       ),
       actions: [
         TextButton(
@@ -134,7 +197,11 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
   @override
   void initState() {
     super.initState();
-    this.selectedItems =
-        widget.selected != null ? LinkedHashSet.of(widget.selected!) : null;
+    // If no selection is provided, select all by default
+    if (widget.selected != null) {
+      this.selectedItems = LinkedHashSet.of(widget.selected!);
+    } else {
+      this.selectedItems = LinkedHashSet.of(widget.all!);
+    }
   }
 }

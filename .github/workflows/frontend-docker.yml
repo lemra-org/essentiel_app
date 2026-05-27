@@ -1,17 +1,27 @@
-name: Backend API - Build and Push Docker Image
+name: Frontend - Build and Push Docker Image
 
 on:
   push:
     branches: [main]
     paths:
-      - 'backend-api/**'
+      - 'lib/**'
+      - 'web/**'
+      - 'pubspec.yaml'
+      - 'Dockerfile'
+      - 'nginx.conf'
+      - '.dockerignore'
       - 'compose.yaml'
       - 'compose-dev.yaml'
-      - '.github/workflows/backend-docker.yml'
+      - '.github/workflows/frontend-docker.yml'
   pull_request:
     branches: [main]
     paths:
-      - 'backend-api/**'
+      - 'lib/**'
+      - 'web/**'
+      - 'pubspec.yaml'
+      - 'Dockerfile'
+      - 'nginx.conf'
+      - '.dockerignore'
       - 'compose.yaml'
       - 'compose-dev.yaml'
   release:
@@ -19,7 +29,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository_owner }}/essentiel-backend-api
+  IMAGE_NAME: ${{ github.repository_owner }}/essentiel-frontend
 
 jobs:
   build-and-push:
@@ -61,8 +71,10 @@ jobs:
         id: build-push
         uses: docker/build-push-action@v5
         with:
-          context: ./backend-api
-          file: ./backend-api/Dockerfile
+          context: .
+          file: ./Dockerfile
+          build-args: |
+            BUILD_ENV=prod
           push: ${{ github.event_name != 'pull_request' }}
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}

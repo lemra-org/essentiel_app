@@ -36,6 +36,7 @@ func NewClient(ctx context.Context, serviceAccountJSON string, spreadsheetID str
 }
 
 // FetchCategories reads the Categories sheet and returns parsed Category objects
+// Expected columns: Catégorie, Couleur
 func (c *Client) FetchCategories(ctx context.Context) ([]Category, error) {
 	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Categories!A:B").Context(ctx).Do()
 	if err != nil {
@@ -46,21 +47,42 @@ func (c *Client) FetchCategories(ctx context.Context) ([]Category, error) {
 		return []Category{}, nil
 	}
 
+	// Parse header row to find column indices
+	headers := resp.Values[0]
+	categoryCol := -1
+	colorCol := -1
+
+	for i, header := range headers {
+		h := toString(header)
+		if h == "Catégorie" || h == "Category" {
+			categoryCol = i
+		} else if h == "Couleur" || h == "Color" {
+			colorCol = i
+		}
+	}
+
+	if categoryCol == -1 {
+		// Fallback: assume first column is category
+		categoryCol = 0
+	}
+	if colorCol == -1 {
+		// Fallback: assume second column is color
+		colorCol = 1
+	}
+
 	categories := make([]Category, 0, len(resp.Values)-1)
 	seen := make(map[string]bool)
 
 	for i, row := range resp.Values {
 		if i == 0 {
+			continue // Skip header row
+		}
+
+		if len(row) <= categoryCol {
 			continue
 		}
 
-		if len(row) < 2 {
-			continue
-		}
-
-		name := toString(row[0])
-		color := toString(row[1])
-
+		name := toString(row[categoryCol])
 		if name == "" {
 			continue
 		}
@@ -70,8 +92,16 @@ func (c *Client) FetchCategories(ctx context.Context) ([]Category, error) {
 		}
 		seen[name] = true
 
-		if !isValidHexColor(color) {
-			color = "#009688"
+		color := "#009688" // Default teal
+		if len(row) > colorCol {
+			colorValue := toString(row[colorCol])
+			// Add # prefix if missing
+			if colorValue != "" && !strings.HasPrefix(colorValue, "#") {
+				colorValue = "#" + colorValue
+			}
+			if isValidHexColor(colorValue) {
+				color = colorValue
+			}
 		}
 
 		categories = append(categories, Category{

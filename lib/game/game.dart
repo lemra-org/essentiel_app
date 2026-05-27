@@ -838,10 +838,8 @@ class _GameState extends State<Game> {
     try {
       if (kIsWeb) {
         // Web builds: Use backend API service (no credentials in client)
-        final backendUrl = Env.value!.backendApiUrl;
-        if (backendUrl == null || backendUrl.isEmpty) {
-          throw Exception('Backend API URL not configured for web build');
-        }
+        // Empty string is valid - means use relative URLs (same origin via nginx proxy)
+        final backendUrl = Env.value!.backendApiUrl ?? '';
 
         final apiService = BackendApiService(baseUrl: backendUrl);
 

@@ -55,6 +55,7 @@ class _GameState extends State<Game> {
   bool? _isReloading;
   List<String>? _categoryListFilter;
   bool _isRefreshing = false;
+  bool _showDealingAnimation = false;
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -131,38 +132,224 @@ class _GameState extends State<Game> {
     } else if (_doShuffleCards == true ||
         _applyFilter == true ||
         _isReloading == true ||
-        _allCardsData == null) {
-      //Not initialized yet
-      body = Center(
-          child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
-        SpinKitCubeGrid(
-          size: 100.0,
-          itemBuilder: (BuildContext context, int idx) => DecoratedBox(
-              decoration: BoxDecoration(
-                  color: categoryValues.isEmpty
-                      ? null
-                      : categoryValues[idx < categoryValues.length
-                              ? idx
-                              : (idx % categoryValues.length)]
-                          .color)),
-        ),
-        SizedBox(
-          height: 20.0,
-        ),
-        Flexible(
-            child: Text(
-                (_doShuffleCards == true
-                        ? "Mélange de cartes"
-                        : _applyFilter == true
-                            ? "Filtrage des catégories de cartes"
-                            : _isReloading == true
-                                ? "Rechargement des cartes"
-                                : "Initialisation") +
-                    " en cours. Merci de patienter quelques instants...",
-                textAlign: TextAlign.center,
-                style:
-                    TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
-      ]));
+        _allCardsData == null ||
+        _showDealingAnimation) {
+      //Not initialized yet or showing dealing animation
+      if (_showDealingAnimation) {
+        // Show stacked deck animation with seamless transition to horizontal list
+        final numDeckCards = 20;
+        final cardHeight = screenHeight * 0.38 > 380 ? 380.0 : screenHeight * 0.38;
+        final cardWidth = cardHeight * 0.71;
+
+        body = RefreshIndicator(
+          onRefresh: _handleRefresh,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final availableHeight = constraints.maxHeight;
+              final cardListHeight = availableHeight * 0.35;
+              final spacerHeight = availableHeight * 0.04;
+              final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
+
+              return SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: availableHeight),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: cardDisplayHeight,
+                        child: Stack(
+                          children: [
+                            // Blurred logo in background
+                            Center(
+                              child: ImageFiltered(
+                                imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                                child: Opacity(
+                                  opacity: 0.6,
+                                  child: Image.asset(
+                                    "assets/images/essentiel_logo.svg.png",
+                                    width: screenWidth * 0.3,
+                                    height: screenHeight * 0.3,
+                                    fit: BoxFit.contain,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            // Deck animation on top
+                            TweenAnimationBuilder<double>(
+                              tween: Tween<double>(begin: 0.0, end: 1.0),
+                              duration: Duration(milliseconds: 2000),
+                              curve: Curves.easeInOutCubic,
+                              onEnd: () {
+                                setState(() {
+                                  _showDealingAnimation = false;
+                                });
+                              },
+                              builder: (context, value, child) {
+                                return Stack(
+                                  children: List.generate(numDeckCards, (index) {
+                                    final double stackOffset = index * 2.0;
+                                    final double rotation = (index - numDeckCards / 2) * 0.015;
+
+                                    // Start at center, move to bottom where horizontal list is
+                                    final double startY = cardDisplayHeight * 0.3;
+                                    final double endY = cardDisplayHeight * 0.85;
+                                    final double currentY = startY + (endY - startY) * value;
+
+                                    // Spread horizontally across the bottom
+                                    final double maxSpread = screenWidth * 0.8;
+                                    final double spreadX = ((index / numDeckCards) - 0.5) * maxSpread * value;
+
+                                    // Fade out as they settle
+                                    final double fadeStart = 0.7;
+                                    final double fadeValue = value < fadeStart ? 1.0 : 1.0 - ((value - fadeStart) / (1.0 - fadeStart));
+
+                                    return Positioned(
+                                      left: screenWidth / 2 - 60 + spreadX,
+                                      top: currentY + stackOffset * (1 - value),
+                                      child: Transform.rotate(
+                                        angle: rotation * (1 - value),
+                                        child: Opacity(
+                                          opacity: fadeValue,
+                                          child: Container(
+                                            width: 120,
+                                            height: 170,
+                                            decoration: BoxDecoration(
+                                              borderRadius: BorderRadius.circular(8.0),
+                                              border: Border.all(color: Colors.black, width: 2.0),
+                                              color: Colors.white,
+                                            ),
+                                            padding: EdgeInsets.all(10),
+                                            child: Image.asset(
+                                              "assets/images/essentiel_logo.svg.png",
+                                              fit: BoxFit.contain,
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  }),
+                                );
+                              },
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(height: spacerHeight),
+                      // Horizontal list fades in as deck cards fade out
+                      SizedBox(
+                        height: cardListHeight,
+                        child: TweenAnimationBuilder<double>(
+                          tween: Tween<double>(begin: 0.0, end: 1.0),
+                          duration: Duration(milliseconds: 2000),
+                          curve: Interval(0.5, 1.0, curve: Curves.easeIn),
+                          builder: (context, value, child) {
+                            return Opacity(
+                              opacity: value,
+                              child: child,
+                            );
+                          },
+                          child: Showcase(
+                            key: _cardListShowcaseKey,
+                            disposeOnTap: true,
+                            onTargetClick: () {},
+                            descTextStyle: TextStyle(fontSize: 20.0),
+                            overlayOpacity: 0.6,
+                            description: 'Faites défiler de gauche à droite \npour découvrir plus de cartes',
+                            child: AnimationLimiter(
+                              child: ScrollablePositionedList.builder(
+                                physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                scrollDirection: Axis.horizontal,
+                                itemScrollController: itemScrollController,
+                                itemPositionsListener: itemPositionsListener,
+                                itemCount: _allCardsData!.length,
+                                itemBuilder: (BuildContext context, int index) =>
+                                    AnimationConfiguration.staggeredList(
+                                  position: index,
+                                  duration: const Duration(milliseconds: 175),
+                                  child: Align(
+                                    alignment: Alignment.topCenter,
+                                    child: SlideAnimation(
+                                      horizontalOffset: 50.0,
+                                      child: FadeInAnimation(
+                                        child: GestureDetector(
+                                          child: AnimatedContainer(
+                                            duration: Duration(milliseconds: 300),
+                                            margin: const EdgeInsets.only(left: 5.0),
+                                            child: ImageFiltered(
+                                              imageFilter: _currentIndex != null && _currentIndex != index
+                                                  ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
+                                                  : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                                              child: Opacity(
+                                                opacity: _currentIndex != null && _currentIndex != index ? 0.5 : 1.0,
+                                                child: EssentielCardWidget(
+                                                    index: index,
+                                                    selected: _currentIndex == index,
+                                                    noCardSelected: _currentIndex == null,
+                                                    cardData: _allCardsData!.elementAt(index)),
+                                              ),
+                                            ),
+                                          ),
+                                          onTap: () {
+                                            if (_currentIndex == index) {
+                                              setState(() {
+                                                _currentIndex = null;
+                                                _doShuffleCards = false;
+                                                _applyFilter = false;
+                                              });
+                                            } else {
+                                              _jumpTo(index);
+                                            }
+                                          },
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            },
+          ),
+        );
+      } else {
+        body = Center(
+            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+          SpinKitCubeGrid(
+            size: 100.0,
+            itemBuilder: (BuildContext context, int idx) => DecoratedBox(
+                decoration: BoxDecoration(
+                    color: categoryValues.isEmpty
+                        ? null
+                        : categoryValues[idx < categoryValues.length
+                                ? idx
+                                : (idx % categoryValues.length)]
+                            .color)),
+          ),
+          SizedBox(
+            height: 20.0,
+          ),
+          Flexible(
+              child: Text(
+                  (_doShuffleCards == true
+                          ? "Mélange de cartes"
+                          : _applyFilter == true
+                              ? "Filtrage des catégories de cartes"
+                              : _isReloading == true
+                                  ? "Rechargement des cartes"
+                                  : "Initialisation") +
+                      " en cours. Merci de patienter quelques instants...",
+                  textAlign: TextAlign.center,
+                  style:
+                      TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
+        ]));
+      }
     } else if (_allCardsData != null && _allCardsData!.isEmpty) {
       //No data
       body = Center(
@@ -635,6 +822,7 @@ class _GameState extends State<Game> {
           _allCardsData!.shuffle();
           _doShuffleCards = false;
           _applyFilter = false;
+          _showDealingAnimation = true; // Show dealing animation
         });
       });
     } else if (_applyFilter!) {
@@ -644,6 +832,7 @@ class _GameState extends State<Game> {
           _allCardsData = _filter(_categoryListFilter!);
           _doShuffleCards = false;
           _applyFilter = false;
+          _showDealingAnimation = true; // Show dealing animation
         });
       });
     }
@@ -1080,6 +1269,9 @@ class _GameState extends State<Game> {
       if (_doShuffleCards == true) {
         _allCardsData!.shuffle();
       }
+
+      // Show dealing animation on initial load
+      _showDealingAnimation = true;
     });
   }
 
@@ -1141,6 +1333,11 @@ class EssentielCardWidget extends StatelessWidget {
     final screenWidth = MediaQuery.of(context).size.width;
     final screenHeight = MediaQuery.of(context).size.height;
 
+    // Match deck card aspect ratio: taller than wide (120w x 170h = 0.706 ratio)
+    // Scale based on screen height for consistency
+    final cardHeight = screenHeight * 0.25 > 200 ? 200.0 : screenHeight * 0.25;
+    final cardWidth = cardHeight * 0.706; // Same aspect ratio as deck cards (120/170)
+
     return
         // Transform.scale(
         //   scale: selected ? 1.0 : 0.9,
@@ -1159,10 +1356,16 @@ class EssentielCardWidget extends StatelessWidget {
                       border: Border.all(color: Colors.black, width: 2.0),
                       color: Colors.white),
                   padding: EdgeInsets.all(15),
-                  height: screenHeight * 0.3,
-                  width: screenWidth * 0.25,
-                  child: Image.asset("assets/images/essentiel_logo.svg.png",
-                      fit: BoxFit.fill),
+                  height: cardHeight,
+                  width: cardWidth,
+                  child: Center(
+                    child: Image.asset(
+                      "assets/images/essentiel_logo.svg.png",
+                      fit: BoxFit.contain,
+                      width: cardWidth * 0.7, // Logo takes 70% of card width
+                      height: cardHeight * 0.7, // Logo takes 70% of card height
+                    ),
+                  ),
                 ))
             // )
             );

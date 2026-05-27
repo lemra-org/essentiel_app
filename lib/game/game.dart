@@ -830,7 +830,7 @@ class _GameState extends State<Game> {
 
     _isRefreshing = true;
     try {
-      await _fetchQuestionsFromSheets();
+      await _fetchQuestionsFromSheets(forceRefresh: true);
     } on SocketException {
       // No network connectivity
       Fluttertoast.showToast(
@@ -873,7 +873,7 @@ class _GameState extends State<Game> {
     }
   }
 
-  Future<void> _fetchQuestionsFromSheets() async {
+  Future<void> _fetchQuestionsFromSheets({bool forceRefresh = false}) async {
     final prefs = await SharedPreferences.getInstance();
     final categoryListFilter = prefs.getStringList(CATEGORY_FILTER_PREF_KEY);
 
@@ -889,10 +889,10 @@ class _GameState extends State<Game> {
         final apiService = BackendApiService(baseUrl: backendUrl);
 
         // Fetch categories from backend API
-        categoryList = await apiService.fetchCategories();
+        categoryList = await apiService.fetchCategories(forceRefresh: forceRefresh);
 
         // Fetch questions from backend API
-        final questionsData = await apiService.fetchQuestions();
+        final questionsData = await apiService.fetchQuestions(forceRefresh: forceRefresh);
         cardData = questionsData
             .map((questionJson) => EssentielCardData.fromGSheet(questionJson))
             .where((element) =>

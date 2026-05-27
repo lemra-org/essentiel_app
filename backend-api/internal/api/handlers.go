@@ -14,8 +14,12 @@ func GetCategories(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http
 	return func(w http.ResponseWriter, r *http.Request) {
 		const cacheKey = "categories"
 
-		// Check cache first
-		if cached, found := cacheInstance.Get(cacheKey); found {
+		// Check if refresh is requested (bypass cache)
+		forceRefresh := r.URL.Query().Get("refresh") == "true"
+
+		// Check cache first (unless refresh is forced)
+		if !forceRefresh {
+			if cached, found := cacheInstance.Get(cacheKey); found {
 			var categories []sheets.Category
 
 			// Handle both in-memory cache ([]sheets.Category) and Redis ([]interface{})
@@ -38,12 +42,13 @@ func GetCategories(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http
 				goto fetchFresh
 			}
 
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.Header().Set("Cache-Control", "public, max-age=300")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"categories": categories,
-			})
-			return
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
+				w.Header().Set("Cache-Control", "public, max-age=300")
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"categories": categories,
+				})
+				return
+			}
 		}
 
 	fetchFresh:
@@ -77,8 +82,12 @@ func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.
 	return func(w http.ResponseWriter, r *http.Request) {
 		const cacheKey = "questions"
 
-		// Check cache first
-		if cached, found := cacheInstance.Get(cacheKey); found {
+		// Check if refresh is requested (bypass cache)
+		forceRefresh := r.URL.Query().Get("refresh") == "true"
+
+		// Check cache first (unless refresh is forced)
+		if !forceRefresh {
+			if cached, found := cacheInstance.Get(cacheKey); found {
 			var questions []sheets.Question
 
 			// Handle both in-memory cache ([]sheets.Question) and Redis ([]interface{})
@@ -103,12 +112,13 @@ func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.
 				goto fetchFresh
 			}
 
-			w.Header().Set("Content-Type", "application/json; charset=utf-8")
-			w.Header().Set("Cache-Control", "public, max-age=300")
-			json.NewEncoder(w).Encode(map[string]interface{}{
-				"questions": questions,
-			})
-			return
+				w.Header().Set("Content-Type", "application/json; charset=utf-8")
+				w.Header().Set("Cache-Control", "public, max-age=300")
+				json.NewEncoder(w).Encode(map[string]interface{}{
+					"questions": questions,
+				})
+				return
+			}
 		}
 
 	fetchFresh:

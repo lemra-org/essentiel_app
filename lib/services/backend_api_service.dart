@@ -12,10 +12,16 @@ class BackendApiService {
 
   /// Fetch all categories from the backend API
   /// Returns a list of QuestionCategory objects
-  Future<List<QuestionCategory>> fetchCategories() async {
+  /// Set [forceRefresh] to true to bypass cache and fetch fresh data from spreadsheet
+  Future<List<QuestionCategory>> fetchCategories({bool forceRefresh = false}) async {
     try {
+      final uri = Uri.parse('$baseUrl/api/categories');
+      final uriWithParams = forceRefresh
+        ? uri.replace(queryParameters: {'refresh': 'true'})
+        : uri;
+
       final response = await http.get(
-        Uri.parse('$baseUrl/api/categories'),
+        uriWithParams,
         headers: {'Content-Type': 'application/json'},
       );
 
@@ -48,10 +54,16 @@ class BackendApiService {
   /// Fetch all questions from the backend API
   /// Returns a list of question data as Maps
   /// Note: The API does not return forParentChild - it must be derived client-side
-  Future<List<Map<String, dynamic>>> fetchQuestions() async {
+  /// Set [forceRefresh] to true to bypass cache and fetch fresh data from spreadsheet
+  Future<List<Map<String, dynamic>>> fetchQuestions({bool forceRefresh = false}) async {
     try {
+      final uri = Uri.parse('$baseUrl/api/questions');
+      final uriWithParams = forceRefresh
+        ? uri.replace(queryParameters: {'refresh': 'true'})
+        : uri;
+
       final response = await http.get(
-        Uri.parse('$baseUrl/api/questions'),
+        uriWithParams,
         headers: {'Content-Type': 'application/json'},
       );
 

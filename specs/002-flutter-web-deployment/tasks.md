@@ -147,20 +147,20 @@ Flutter project structure:
 
 ### Desktop Layout Adaptation for User Story 3
 
-- [ ] T054 [US3] Implement responsive breakpoints using MediaQuery.sizeOf in lib/game/game.dart (mobile <600px, tablet 600-1200px, desktop >1200px)
-- [ ] T055 [US3] Add ConstrainedBox with max width constraint for card container on screens >1200px in lib/game/game.dart
-- [ ] T056 [US3] Center card container on large screens using Center widget in lib/game/game.dart
-- [ ] T057 [US3] Test layout at 1920x1080 (Full HD) - verify no excessive whitespace, readable text
-- [ ] T058 [US3] Test layout at 2560x1440 (2K) - verify content scales appropriately
-- [ ] T059 [US3] Test layout at 3840x2160 (4K) - verify content constraints prevent excessive stretching
+- [X] T054 [US3] Implement responsive breakpoints using MediaQuery.sizeOf in lib/game/game.dart (mobile <600px, tablet 600-1200px, desktop >1200px)
+- [X] T055 [US3] Add ConstrainedBox with max width constraint for card container on screens >1200px in lib/game/game.dart
+- [X] T056 [US3] Center card container on large screens using Center widget in lib/game/game.dart
+- [X] T057 [US3] Test layout at 1920x1080 (Full HD) - verify no excessive whitespace, readable text
+- [X] T058 [US3] Test layout at 2560x1440 (2K) - verify content scales appropriately
+- [X] T059 [US3] Test layout at 3840x2160 (4K) - verify content constraints prevent excessive stretching
 
 ### Mouse Interaction for User Story 3
 
-- [ ] T060 [P] [US3] Add hover states to speed dial menu items using MouseRegion in lib/widgets/ or lib/game/
-- [ ] T061 [P] [US3] Add hover state to shuffle button using MouseRegion
-- [ ] T062 [P] [US3] Add cursor: pointer indicators for interactive elements using MouseRegion
-- [ ] T063 [US3] Verify mouse click interactions work for all buttons and menu items
-- [ ] T064 [US3] Test keyboard navigation using Tab, Enter, Escape, and Space keys for accessibility
+- [X] T060 [P] [US3] Add hover states to speed dial menu items using MouseRegion in lib/widgets/ or lib/game/
+- [X] T061 [P] [US3] Add hover state to shuffle button using MouseRegion
+- [X] T062 [P] [US3] Add cursor: pointer indicators for interactive elements using MouseRegion
+- [X] T063 [US3] Verify mouse click interactions work for all buttons and menu items
+- [X] T064 [US3] Test keyboard navigation using Tab, Enter, Escape, and Space keys for accessibility
 
 ### Desktop Browser Testing for User Story 3
 
@@ -201,14 +201,14 @@ Flutter project structure:
 
 ### Documentation Updates
 
-- [ ] T082 [P] Update README.md with web deployment section including live URL and browser compatibility
-- [ ] T083 [P] Add web testing instructions to project documentation
-- [ ] T084 [P] Document backend API dependency and setup instructions for developers
+- [X] T082 [P] Update README.md with web deployment section including live URL and browser compatibility
+- [X] T083 [P] Add web testing instructions to project documentation (docs/testing-web.md)
+- [X] T084 [P] Document backend API dependency and setup instructions for developers (backend-api/README.md)
 
 ### Performance Optimization
 
-- [ ] T085 [P] Run `flutter build web --analyze-size` and verify total bundle size <2MB
-- [ ] T086 [P] Optimize image assets using cacheWidth/cacheHeight parameters in lib/widgets/
+- [X] T085 [P] Run bundle size check and verify total bundle size <2MB (note: --analyze-size not available in Flutter 3.22.3)
+- [X] T086 [P] Optimize image assets using cacheWidth/cacheHeight parameters in lib/ (about.dart, cards.dart, game.dart)
 - [ ] T087 Run Lighthouse audit on deployed site and verify scores ≥90 for Performance, Accessibility, Best Practices, SEO
 - [ ] T088 Verify Core Web Vitals pass thresholds (LCP <2.5s, FID <100ms, CLS <0.1)
 

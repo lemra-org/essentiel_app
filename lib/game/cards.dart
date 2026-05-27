@@ -73,7 +73,8 @@ class _EssentielCardState extends State<EssentielCard> {
           height: cardHeight,
           width: cardWidth,
           child: Image.asset("assets/images/essentiel_logo.svg.png",
-              fit: BoxFit.fill),
+              fit: BoxFit.fill,
+              cacheWidth: (cardWidth * 2).toInt()),
         ),
         back: Container(
             decoration: BoxDecoration(

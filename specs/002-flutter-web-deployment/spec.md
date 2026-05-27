@@ -122,7 +122,7 @@ No new entities are introduced by this feature. The web app uses the same data m
 ### Session 2026-05-27
 
 - Q: Should the Flutter web app derive `forParentChild` client-side, or should we modify the backend to include it? → A: Keep backend as-is: web app derives `forParentChild` by checking if category == "Parent - Enfant" (matches current backend implementation)
-- Q: What is the current deployment status of the backend API? → A: Backend code exists but NOT yet deployed remotely - use localhost for development (port 8080), production deployment URL TBD. Docker Compose option available for running both frontend and backend together locally.
-- Q: Which approach should be documented as the primary development workflow? → A: Flutter web dev server connects to localhost:8080 backend (developer runs backend separately with `go run`)
-- Q: What CORS configuration should the backend use for local development? → A: Allow all localhost origins (`http://localhost:*`) in development mode - Flutter can use any port
+- Q: What is the current deployment status of the backend API? → A: Backend code exists AND is now merged into main branch with full implementation. Use localhost for development (port 8080), production deployment to https://api.essentiel.app or https://api.essentiel.soro.io. Docker Compose available for running both frontend and backend together locally.
+- Q: Which approach should be documented as the primary development workflow? → A: Two workflows supported: (1) Flutter web dev server connects to localhost:8080 backend (developer runs backend separately with `go run`), (2) Docker Compose runs both frontend and backend together
+- Q: What CORS configuration should the backend use for local development? → A: Backend already implements CORS middleware allowing all localhost origins (`http://localhost:*`) in development mode
 - Q: Can the Flutter web app be deployed to GitHub Pages before the backend has a production URL? → A: Backend will be deployed to https://api.essentiel.app or https://api.essentiel.soro.io

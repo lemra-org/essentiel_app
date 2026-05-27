@@ -171,6 +171,8 @@ class _GameState extends State<Game> {
                                     width: screenWidth * 0.3,
                                     height: screenHeight * 0.3,
                                     fit: BoxFit.contain,
+                                    cacheWidth: (screenWidth * 0.6).toInt(),
+                                    cacheHeight: (screenHeight * 0.6).toInt(),
                                   ),
                                 ),
                               ),
@@ -223,6 +225,8 @@ class _GameState extends State<Game> {
                                             child: Image.asset(
                                               "assets/images/essentiel_logo.svg.png",
                                               fit: BoxFit.contain,
+                                              cacheWidth: 240,
+                                              cacheHeight: 340,
                                             ),
                                           ),
                                         ),
@@ -392,6 +396,8 @@ class _GameState extends State<Game> {
                         width: screenWidth * 0.3,
                         height: screenHeight * 0.3,
                         fit: BoxFit.contain,
+                        cacheWidth: (screenWidth * 0.6).toInt(),
+                        cacheHeight: (screenHeight * 0.6).toInt(),
                       ),
                     ),
                   ),
@@ -427,12 +433,16 @@ class _GameState extends State<Game> {
             ));
       } else {
         final cardData = _allCardsData?.elementAt(_currentIndex!);
-        // Responsive card size: larger on desktop, more conservative on mobile
+        // Responsive breakpoints: mobile <600px, tablet 600-1200px, desktop >1200px
         final isMobile = screenWidth < 600;
-        final heightRatio = isMobile ? 0.6 : 0.7;
-        final maxHeight = isMobile ? 500.0 : 600.0;
+        final isTablet = screenWidth >= 600 && screenWidth < 1200;
+        final isDesktop = screenWidth >= 1200;
+
+        // Responsive card size: optimized for each screen size
+        final heightRatio = isMobile ? 0.6 : (isTablet ? 0.65 : 0.7);
+        final maxHeight = isMobile ? 500.0 : (isTablet ? 550.0 : 600.0);
         final aspectRatio = isMobile ? 0.85 : 0.9;
-        final widthCap = isMobile ? 0.9 : 0.95;
+        final widthCap = isMobile ? 0.9 : (isTablet ? 0.85 : 0.8); // More constrained on desktop
 
         final selectedCardHeight = screenHeight * heightRatio > maxHeight ? maxHeight : screenHeight * heightRatio;
         final calculatedWidth = selectedCardHeight * aspectRatio;
@@ -538,6 +548,8 @@ class _GameState extends State<Game> {
                           fit: BoxFit.scaleDown,
                           height: 60.0,
                           width: 60.0,
+                          cacheWidth: 120,
+                          cacheHeight: 120,
                           // colorBlendMode: ,
                         ),
                       ),
@@ -550,6 +562,8 @@ class _GameState extends State<Game> {
                           'assets/images/couple.png',
                           fit: BoxFit.scaleDown,
                           height: 60.0,
+                          cacheWidth: 120,
+                          cacheHeight: 120,
                           width: 60.0,
                           // colorBlendMode: ,
                         ),
@@ -637,18 +651,21 @@ class _GameState extends State<Game> {
               Positioned(
                 top: -8,
                 right: -8,
-                child: IconButton(
-                  onPressed: () {
-                    setState(() {
-                      _currentIndex = null;
-                      _doShuffleCards = false;
-                      _applyFilter = false;
-                    });
-                  },
-                  icon: FaIcon(
-                    FontAwesomeIcons.solidCircleXmark,
-                    size: 36.0,
-                    color: Colors.black87,
+                child: MouseRegion(
+                  cursor: SystemMouseCursors.click,
+                  child: IconButton(
+                    onPressed: () {
+                      setState(() {
+                        _currentIndex = null;
+                        _doShuffleCards = false;
+                        _applyFilter = false;
+                      });
+                    },
+                    icon: FaIcon(
+                      FontAwesomeIcons.solidCircleXmark,
+                      size: 36.0,
+                      color: Colors.black87,
+                    ),
                   ),
                 ),
               ),
@@ -912,21 +929,26 @@ class _GameState extends State<Game> {
                   mainAxisAlignment: MainAxisAlignment.end,
                   children: [
                     // "Tirer une carte" button - always visible for easy access
-                    FloatingActionButton.extended(
-                      heroTag: 'draw-card-fab',
-                      onPressed: _randomDraw,
-                      backgroundColor: const Color(0xFFED2910),
-                      foregroundColor: Colors.white,
-                      elevation: 8.0,
-                      icon: FaIcon(FontAwesomeIcons.handSparkles, size: 20),
-                      label: Text(
-                        'Tirer une carte',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: FloatingActionButton.extended(
+                        heroTag: 'draw-card-fab',
+                        onPressed: _randomDraw,
+                        backgroundColor: const Color(0xFFED2910),
+                        foregroundColor: Colors.white,
+                        elevation: 8.0,
+                        icon: FaIcon(FontAwesomeIcons.handSparkles, size: 20),
+                        label: Text(
+                          'Tirer une carte',
+                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        ),
                       ),
                     ),
                     SizedBox(width: 16),
                     // Menu button
-                    SpeedDial(
+                    MouseRegion(
+                      cursor: SystemMouseCursors.click,
+                      child: SpeedDial(
                   animatedIcon: AnimatedIcons.menu_close,
                   animatedIconTheme: IconThemeData(size: 22.0),
                   overlayColor: Colors.black,
@@ -1054,6 +1076,7 @@ class _GameState extends State<Game> {
                     ),
                   ],
                 ),
+                    ),
                   ],
                 )
               : null,
@@ -1364,6 +1387,8 @@ class EssentielCardWidget extends StatelessWidget {
                       fit: BoxFit.contain,
                       width: cardWidth * 0.7, // Logo takes 70% of card width
                       height: cardHeight * 0.7, // Logo takes 70% of card height
+                      cacheWidth: (cardWidth * 1.4).toInt(),
+                      cacheHeight: (cardHeight * 1.4).toInt(),
                     ),
                   ),
                 ))

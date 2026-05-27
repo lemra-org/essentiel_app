@@ -40,11 +40,11 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
     return AlertDialog(
       title: widget.title,
       content: Wrap(
+        spacing: 8.0,
+        runSpacing: 8.0,
         children: widget.all!.map((element) {
           final isSelected = selectedItems?.contains(element) ?? false;
-          return Padding(
-              padding: const EdgeInsets.only(right: 10.0),
-              child: GestureDetector(
+          return GestureDetector(
                 onTap: () {
                   setState(() {
                     if (selectedItems != null &&
@@ -72,7 +72,7 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
                     ),
                   ),
                 ),
-              ));
+              );
         }).toList(),
       ),
       actions: [

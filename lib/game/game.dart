@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:io';
 import 'dart:math';
+import 'dart:ui';
 
 import 'package:animated_widgets/animated_widgets.dart';
 import 'package:essentiel/about.dart';
@@ -185,14 +186,31 @@ class _GameState extends State<Game> {
       //Yeah - we have some data !
       Widget widgetToDisplay;
       if (_currentIndex == null) {
-        // Show shake animation only on native platforms (not web)
+        // Show blurred Essentiel logo when no card is selected
         final isWeb = kIsWeb;
 
         widgetToDisplay = Container(
             padding: const EdgeInsets.all(15.0),
             child: Center(
-              child: !isWeb
-                  ? Column(
+              child: Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Blurred logo background (always shown)
+                  ImageFiltered(
+                    imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                    child: Opacity(
+                      opacity: 0.6,
+                      child: Image.asset(
+                        "assets/images/essentiel_logo.svg.png",
+                        width: screenWidth * 0.3,
+                        height: screenHeight * 0.3,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                  // Shake animation and text on mobile (on top of logo)
+                  if (!isWeb)
+                    Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         ShakeAnimatedWidget(
@@ -216,8 +234,9 @@ class _GameState extends State<Game> {
                             style: TextStyle(
                                 fontSize: 24, height: 1.2, color: Colors.white)),
                       ],
-                    )
-                  : SizedBox.shrink(), // Empty on web - use floating button instead
+                    ),
+                ],
+              ),
             ));
       } else {
         final cardData = _allCardsData?.elementAt(_currentIndex!);
@@ -233,15 +252,74 @@ class _GameState extends State<Game> {
         final selectedCardWidth = calculatedWidth > screenWidth * widthCap ? screenWidth * widthCap : calculatedWidth;
 
         widgetToDisplay = Center(
-          child: Stack(
-            clipBehavior: Clip.none,
-            children: [
-              ConstrainedBox(
-                constraints: BoxConstraints(
-                  maxWidth: selectedCardWidth,
-                  maxHeight: selectedCardHeight,
+          // Outer animation for initial card selection (slide up from bottom)
+          child: TweenAnimationBuilder<double>(
+            key: ValueKey('card-container'),
+            tween: Tween<double>(begin: 0.0, end: 1.0),
+            duration: Duration(milliseconds: 700),
+            curve: Curves.easeOutCubic,
+            builder: (context, value, child) {
+              return Transform.translate(
+                offset: Offset(0, (1 - value) * screenHeight * 0.5),
+                child: Opacity(
+                  opacity: value,
+                  child: child,
                 ),
-                child: Container(
+              );
+            },
+            // Inner animation for card-to-card switching
+            child: AnimatedSwitcher(
+              duration: Duration(milliseconds: 1000),
+              switchInCurve: Curves.easeOutCubic,
+              switchOutCurve: Curves.easeInCubic,
+              transitionBuilder: (Widget child, Animation<double> animation) {
+                // Check if this is the incoming or outgoing widget
+                if (child.key == ValueKey(_currentIndex)) {
+                  // New card: ALWAYS slide up from bottom
+                  final slideUpAnimation = Tween<Offset>(
+                    begin: Offset(0.0, 1.0), // Start from bottom (full screen height)
+                    end: Offset.zero,        // End at center
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeOutCubic,
+                  ));
+
+                  return SlideTransition(
+                    position: slideUpAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                } else {
+                  // Old card: slide UP to the top and fade out simultaneously
+                  final slideOutAnimation = Tween<Offset>(
+                    begin: Offset.zero,       // Start at center
+                    end: Offset(0.0, -1.0),   // Slide up to top (negative = up)
+                  ).animate(CurvedAnimation(
+                    parent: animation,
+                    curve: Curves.easeInCubic,
+                  ));
+
+                  return SlideTransition(
+                    position: slideOutAnimation,
+                    child: FadeTransition(
+                      opacity: animation,
+                      child: child,
+                    ),
+                  );
+                }
+              },
+              child: Stack(
+                key: ValueKey(_currentIndex), // Key changes trigger the animation
+              clipBehavior: Clip.none,
+              children: [
+                ConstrainedBox(
+                  constraints: BoxConstraints(
+                    maxWidth: selectedCardWidth,
+                    maxHeight: selectedCardHeight,
+                  ),
+                  child: Container(
                   padding: const EdgeInsets.all(10.0),
                   decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(8.0),
@@ -387,7 +465,9 @@ class _GameState extends State<Game> {
                   ),
                 ),
               ),
-            ],
+              ],
+              ),
+            ),
           ),
         );
       }
@@ -452,14 +532,24 @@ class _GameState extends State<Game> {
                           horizontalOffset: 50.0,
                           child: FadeInAnimation(
                             child: GestureDetector(
-                                child: Container(
+                                child: AnimatedContainer(
+                                  duration: Duration(milliseconds: 300),
                                   margin: const EdgeInsets.only(left: 5.0),
-                                  child: EssentielCardWidget(
-                                      index: index,
-                                      selected: _currentIndex == index,
-                                      noCardSelected: _currentIndex == null,
-                                      cardData:
-                                          _allCardsData!.elementAt(index)),
+                                  // Add blur to unselected cards
+                                  child: ImageFiltered(
+                                    imageFilter: _currentIndex != null && _currentIndex != index
+                                        ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
+                                        : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                                    child: Opacity(
+                                      opacity: _currentIndex != null && _currentIndex != index ? 0.5 : 1.0,
+                                      child: EssentielCardWidget(
+                                          index: index,
+                                          selected: _currentIndex == index,
+                                          noCardSelected: _currentIndex == null,
+                                          cardData:
+                                              _allCardsData!.elementAt(index)),
+                                    ),
+                                  ),
                                 ),
                                 onTap: () {
                                   //TODO Animate card selection

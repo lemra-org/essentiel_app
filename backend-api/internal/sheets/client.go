@@ -36,9 +36,10 @@ func NewClient(ctx context.Context, serviceAccountJSON string, spreadsheetID str
 }
 
 // FetchCategories reads the Categories sheet and returns parsed Category objects
-// Expected columns: Catégorie, Couleur
+// Expected columns: Catégorie, Couleur (detected from header row)
 func (c *Client) FetchCategories(ctx context.Context) ([]Category, error) {
-	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Categories!A:C").Context(ctx).Do()
+	// Fetch all columns - header parsing will find the right ones by name
+	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Categories!A:Z").Context(ctx).Do()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch categories: %w", err)
 	}
@@ -114,8 +115,10 @@ func (c *Client) FetchCategories(ctx context.Context) ([]Category, error) {
 }
 
 // FetchQuestions reads the Questions sheet and returns parsed Question objects
+// Expected columns: Catégorie, Question, Pour Couples, Pour Familles (detected from header row)
 func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
-	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Questions!A:D").Context(ctx).Do()
+	// Fetch all columns - header parsing will find the right ones by name
+	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Questions!A:Z").Context(ctx).Do()
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch questions: %w", err)
 	}
@@ -124,19 +127,54 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 		return []Question{}, nil
 	}
 
+	// Parse header row to find column indices
+	headers := resp.Values[0]
+	categoryCol := -1
+	questionCol := -1
+	couplesCol := -1
+	familiesCol := -1
+
+	for i, header := range headers {
+		h := toString(header)
+		switch h {
+		case "Catégorie", "Category":
+			categoryCol = i
+		case "Question":
+			questionCol = i
+		case "Pour Couples", "For Couples":
+			couplesCol = i
+		case "Pour Familles", "For Families":
+			familiesCol = i
+		}
+	}
+
+	// Fallback to positional if headers not found
+	if categoryCol == -1 {
+		categoryCol = 0
+	}
+	if questionCol == -1 {
+		questionCol = 1
+	}
+	if couplesCol == -1 {
+		couplesCol = 2
+	}
+	if familiesCol == -1 {
+		familiesCol = 3
+	}
+
 	questions := make([]Question, 0, len(resp.Values)-1)
 
 	for i, row := range resp.Values {
 		if i == 0 {
+			continue // Skip header row
+		}
+
+		if len(row) <= categoryCol || len(row) <= questionCol {
 			continue
 		}
 
-		if len(row) < 2 {
-			continue
-		}
-
-		category := toString(row[0])
-		questionText := toString(row[1])
+		category := toString(row[categoryCol])
+		questionText := toString(row[questionCol])
 
 		if questionText == "" || category == "" {
 			continue
@@ -144,11 +182,11 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 
 		forCouples := false
 		forFamilies := false
-		if len(row) >= 3 {
-			forCouples = toBool(row[2])
+		if len(row) > couplesCol {
+			forCouples = toBool(row[couplesCol])
 		}
-		if len(row) >= 4 {
-			forFamilies = toBool(row[3])
+		if len(row) > familiesCol {
+			forFamilies = toBool(row[familiesCol])
 		}
 
 		// Parent-child questions are inherently family questions

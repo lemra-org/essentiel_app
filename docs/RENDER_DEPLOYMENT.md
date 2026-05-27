@@ -33,9 +33,9 @@ The project uses a monorepo structure with both frontend and backend deployed to
 
 1. Click **"New"** → **"Blueprint"**
 2. Connect to repository: `lemra-org/essentiel_app`
-3. Render auto-detects `render.yaml`
-4. Review services:
-   - `essentiel-redis` (Private service - Redis cache)
+3. **Important**: Change branch from `main` to `002-flutter-web-deployment`
+4. Render auto-detects `render.yaml`
+5. Review services:
    - `essentiel-backend-api` (Web service - Go API)
    - `essentiel-frontend` (Web service - Flutter web)
 
@@ -54,22 +54,32 @@ Before deploying, add these environment variables in the Render dashboard:
 
 ### 4. Deploy
 
-1. Click **"Apply"** to create all services
+1. Click **"Apply"** to create both services
 2. Render will:
    - Build Docker images for frontend and backend
-   - Deploy Redis cache
-   - Start all services with health checks
+   - Start both services with health checks
    - Assign URLs (e.g., `essentiel-frontend.onrender.com`)
 
-**Build time**: ~5-10 minutes for first deployment
+**Build time**: ~5-10 minutes for first deployment (Flutter build takes longer)
 
-### 5. Update CORS Configuration
+### 5. Update CORS Configuration (After Deployment)
 
-After frontend is deployed, update the backend's `ALLOWED_ORIGIN`:
+Backend initially allows all origins (`ALLOWED_ORIGIN=*`). For security, update to specific frontend URL:
 
-1. Go to `essentiel-backend-api` service settings
-2. Update `ALLOWED_ORIGIN` env var to your frontend URL
+1. Go to `essentiel-backend-api` service settings → Environment
+2. Update `ALLOWED_ORIGIN` to your frontend URL
 3. Example: `https://essentiel-frontend.onrender.com`
+4. Click **"Save Changes"** (triggers redeploy)
+
+### 6. (Optional) Add Redis Cache
+
+Backend uses in-memory cache by default. To add Redis for better performance:
+
+1. In Render dashboard, create a **new Redis** instance
+2. Copy the **Internal Redis URL**
+3. Go to `essentiel-backend-api` → Environment
+4. Update `REDIS_ADDR` to the Redis URL
+5. Save (triggers redeploy)
 
 ---
 
@@ -192,21 +202,16 @@ essentiel_app/
 
 ### Services
 
-1. **essentiel-redis** (Private Service)
-   - Redis 7 Alpine
-   - Caching layer for backend
-   - Not exposed publicly
-
-2. **essentiel-backend-api** (Web Service)
+1. **essentiel-backend-api** (Web Service)
    - Go API server
    - Fetches data from Google Sheets
-   - Caches responses in Redis
+   - In-memory cache (or Redis if configured)
    - Exposes REST API at `/api/categories`, `/api/questions`
 
-3. **essentiel-frontend** (Web Service)
+2. **essentiel-frontend** (Web Service)
    - Flutter web app
    - Served via nginx
-   - Connects to backend API
+   - Proxies API requests to backend
    - PWA with offline support
 
 ### Request Flow
@@ -215,10 +220,10 @@ essentiel_app/
 User Browser
     ↓
 Frontend (nginx on Render)
-    ↓ HTTP requests to /api/*
+    ↓ Proxies /api/* to backend (internal URL)
 Backend API (Go on Render)
-    ↓ Cache check
-Redis (on Render)
+    ↓ Cache check (in-memory or Redis)
+In-Memory Cache or Redis (optional)
     ↓ Cache miss
 Google Sheets API
 ```

@@ -215,22 +215,37 @@ class _GameState extends State<Game> {
             ));
       } else {
         final cardData = _allCardsData?.elementAt(_currentIndex!);
-        widgetToDisplay = Container(
-            padding: const EdgeInsets.all(10.0),
-            decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8.0),
-                border: Border.all(color: Colors.black, width: 2.0),
-                color: Colors.white),
-            // height: screenHeight * 0.1,
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: Stack(
-                children: [
+        // Larger card for selected view: max 500px height
+        // Wider aspect ratio (0.85) to accommodate text, but cap at 90% screen width
+        final selectedCardHeight = screenHeight * 0.6 > 500 ? 500.0 : screenHeight * 0.6;
+        final calculatedWidth = selectedCardHeight * 0.85;
+        final selectedCardWidth = calculatedWidth > screenWidth * 0.9 ? screenWidth * 0.9 : calculatedWidth;
+
+        widgetToDisplay = Center(
+          child: Stack(
+            clipBehavior: Clip.none,
+            children: [
+              ConstrainedBox(
+                constraints: BoxConstraints(
+                  maxWidth: selectedCardWidth,
+                  maxHeight: selectedCardHeight,
+                ),
+                child: Container(
+                  padding: const EdgeInsets.all(10.0),
+                  decoration: BoxDecoration(
+                      borderRadius: BorderRadius.circular(8.0),
+                      border: Border.all(color: Colors.black, width: 2.0),
+                      color: Colors.white),
+                  // height: screenHeight * 0.1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Stack(
+                    children: [
                   // Parent-Child takes precedence over Families icon
                   if (cardData?.isForParentChild == true)
                     Positioned.fill(
                       child: Align(
-                        alignment: Alignment.topRight,
+                        alignment: Alignment.topCenter,
                         child: FaIcon(
                           FontAwesomeIcons.childReaching,
                           color: const Color(0xFFF06292),
@@ -241,7 +256,7 @@ class _GameState extends State<Game> {
                   else if (cardData?.isForFamilies == true)
                     Positioned.fill(
                       child: Align(
-                        alignment: Alignment.topRight,
+                        alignment: Alignment.topCenter,
                         child: Image.asset(
                           'assets/images/family.png',
                           fit: BoxFit.scaleDown,
@@ -254,7 +269,7 @@ class _GameState extends State<Game> {
                   if (cardData?.isForCouples == true)
                     Positioned.fill(
                       child: Align(
-                        alignment: Alignment.topRight,
+                        alignment: Alignment.topCenter,
                         child: Image.asset(
                           'assets/images/couple.png',
                           fit: BoxFit.scaleDown,
@@ -339,7 +354,31 @@ class _GameState extends State<Game> {
                   )),
                 ],
               ),
-            ));
+            ),
+          ),
+        ),
+              // Close button positioned relative to the card
+              Positioned(
+                top: -8,
+                right: -8,
+                child: IconButton(
+                  onPressed: () {
+                    setState(() {
+                      _currentIndex = null;
+                      _doShuffleCards = false;
+                      _applyFilter = false;
+                    });
+                  },
+                  icon: FaIcon(
+                    FontAwesomeIcons.solidCircleXmark,
+                    size: 36.0,
+                    color: Colors.black87,
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
       }
       body = RefreshIndicator(
         onRefresh: _handleRefresh,
@@ -361,24 +400,6 @@ class _GameState extends State<Game> {
                       child: Stack(
               children: [
                 widgetToDisplay,
-                if (_currentIndex != null)
-                  Positioned.fill(
-                      child: Align(
-                    alignment: Alignment.bottomRight,
-                    child: IconButton(
-                        onPressed: () {
-                          setState(() {
-                            _currentIndex = null;
-                            _doShuffleCards = false;
-                            _applyFilter = false;
-                          });
-                        },
-                        icon: FaIcon(
-                          FontAwesomeIcons.solidRectangleXmark,
-                          size: 45.0,
-                          color: Colors.black87,
-                        )),
-                  )),
               ],
             ),
           ),

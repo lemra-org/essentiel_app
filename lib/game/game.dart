@@ -680,9 +680,13 @@ class _GameState extends State<Game> {
         child: LayoutBuilder(
           builder: (context, constraints) {
             final availableHeight = constraints.maxHeight;
+            final screenWidth = MediaQuery.of(context).size.width;
+
             // Balanced allocation for card list - enough room without overwhelming
-            final cardListHeight = availableHeight * 0.35;
-            final spacerHeight = availableHeight * 0.04;
+            // For mobile web, allocate more space to horizontal card list for better visibility
+            final isMobileWeb = kIsWeb && screenWidth < 600;
+            final cardListHeight = availableHeight * (isMobileWeb ? 0.40 : 0.35);
+            final spacerHeight = availableHeight * (isMobileWeb ? 0.02 : 0.04);
             final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
 
             return SingleChildScrollView(
@@ -1358,7 +1362,12 @@ class EssentielCardWidget extends StatelessWidget {
 
     // Match deck card aspect ratio: taller than wide (120w x 170h = 0.706 ratio)
     // Scale based on screen height for consistency
-    final cardHeight = screenHeight * 0.25 > 200 ? 200.0 : screenHeight * 0.25;
+    // For mobile web, use larger cards in horizontal scrollbar for better visibility
+    final isMobileWeb = kIsWeb && screenWidth < 600;
+    final heightRatio = isMobileWeb ? 0.30 : 0.25;
+    final maxHeight = isMobileWeb ? 300.0 : 200.0;
+
+    final cardHeight = screenHeight * heightRatio > maxHeight ? maxHeight : screenHeight * heightRatio;
     final cardWidth = cardHeight * 0.706; // Same aspect ratio as deck cards (120/170)
 
     return

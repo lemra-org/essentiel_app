@@ -1,5 +1,6 @@
 import 'package:essentiel/resources/category.dart';
 import 'package:flip_card/flip_card.dart';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 
 class EssentielCardData {

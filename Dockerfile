@@ -44,11 +44,18 @@ RUN flutter build web \
 # Stage 2: Serve with nginx
 FROM nginx:alpine
 
+# Build argument to determine which nginx config to use
+ARG BUILD_ENV=prod
+
 # Copy Flutter web build
 COPY --from=flutter-builder /app/build/web /usr/share/nginx/html
 
-# Copy nginx config template (will be processed by entrypoint)
-COPY nginx.conf /etc/nginx/conf.d/default.conf.template
+# Copy both nginx configs
+COPY nginx.conf /etc/nginx/nginx-prod.conf.template
+COPY nginx-dev.conf /etc/nginx/nginx-dev.conf.template
+
+# Set environment variable for entrypoint to use
+ENV BUILD_ENV=${BUILD_ENV}
 
 # Copy entrypoint script
 COPY docker-entrypoint.sh /docker-entrypoint.sh

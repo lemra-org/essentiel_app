@@ -850,7 +850,9 @@ class _GameState extends State<Game> {
           _allCardsData!.shuffle();
           _doShuffleCards = false;
           _applyFilter = false;
-          _showDealingAnimation = true; // Show dealing animation
+          // Disable deck animation on mobile browsers - causes freezing
+          final screenWidth = MediaQuery.of(context).size.width;
+          _showDealingAnimation = !(kIsWeb && screenWidth < 600);
         });
       });
     } else if (_applyFilter!) {
@@ -860,7 +862,9 @@ class _GameState extends State<Game> {
           _allCardsData = _filter(_categoryListFilter!);
           _doShuffleCards = false;
           _applyFilter = false;
-          _showDealingAnimation = true; // Show dealing animation
+          // Disable deck animation on mobile browsers - causes freezing
+          final screenWidth = MediaQuery.of(context).size.width;
+          _showDealingAnimation = !(kIsWeb && screenWidth < 600);
         });
       });
     }
@@ -1305,18 +1309,9 @@ class _GameState extends State<Game> {
       }
 
       // Show dealing animation on initial load
-      _showDealingAnimation = true;
-
-      // Failsafe: ensure animation completes even if onEnd doesn't fire
-      // This prevents freezing on mobile browsers (shorter timeout for mobile web)
-      final isMobileBrowser = kIsWeb && MediaQuery.of(context).size.width < 600;
-      Timer(Duration(milliseconds: isMobileBrowser ? 1500 : 2500), () {
-        if (mounted && _showDealingAnimation) {
-          setState(() {
-            _showDealingAnimation = false;
-          });
-        }
-      });
+      // Disable on mobile browsers due to performance issues causing freezing
+      final screenWidth = MediaQuery.of(context).size.width;
+      _showDealingAnimation = !(kIsWeb && screenWidth < 600);
     });
   }
 

@@ -137,9 +137,7 @@ class _GameState extends State<Game> {
       //Not initialized yet or showing dealing animation
       if (_showDealingAnimation) {
         // Show stacked deck animation with seamless transition to horizontal list
-        // Reduce card count on mobile browsers for better performance
-        final isMobileBrowser = kIsWeb && screenWidth < 600;
-        final numDeckCards = isMobileBrowser ? 12 : 20;
+        final numDeckCards = 20;
         final cardHeight = screenHeight * 0.38 > 380 ? 380.0 : screenHeight * 0.38;
         final cardWidth = cardHeight * 0.71;
 
@@ -182,8 +180,7 @@ class _GameState extends State<Game> {
                             // Deck animation on top
                             TweenAnimationBuilder<double>(
                               tween: Tween<double>(begin: 0.0, end: 1.0),
-                              // Shorter duration on mobile browsers for better performance
-                              duration: Duration(milliseconds: isMobileBrowser ? 1200 : 2000),
+                              duration: Duration(milliseconds: 2000),
                               curve: Curves.easeInOutCubic,
                               onEnd: () {
                                 setState(() {
@@ -248,8 +245,7 @@ class _GameState extends State<Game> {
                         height: cardListHeight,
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(begin: 0.0, end: 1.0),
-                          // Match deck animation duration - shorter on mobile browsers
-                          duration: Duration(milliseconds: (kIsWeb && screenWidth < 600) ? 1200 : 2000),
+                          duration: Duration(milliseconds: 2000),
                           curve: Interval(0.5, 1.0, curve: Curves.easeIn),
                           builder: (context, value, child) {
                             return Opacity(
@@ -285,12 +281,9 @@ class _GameState extends State<Game> {
                                             duration: Duration(milliseconds: 300),
                                             margin: const EdgeInsets.only(left: 5.0),
                                             child: ImageFiltered(
-                                              // Disable blur on mobile web during dealing animation for better performance
-                                              imageFilter: (kIsWeb && screenWidth < 600 && _showDealingAnimation)
-                                                  ? ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0)
-                                                  : (_currentIndex != null && _currentIndex != index
-                                                      ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
-                                                      : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0)),
+                                              imageFilter: _currentIndex != null && _currentIndex != index
+                                                  ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
+                                                  : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
                                               child: Opacity(
                                                 opacity: _currentIndex != null && _currentIndex != index ? 0.5 : 1.0,
                                                 child: EssentielCardWidget(
@@ -850,8 +843,7 @@ class _GameState extends State<Game> {
           _allCardsData!.shuffle();
           _doShuffleCards = false;
           _applyFilter = false;
-          // Disable animation on web to prevent mobile browser freezing
-          _showDealingAnimation = !kIsWeb;
+          _showDealingAnimation = true; // Show dealing animation
         });
       });
     } else if (_applyFilter!) {
@@ -861,8 +853,7 @@ class _GameState extends State<Game> {
           _allCardsData = _filter(_categoryListFilter!);
           _doShuffleCards = false;
           _applyFilter = false;
-          // Disable animation on web to prevent mobile browser freezing
-          _showDealingAnimation = !kIsWeb;
+          _showDealingAnimation = true; // Show dealing animation
         });
       });
     }
@@ -1307,8 +1298,7 @@ class _GameState extends State<Game> {
       }
 
       // Show dealing animation on initial load
-      // DISABLED on web to prevent mobile browser freezing - see issue #XXX
-      _showDealingAnimation = !kIsWeb;
+      _showDealingAnimation = true;
     });
   }
 

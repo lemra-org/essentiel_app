@@ -850,7 +850,8 @@ class _GameState extends State<Game> {
           _allCardsData!.shuffle();
           _doShuffleCards = false;
           _applyFilter = false;
-          _showDealingAnimation = true;
+          // Disable animation on web to prevent mobile browser freezing
+          _showDealingAnimation = !kIsWeb;
         });
       });
     } else if (_applyFilter!) {
@@ -860,7 +861,8 @@ class _GameState extends State<Game> {
           _allCardsData = _filter(_categoryListFilter!);
           _doShuffleCards = false;
           _applyFilter = false;
-          _showDealingAnimation = true;
+          // Disable animation on web to prevent mobile browser freezing
+          _showDealingAnimation = !kIsWeb;
         });
       });
     }
@@ -1305,16 +1307,8 @@ class _GameState extends State<Game> {
       }
 
       // Show dealing animation on initial load
-      _showDealingAnimation = true;
-
-      // Force animation to end after timeout to prevent freezing
-      Timer(Duration(milliseconds: 2500), () {
-        if (mounted && _showDealingAnimation) {
-          setState(() {
-            _showDealingAnimation = false;
-          });
-        }
-      });
+      // DISABLED on web to prevent mobile browser freezing - see issue #XXX
+      _showDealingAnimation = !kIsWeb;
     });
   }
 

@@ -115,7 +115,7 @@ func (c *Client) FetchCategories(ctx context.Context) ([]Category, error) {
 }
 
 // FetchQuestions reads the Questions sheet and returns parsed Question objects
-// Expected columns: Catégorie, Question, Pour Couples, Pour Familles (detected from header row)
+// Expected columns: Catégorie, Question, Pour Couples, Pour Parents (detected from header row)
 func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 	// Fetch all columns - header parsing will find the right ones by name
 	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Questions!A:Z").Context(ctx).Do()
@@ -143,7 +143,7 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 			questionCol = i
 		case "Pour Couples", "For Couples":
 			couplesCol = i
-		case "Pour Familles", "For Families":
+		case "Pour Parents", "For Parents", "Pour Familles", "For Families":
 			familiesCol = i
 		}
 	}

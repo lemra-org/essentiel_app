@@ -907,7 +907,7 @@ class _GameState extends State<Game> {
         CategoryStore.findAll();
 
     final allCategoryFilters = allCategoryTitlesMap.keys.toList()
-      ..addAll(["Familles", "Couples"])
+      ..addAll(["Parents", "Couples"])
       ..sort((a, b) {
         // Normalize French accents for proper alphabetical sorting
         String normalize(String s) {
@@ -941,7 +941,7 @@ class _GameState extends State<Game> {
       if (category == "Couples") {
         return Colors.pink;
       }
-      if (category == "Familles") {
+      if (category == "Parents") {
         return Colors.brown;
       }
       return null;
@@ -1161,7 +1161,7 @@ class _GameState extends State<Game> {
       if (_categoryListFilter!.contains(cardData.category!.title)) {
         return true;
       }
-      if (_categoryListFilter!.contains("Familles") && cardData.isForFamilies) {
+      if (_categoryListFilter!.contains("Parents") && cardData.isForFamilies) {
         return true;
       }
       if (_categoryListFilter!.contains("Couples") && cardData.isForCouples) {
@@ -1358,7 +1358,7 @@ class _GameState extends State<Game> {
       _categoryList = categoryList.toList(growable: false);
       if (_categoryListFilter == null || _categoryListFilter!.length == 0) {
         // All categories selected by default
-        _categoryListFilter = <String>["Familles", "Couples"];
+        _categoryListFilter = <String>["Parents", "Couples"];
         categoryList
             .where((element) => element.title != null)
             .forEach((element) {

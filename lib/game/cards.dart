@@ -29,8 +29,10 @@ class EssentielCardData {
             question.toString().toLowerCase().contains("météo"),
         isForCouples: json["Pour Couples"]?.toString().toLowerCase() ==
             "Oui".toLowerCase(),
-        isForFamilies: json["Pour Familles"]?.toString().toLowerCase() ==
-            "Oui".toLowerCase(),
+        isForFamilies: (json["Pour Parents"]?.toString().toLowerCase() ==
+                "Oui".toLowerCase()) ||
+            (json["Pour Familles"]?.toString().toLowerCase() ==
+                "Oui".toLowerCase()),
         isForParentChild: categoryName?.toString() == "Parent - Enfant");
   }
 }
@@ -59,7 +61,9 @@ class _EssentielCardState extends State<EssentielCard> {
     final baseHeightRatio = kIsWeb ? 0.85 : 0.38;
     final maxCardHeight = kIsWeb ? 1200.0 : 380.0;
 
-    final cardHeight = screenHeight * baseHeightRatio > maxCardHeight ? maxCardHeight : screenHeight * baseHeightRatio;
+    final cardHeight = screenHeight * baseHeightRatio > maxCardHeight
+        ? maxCardHeight
+        : screenHeight * baseHeightRatio;
     final cardWidth = cardHeight * 0.71;
 
     // EXTREMELY large font sizes for web - mobile viewing in desktop layout needs huge text
@@ -83,8 +87,7 @@ class _EssentielCardState extends State<EssentielCard> {
           height: cardHeight,
           width: cardWidth,
           child: Image.asset("assets/images/essentiel_logo.svg.png",
-              fit: BoxFit.fill,
-              cacheWidth: (cardWidth * 2).toInt()),
+              fit: BoxFit.fill, cacheWidth: (cardWidth * 2).toInt()),
         ),
         back: Container(
             decoration: BoxDecoration(
@@ -93,40 +96,40 @@ class _EssentielCardState extends State<EssentielCard> {
                 color: Colors.white),
             height: cardHeight,
             width: cardWidth,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Stack(
-              children: [
-                Center(
-                  child: Text(
-                    widget.cardData!.question!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: questionFontSize,
-                        color: widget.cardData!.category!.color),
-                  ),
-                ),
-                Positioned.fill(
-                    child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    padding: const EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: widget.cardData!.category!.color,
-                    ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Stack(
+                children: [
+                  Center(
                     child: Text(
-                      widget.cardData!.category!.title!,
+                      widget.cardData!.question!,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: categoryFontSize,
-                        color: Colors.white,
-                      ),
+                          fontSize: questionFontSize,
+                          color: widget.cardData!.category!.color),
                     ),
                   ),
-                )),
-              ],
-            ),
-          )),
+                  Positioned.fill(
+                      child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        color: widget.cardData!.category!.color,
+                      ),
+                      child: Text(
+                        widget.cardData!.category!.title!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: categoryFontSize,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  )),
+                ],
+              ),
+            )),
       ),
     );
   }

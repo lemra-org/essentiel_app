@@ -541,142 +541,112 @@ class _GameState extends State<Game> {
             key: ValueKey(_currentIndex), // Key changes trigger the animation
             clipBehavior: Clip.none,
             children: [
-              ConstrainedBox(
+              Container(
                 constraints: BoxConstraints(
                   minWidth: selectedCardWidth * 0.8,
                   maxWidth: selectedCardWidth,
-                  minHeight: selectedCardHeight * 0.7,
                   maxHeight: kIsWeb ? screenHeight * 0.95 : selectedCardHeight,
                 ),
-                child: Container(
-                  padding: const EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(color: Colors.black, width: 2.0),
-                      color: Colors.white),
-                  // height: screenHeight * 0.1,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Stack(
-                      children: [
-                        // Parent-Child takes precedence over Families icon
-                        if (cardData?.isForParentChild == true)
-                          Positioned.fill(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: FaIcon(
-                                FontAwesomeIcons.childReaching,
-                                color: const Color(0xFFF06292),
-                                size: 50.0,
-                              ),
+                padding: const EdgeInsets.all(10.0),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(color: Colors.black, width: 2.0),
+                    color: Colors.white),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      // Icon at top - scrollable with content
+                      if (cardData?.isForParentChild == true)
+                        FaIcon(
+                          FontAwesomeIcons.childReaching,
+                          color: const Color(0xFFF06292),
+                          size: 50.0,
+                        )
+                      else if (cardData?.isForFamilies == true)
+                        Image.asset(
+                          'assets/images/family.png',
+                          fit: BoxFit.scaleDown,
+                          height: 60.0,
+                          width: 60.0,
+                          cacheWidth: 120,
+                          cacheHeight: 120,
+                        )
+                      else if (cardData?.isForCouples == true)
+                        Image.asset(
+                          'assets/images/couple.png',
+                          fit: BoxFit.scaleDown,
+                          height: 60.0,
+                          cacheWidth: 120,
+                          cacheHeight: 120,
+                          width: 60.0,
+                        )
+                      else if (cardData?.isForInternalMood == true)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceAround,
+                          crossAxisAlignment: CrossAxisAlignment.center,
+                          children: [
+                            Icon(
+                              Icons.wb_sunny,
+                              color: const Color(0xFFF7B900),
+                              size: 40.0,
                             ),
-                          )
-                        else if (cardData?.isForFamilies == true)
-                          Positioned.fill(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: Image.asset(
-                                'assets/images/family.png',
-                                fit: BoxFit.scaleDown,
-                                height: 60.0,
-                                width: 60.0,
-                                cacheWidth: 120,
-                                cacheHeight: 120,
-                                // colorBlendMode: ,
-                              ),
+                            FaIcon(
+                              FontAwesomeIcons.cloudSun,
+                              color: const Color(0xFFb5a347),
+                              size: 35.0,
                             ),
-                          ),
-                        if (cardData?.isForCouples == true)
-                          Positioned.fill(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: Image.asset(
-                                'assets/images/couple.png',
-                                fit: BoxFit.scaleDown,
-                                height: 60.0,
-                                cacheWidth: 120,
-                                cacheHeight: 120,
-                                width: 60.0,
-                                // colorBlendMode: ,
-                              ),
+                            FaIcon(
+                              FontAwesomeIcons.cloudSunRain,
+                              color: Colors.blueGrey,
+                              size: 35.0,
                             ),
-                          ),
-                        if (cardData?.isForInternalMood == true)
-                          Positioned.fill(
-                            child: Align(
-                              alignment: Alignment.topCenter,
-                              child: Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceAround,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                children: [
-                                  Icon(
-                                    Icons.wb_sunny,
-                                    color: const Color(0xFFF7B900),
-                                    size: 40.0,
-                                  ),
-                                  FaIcon(
-                                    FontAwesomeIcons.cloudSun,
-                                    color: const Color(0xFFb5a347),
-                                    size: 35.0,
-                                  ),
-                                  FaIcon(
-                                    FontAwesomeIcons.cloudSunRain,
-                                    color: Colors.blueGrey,
-                                    size: 35.0,
-                                  ),
-                                  FaIcon(
-                                    FontAwesomeIcons.cloudRain,
-                                    color: Colors.blue,
-                                    size: 35.0,
-                                  ),
-                                ],
-                              ),
+                            FaIcon(
+                              FontAwesomeIcons.cloudRain,
+                              color: Colors.blue,
+                              size: 35.0,
                             ),
-                          ),
-                        Center(
-                          child: SingleChildScrollView(
-                            child: Padding(
-                              padding: EdgeInsets.only(
-                                  top: (cardData!.isForFamilies ||
-                                          cardData.isForParentChild ||
-                                          cardData.isForCouples ||
-                                          cardData.isForInternalMood)
-                                      ? 40.0
-                                      : 0.0,
-                                  bottom: 35.0),
-                              child: Text(
-                                cardData.question!,
-                                style: TextStyle(
-                                    fontSize: kIsWeb ? 56.0 : 25.0,
-                                    color: cardData.category!.color,
-                                    wordSpacing: 2.0,
-                                    height: 1.75,
-                                    fontWeight: FontWeight.bold),
-                                textAlign: TextAlign.center,
-                              ),
-                            ),
+                          ],
+                        ),
+                      // Spacing between icon and text
+                      if (cardData!.isForFamilies ||
+                          cardData.isForParentChild ||
+                          cardData.isForCouples ||
+                          cardData.isForInternalMood)
+                        SizedBox(height: 10.0),
+                      // Question text - flexible to grow
+                      Flexible(
+                        child: SingleChildScrollView(
+                          child: Text(
+                            cardData.question!,
+                            style: TextStyle(
+                                fontSize: kIsWeb ? 56.0 : 25.0,
+                                color: cardData.category!.color,
+                                wordSpacing: 2.0,
+                                height: 1.75,
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
                           ),
                         ),
-                        Positioned.fill(
-                            child: Align(
-                          alignment: Alignment.bottomCenter,
-                          child: Container(
-                            padding: const EdgeInsets.all(10.0),
-                            decoration: BoxDecoration(
-                              color: cardData.category!.color,
-                            ),
-                            child: Text(
-                              cardData.category!.title!,
-                              style: TextStyle(
-                                fontSize: kIsWeb ? 38.0 : 22.0,
-                                color: Colors.white,
-                              ),
-                            ),
+                      ),
+                      // Category label at bottom
+                      Container(
+                        width: double.infinity,
+                        padding: const EdgeInsets.all(10.0),
+                        decoration: BoxDecoration(
+                          color: cardData.category!.color,
+                        ),
+                        child: Text(
+                          cardData.category!.title!,
+                          style: TextStyle(
+                            fontSize: kIsWeb ? 38.0 : 22.0,
+                            color: Colors.white,
                           ),
-                        )),
-                      ],
-                    ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),

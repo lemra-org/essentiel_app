@@ -153,9 +153,9 @@ class _GameState extends State<Game> {
               final availableHeight = constraints.maxHeight;
               // On web, balance space between popup card area and horizontal list
               final cardListHeight =
-                  kIsWeb ? availableHeight * 0.50 : availableHeight * 0.35;
+                  kIsWeb ? 150.0 : availableHeight * 0.35;
               final spacerHeight =
-                  kIsWeb ? availableHeight * 0.005 : availableHeight * 0.04;
+                  kIsWeb ? 10.0 : availableHeight * 0.04;
               final cardDisplayHeight =
                   availableHeight - cardListHeight - spacerHeight;
 
@@ -486,14 +486,14 @@ class _GameState extends State<Game> {
         // Responsive card size: for web, use much larger sizes for readability
         // Allow card to grow beyond initial size if text overflows
         final heightRatio =
-            kIsWeb ? 0.85 : (isMobile ? 0.6 : (isTablet ? 0.65 : 0.7));
-        final minHeight = kIsWeb ? 800.0 : (isMobile ? 500.0 : 550.0);
+            kIsWeb ? 0.80 : (isMobile ? 0.6 : (isTablet ? 0.65 : 0.7));
+        final minHeight = kIsWeb ? 700.0 : (isMobile ? 500.0 : 550.0);
         final maxHeight = kIsWeb
-            ? double.infinity
+            ? screenHeight * 0.85
             : (isMobile ? 500.0 : (isTablet ? 550.0 : 600.0));
-        final aspectRatio = isMobile ? 0.85 : 0.9;
+        final aspectRatio = kIsWeb ? 1.3 : (isMobile ? 0.85 : 0.9);
         final widthCap = kIsWeb
-            ? 0.95
+            ? 0.70
             : (isMobile
                 ? 0.9
                 : (isTablet ? 0.85 : 0.8)); // More constrained on desktop
@@ -726,9 +726,9 @@ class _GameState extends State<Game> {
             // For web, push horizontal scrollbar to bottom near menu buttons
             final isMobileWeb = kIsWeb && screenWidth < 600;
             final cardListHeight =
-                kIsWeb ? availableHeight * 0.50 : availableHeight * 0.35;
+                kIsWeb ? 150.0 : availableHeight * 0.35;
             final spacerHeight =
-                kIsWeb ? availableHeight * 0.01 : availableHeight * 0.04;
+                kIsWeb ? 10.0 : availableHeight * 0.04;
             final cardDisplayHeight =
                 availableHeight - cardListHeight - spacerHeight;
 
@@ -885,7 +885,7 @@ class _GameState extends State<Game> {
               child: Container(
                 padding: EdgeInsets.only(
                     top: screenHeight * 0.2,
-                    bottom: kIsWeb ? screenHeight * 0.02 : screenHeight * 0.13,
+                    bottom: kIsWeb ? 100 : screenHeight * 0.13,
                     left: 10.0,
                     right: 10.0),
                 // height: screenHeight * 0.5,
@@ -1472,8 +1472,8 @@ class EssentielCardWidget extends StatelessWidget {
     // Match deck card aspect ratio: taller than wide (120w x 170h = 0.706 ratio)
     // For horizontal cards, use landscape/paysage orientation (width > height)
     // This preserves the Essentiel logo's original scale better
-    final widthRatio = kIsWeb ? 0.30 : 0.25;
-    final maxWidth = kIsWeb ? 500.0 : 250.0;
+    final widthRatio = kIsWeb ? 0.10 : 0.25;
+    final maxWidth = kIsWeb ? 150.0 : 250.0;
 
     final cardWidth = screenWidth * widthRatio > maxWidth
         ? maxWidth

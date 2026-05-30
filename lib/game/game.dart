@@ -31,6 +31,7 @@ import 'package:googleapis_auth/googleapis_auth.dart';
 const _spreadsheetId = '1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI';
 
 const title = 'Jeu Essentiel';
+// Updated: 2026-05-30 - Large text for mobile web
 
 // French error messages for refresh failures
 const _errorNoNetwork = "Pas de connexion réseau. Veuillez vérifier votre connexion.";
@@ -56,6 +57,7 @@ class _GameState extends State<Game> {
   List<String>? _categoryListFilter;
   bool _isRefreshing = false;
   bool _showDealingAnimation = false;
+  int? _previousIndex; // Track previous card for animation logic
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -146,8 +148,9 @@ class _GameState extends State<Game> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final availableHeight = constraints.maxHeight;
-              final cardListHeight = availableHeight * 0.35;
-              final spacerHeight = availableHeight * 0.04;
+              // On web, balance space between popup card area and horizontal list
+              final cardListHeight = kIsWeb ? availableHeight * 0.50 : availableHeight * 0.35;
+              final spacerHeight = kIsWeb ? availableHeight * 0.005 : availableHeight * 0.04;
               final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
 
               return SingleChildScrollView(
@@ -438,9 +441,9 @@ class _GameState extends State<Game> {
         final isTablet = screenWidth >= 600 && screenWidth < 1200;
         final isDesktop = screenWidth >= 1200;
 
-        // Responsive card size: optimized for each screen size
-        final heightRatio = isMobile ? 0.6 : (isTablet ? 0.65 : 0.7);
-        final maxHeight = isMobile ? 500.0 : (isTablet ? 550.0 : 600.0);
+        // Responsive card size: for web, use much larger sizes for readability
+        final heightRatio = kIsWeb ? 0.85 : (isMobile ? 0.6 : (isTablet ? 0.65 : 0.7));
+        final maxHeight = kIsWeb ? 1200.0 : (isMobile ? 500.0 : (isTablet ? 550.0 : 600.0));
         final aspectRatio = isMobile ? 0.85 : 0.9;
         final widthCap = isMobile ? 0.9 : (isTablet ? 0.85 : 0.8); // More constrained on desktop
 
@@ -448,64 +451,35 @@ class _GameState extends State<Game> {
         final calculatedWidth = selectedCardHeight * aspectRatio;
         final selectedCardWidth = calculatedWidth > screenWidth * widthCap ? screenWidth * widthCap : calculatedWidth;
 
-        widgetToDisplay = Center(
-          // Outer animation for initial card selection (slide up from bottom)
-          child: TweenAnimationBuilder<double>(
-            key: ValueKey('card-container'),
-            tween: Tween<double>(begin: 0.0, end: 1.0),
-            duration: Duration(milliseconds: 700),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Transform.translate(
-                offset: Offset(0, (1 - value) * screenHeight * 0.5),
-                child: Opacity(
-                  opacity: value,
-                  child: child,
-                ),
-              );
-            },
-            // Inner animation for card-to-card switching
-            child: AnimatedSwitcher(
-              duration: Duration(milliseconds: 1000),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
+        // Build the card content (AnimatedSwitcher for card-to-card transitions)
+        final cardContent = AnimatedSwitcher(
+          duration: Duration(milliseconds: 600),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
               transitionBuilder: (Widget child, Animation<double> animation) {
-                // Check if this is the incoming or outgoing widget
-                if (child.key == ValueKey(_currentIndex)) {
-                  // New card: ALWAYS slide up from bottom
-                  final slideUpAnimation = Tween<Offset>(
-                    begin: Offset(0.0, 1.0), // Start from bottom (full screen height)
-                    end: Offset.zero,        // End at center
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ));
+                // Flip animation: rotate on Y-axis
+                return AnimatedBuilder(
+                  animation: animation,
+                  builder: (context, child) {
+                    // Determine rotation angle based on whether this is incoming or outgoing
+                    final isIncoming = child?.key == ValueKey(_currentIndex);
+                    final rotationValue = isIncoming
+                        ? (1 - animation.value) * 0.5  // Incoming: rotate from 90° to 0°
+                        : animation.value * 0.5;        // Outgoing: rotate from 0° to 90°
 
-                  return SlideTransition(
-                    position: slideUpAnimation,
-                    child: FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                  );
-                } else {
-                  // Old card: slide UP to the top and fade out simultaneously
-                  final slideOutAnimation = Tween<Offset>(
-                    begin: Offset.zero,       // Start at center
-                    end: Offset(0.0, -1.0),   // Slide up to top (negative = up)
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeInCubic,
-                  ));
-
-                  return SlideTransition(
-                    position: slideOutAnimation,
-                    child: FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                  );
-                }
+                    return Transform(
+                      transform: Matrix4.identity()
+                        ..setEntry(3, 2, 0.001) // perspective
+                        ..rotateY(3.14159 * rotationValue), // rotate around Y-axis
+                      alignment: Alignment.center,
+                      child: Opacity(
+                        opacity: isIncoming ? animation.value : (1 - animation.value),
+                        child: child,
+                      ),
+                    );
+                  },
+                  child: child,
+                );
               },
               child: Stack(
                 key: ValueKey(_currentIndex), // Key changes trigger the animation
@@ -615,7 +589,7 @@ class _GameState extends State<Game> {
                         child: Text(
                           cardData.question!,
                           style: TextStyle(
-                              fontSize: 25.0,
+                              fontSize: kIsWeb ? 72.0 : 25.0,
                               color: cardData.category!.color,
                               wordSpacing: 2.0,
                               height: 1.75,
@@ -636,7 +610,7 @@ class _GameState extends State<Game> {
                       child: Text(
                         cardData.category!.title!,
                         style: TextStyle(
-                          fontSize: 22.0,
+                          fontSize: kIsWeb ? 48.0 : 22.0,
                           color: Colors.white,
                         ),
                       ),
@@ -656,6 +630,7 @@ class _GameState extends State<Game> {
                   child: IconButton(
                     onPressed: () {
                       setState(() {
+                        _previousIndex = _currentIndex; // Remember last card for next animation
                         _currentIndex = null;
                         _doShuffleCards = false;
                         _applyFilter = false;
@@ -670,9 +645,29 @@ class _GameState extends State<Game> {
                 ),
               ),
               ],
-              ),
             ),
           ),
+        );
+
+        // Wrap in slide-up animation only for first card
+        final isFirstCard = _previousIndex == null;
+        widgetToDisplay = Align(
+          alignment: kIsWeb ? Alignment(0, -0.3) : Alignment.center,
+          child: isFirstCard
+              ? TweenAnimationBuilder<double>(
+                  key: ValueKey('slide-$_currentIndex'),
+                  tween: Tween<double>(begin: 0.0, end: 1.0),
+                  duration: Duration(milliseconds: 700),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(0, (1 - value) * screenHeight * 0.5),
+                      child: Opacity(opacity: value, child: child),
+                    );
+                  },
+                  child: cardContent,
+                )
+              : cardContent,
         );
       }
       body = RefreshIndicator(
@@ -808,11 +803,13 @@ class _GameState extends State<Game> {
           alignment: Alignment.topLeft,
           child: Padding(
             padding: EdgeInsets.only(
-                top: screenHeight * 0.085, left: 10.0, right: 10.0),
+                top: kIsWeb ? screenHeight * 0.01 : screenHeight * 0.085,
+                left: 10.0,
+                right: 10.0),
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 36.0,
+                fontSize: kIsWeb ? 42.0 : 36.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
@@ -941,10 +938,13 @@ class _GameState extends State<Game> {
                         backgroundColor: const Color(0xFFED2910),
                         foregroundColor: Colors.white,
                         elevation: 8.0,
-                        icon: FaIcon(FontAwesomeIcons.handSparkles, size: 20),
-                        label: Text(
-                          'Tirer une carte',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        icon: FaIcon(FontAwesomeIcons.handSparkles, size: kIsWeb ? 40 : 20),
+                        label: Padding(
+                          padding: EdgeInsets.symmetric(horizontal: kIsWeb ? 12 : 0, vertical: kIsWeb ? 8 : 0),
+                          child: Text(
+                            'Tirer une carte',
+                            style: TextStyle(fontSize: kIsWeb ? 32 : 16, fontWeight: FontWeight.bold),
+                          ),
                         ),
                       ),
                     ),
@@ -954,7 +954,7 @@ class _GameState extends State<Game> {
                       cursor: SystemMouseCursors.click,
                       child: SpeedDial(
                   animatedIcon: AnimatedIcons.menu_close,
-                  animatedIconTheme: IconThemeData(size: 22.0),
+                  animatedIconTheme: IconThemeData(size: kIsWeb ? 44.0 : 22.0),
                   overlayColor: Colors.black,
                   overlayOpacity: 0.5,
                   tooltip: 'Menu',
@@ -964,23 +964,24 @@ class _GameState extends State<Game> {
                   foregroundColor: Colors.white,
                   backgroundColor: Colors.lightGreen,
                   curve: Curves.bounceIn,
+                  buttonSize: Size(kIsWeb ? 84 : 56, kIsWeb ? 84 : 56),
                   children: [
                     SpeedDialChild(
-                      child: Icon(Icons.info_outline),
+                      child: Icon(Icons.info_outline, size: kIsWeb ? 44 : 24),
                       backgroundColor: const Color(0xFF62D739),
                       label: 'À propos',
                       labelBackgroundColor: const Color(0xFF62D739),
                       labelStyle:
-                          TextStyle(fontSize: 18.0, color: Colors.white),
+                          TextStyle(fontSize: kIsWeb ? 34.0 : 18.0, color: Colors.white),
                       onTap: () => showAppAboutDialog(context),
                     ),
                     SpeedDialChild(
-                        child: Icon(Icons.filter_alt_sharp),
+                        child: Icon(Icons.filter_alt_sharp, size: kIsWeb ? 44 : 24),
                         backgroundColor: const Color(0xFF12A0FF),
                         label: 'Filtres',
                         labelBackgroundColor: const Color(0xFF12A0FF),
                         labelStyle:
-                            TextStyle(fontSize: 18.0, color: Colors.white),
+                            TextStyle(fontSize: kIsWeb ? 34.0 : 18.0, color: Colors.white),
                         onTap: () async => showDialog(
                             context: context,
                             barrierDismissible: false,
@@ -1061,21 +1062,21 @@ class _GameState extends State<Game> {
                         // },
                         ),
                     SpeedDialChild(
-                      child: Icon(Icons.refresh),
+                      child: Icon(Icons.refresh, size: kIsWeb ? 44 : 24),
                       backgroundColor: const Color(0xFF9C27B0),
                       label: 'Recharger les cartes',
                       labelBackgroundColor: const Color(0xFF9C27B0),
                       labelStyle:
-                          TextStyle(fontSize: 18.0, color: Colors.white),
+                          TextStyle(fontSize: kIsWeb ? 34.0 : 18.0, color: Colors.white),
                       onTap: () => _handleRefresh(),
                     ),
                     SpeedDialChild(
-                      child: Icon(Icons.shuffle_outlined),
+                      child: Icon(Icons.shuffle_outlined, size: kIsWeb ? 44 : 24),
                       backgroundColor: const Color(0xFF97205E),
                       label: 'Mélanger les cartes',
                       labelBackgroundColor: const Color(0xFF97205E),
                       labelStyle:
-                          TextStyle(fontSize: 18.0, color: Colors.white),
+                          TextStyle(fontSize: kIsWeb ? 34.0 : 18.0, color: Colors.white),
                       onTap: _shuffleCards,
                     ),
                   ],
@@ -1146,6 +1147,7 @@ class _GameState extends State<Game> {
               curve: Curves.easeInOutCubic)
           .whenComplete(() {
         setState(() {
+          _previousIndex = _currentIndex; // Track previous for animation
           _currentIndex = index;
           _doShuffleCards = false;
           _applyFilter = false;
@@ -1362,13 +1364,15 @@ class EssentielCardWidget extends StatelessWidget {
 
     // Match deck card aspect ratio: taller than wide (120w x 170h = 0.706 ratio)
     // Scale based on screen height for consistency
-    // For mobile web, use larger cards in horizontal scrollbar for better visibility
-    final isMobileWeb = kIsWeb && screenWidth < 600;
-    final heightRatio = isMobileWeb ? 0.30 : 0.25;
-    final maxHeight = isMobileWeb ? 300.0 : 200.0;
+    // For web, use moderate size to show 3+ cards
+    final heightRatio = kIsWeb ? 0.40 : 0.25;
+    final maxHeight = kIsWeb ? 450.0 : 200.0;
 
     final cardHeight = screenHeight * heightRatio > maxHeight ? maxHeight : screenHeight * heightRatio;
     final cardWidth = cardHeight * 0.706; // Same aspect ratio as deck cards (120/170)
+
+    // For web, add much larger font sizes to card logos
+    final logoFontSize = kIsWeb ? cardHeight * 0.08 : cardHeight * 0.05;
 
     return
         // Transform.scale(

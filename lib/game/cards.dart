@@ -55,17 +55,17 @@ class _EssentielCardState extends State<EssentielCard> {
 
     // Cards for horizontal list: balanced size with good spacing around logo
     // Maintain playing card aspect ratio (roughly 2.5:3.5 or 0.71)
-    // For mobile web, use larger cards for better readability
-    final isMobileWeb = kIsWeb && screenWidth < 600;
-    final baseHeightRatio = isMobileWeb ? 0.55 : 0.38;
-    final maxCardHeight = isMobileWeb ? 600.0 : 380.0;
+    // For web builds, maximize card size to fill available space with large text
+    final baseHeightRatio = kIsWeb ? 0.85 : 0.38;
+    final maxCardHeight = kIsWeb ? 1200.0 : 380.0;
 
     final cardHeight = screenHeight * baseHeightRatio > maxCardHeight ? maxCardHeight : screenHeight * baseHeightRatio;
     final cardWidth = cardHeight * 0.71;
 
-    // Responsive font sizes based on card height
-    final questionFontSize = cardHeight * 0.065; // ~6.5% of card height
-    final categoryFontSize = cardHeight * 0.05;  // ~5% of card height
+    // EXTREMELY large font sizes for web - mobile viewing in desktop layout needs huge text
+    // Use absolute size for web to ensure readability regardless of card size
+    final questionFontSize = kIsWeb ? 48.0 : cardHeight * 0.065;
+    final categoryFontSize = kIsWeb ? 36.0 : cardHeight * 0.05;
 
     return ConstrainedBox(
       constraints: BoxConstraints(

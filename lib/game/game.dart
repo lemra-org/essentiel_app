@@ -484,14 +484,18 @@ class _GameState extends State<Game> {
         final isDesktop = screenWidth >= 1200;
 
         // Responsive card size: for web, use much larger sizes for readability
+        // Allow card to grow beyond initial size if text overflows
         final heightRatio =
             kIsWeb ? 0.85 : (isMobile ? 0.6 : (isTablet ? 0.65 : 0.7));
-        final maxHeight =
-            kIsWeb ? 1200.0 : (isMobile ? 500.0 : (isTablet ? 550.0 : 600.0));
+        final maxHeight = kIsWeb
+            ? double.infinity
+            : (isMobile ? 500.0 : (isTablet ? 550.0 : 600.0));
         final aspectRatio = isMobile ? 0.85 : 0.9;
-        final widthCap = isMobile
-            ? 0.9
-            : (isTablet ? 0.85 : 0.8); // More constrained on desktop
+        final widthCap = kIsWeb
+            ? 0.95
+            : (isMobile
+                ? 0.9
+                : (isTablet ? 0.85 : 0.8)); // More constrained on desktop
 
         final selectedCardHeight = screenHeight * heightRatio > maxHeight
             ? maxHeight
@@ -539,8 +543,10 @@ class _GameState extends State<Game> {
             children: [
               ConstrainedBox(
                 constraints: BoxConstraints(
+                  minWidth: selectedCardWidth * 0.8,
                   maxWidth: selectedCardWidth,
-                  maxHeight: selectedCardHeight,
+                  minHeight: selectedCardHeight * 0.7,
+                  maxHeight: kIsWeb ? screenHeight * 0.95 : selectedCardHeight,
                 ),
                 child: Container(
                   padding: const EdgeInsets.all(10.0),
@@ -642,7 +648,7 @@ class _GameState extends State<Game> {
                               child: Text(
                                 cardData.question!,
                                 style: TextStyle(
-                                    fontSize: kIsWeb ? 72.0 : 25.0,
+                                    fontSize: kIsWeb ? 56.0 : 25.0,
                                     color: cardData.category!.color,
                                     wordSpacing: 2.0,
                                     height: 1.75,
@@ -663,7 +669,7 @@ class _GameState extends State<Game> {
                             child: Text(
                               cardData.category!.title!,
                               style: TextStyle(
-                                fontSize: kIsWeb ? 48.0 : 22.0,
+                                fontSize: kIsWeb ? 38.0 : 22.0,
                                 color: Colors.white,
                               ),
                             ),

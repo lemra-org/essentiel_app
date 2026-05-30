@@ -726,9 +726,9 @@ class _GameState extends State<Game> {
             // For web, push horizontal scrollbar to bottom near menu buttons
             final isMobileWeb = kIsWeb && screenWidth < 600;
             final cardListHeight =
-                availableHeight * (isMobileWeb ? 0.40 : 0.35);
+                kIsWeb ? availableHeight * 0.50 : availableHeight * 0.35;
             final spacerHeight =
-                kIsWeb ? availableHeight * 0.02 : availableHeight * 0.04;
+                kIsWeb ? availableHeight * 0.01 : availableHeight * 0.04;
             final cardDisplayHeight =
                 availableHeight - cardListHeight - spacerHeight;
 

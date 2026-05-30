@@ -710,12 +710,12 @@ class _GameState extends State<Game> {
             final screenWidth = MediaQuery.of(context).size.width;
 
             // Balanced allocation for card list - enough room without overwhelming
-            // For web, reduce spacer to bring horizontal scrollbar closer to menu buttons
+            // For web, push horizontal scrollbar to bottom near menu buttons
             final isMobileWeb = kIsWeb && screenWidth < 600;
             final cardListHeight =
                 availableHeight * (isMobileWeb ? 0.40 : 0.35);
             final spacerHeight =
-                kIsWeb ? availableHeight * 0.005 : availableHeight * 0.04;
+                kIsWeb ? availableHeight * 0.02 : availableHeight * 0.04;
             final cardDisplayHeight =
                 availableHeight - cardListHeight - spacerHeight;
 
@@ -725,8 +725,7 @@ class _GameState extends State<Game> {
                 constraints: BoxConstraints(minHeight: availableHeight),
                 child: Column(
                   children: [
-                    SizedBox(
-                      height: cardDisplayHeight,
+                    Expanded(
                       child: Stack(
                         children: [
                           widgetToDisplay,

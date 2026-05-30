@@ -1042,9 +1042,10 @@ class _GameState extends State<Game> {
                         buttonSize: Size(kIsWeb ? 100 : 56, kIsWeb ? 100 : 56),
                         spacing: kIsWeb ? 20 : 12,
                         spaceBetweenChildren: kIsWeb ? 20 : 12,
-                        childPadding: kIsWeb ? EdgeInsets.all(12) : null,
-                        childMargin:
-                            kIsWeb ? EdgeInsets.symmetric(vertical: 8) : null,
+                        childPadding: kIsWeb ? EdgeInsets.all(16) : EdgeInsets.all(5),
+                        childMargin: kIsWeb
+                            ? EdgeInsets.symmetric(vertical: 10)
+                            : EdgeInsets.symmetric(vertical: 4),
                         children: [
                           SpeedDialChild(
                             child: Icon(Icons.info_outline,

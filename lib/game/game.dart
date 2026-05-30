@@ -487,6 +487,7 @@ class _GameState extends State<Game> {
         // Allow card to grow beyond initial size if text overflows
         final heightRatio =
             kIsWeb ? 0.85 : (isMobile ? 0.6 : (isTablet ? 0.65 : 0.7));
+        final minHeight = kIsWeb ? 800.0 : (isMobile ? 500.0 : 550.0);
         final maxHeight = kIsWeb
             ? double.infinity
             : (isMobile ? 500.0 : (isTablet ? 550.0 : 600.0));
@@ -497,9 +498,10 @@ class _GameState extends State<Game> {
                 ? 0.9
                 : (isTablet ? 0.85 : 0.8)); // More constrained on desktop
 
-        final selectedCardHeight = screenHeight * heightRatio > maxHeight
-            ? maxHeight
-            : screenHeight * heightRatio;
+        final calculatedHeight = screenHeight * heightRatio;
+        final selectedCardHeight = calculatedHeight < minHeight
+            ? minHeight
+            : (calculatedHeight > maxHeight ? maxHeight : calculatedHeight);
         final calculatedWidth = selectedCardHeight * aspectRatio;
         final selectedCardWidth = calculatedWidth > screenWidth * widthCap
             ? screenWidth * widthCap
@@ -543,8 +545,9 @@ class _GameState extends State<Game> {
             children: [
               Container(
                 constraints: BoxConstraints(
-                  minWidth: selectedCardWidth * 0.8,
+                  minWidth: selectedCardWidth * 0.9,
                   maxWidth: selectedCardWidth,
+                  minHeight: kIsWeb ? 800.0 : selectedCardHeight * 0.8,
                   maxHeight: kIsWeb ? screenHeight * 0.95 : selectedCardHeight,
                 ),
                 padding: const EdgeInsets.all(10.0),
@@ -707,11 +710,12 @@ class _GameState extends State<Game> {
             final screenWidth = MediaQuery.of(context).size.width;
 
             // Balanced allocation for card list - enough room without overwhelming
-            // For mobile web, allocate more space to horizontal card list for better visibility
+            // For web, reduce spacer to bring horizontal scrollbar closer to menu buttons
             final isMobileWeb = kIsWeb && screenWidth < 600;
             final cardListHeight =
                 availableHeight * (isMobileWeb ? 0.40 : 0.35);
-            final spacerHeight = availableHeight * (isMobileWeb ? 0.02 : 0.04);
+            final spacerHeight =
+                kIsWeb ? availableHeight * 0.005 : availableHeight * 0.04;
             final cardDisplayHeight =
                 availableHeight - cardListHeight - spacerHeight;
 

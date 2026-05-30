@@ -1002,15 +1002,15 @@ class _GameState extends State<Game> {
                         foregroundColor: Colors.white,
                         elevation: 8.0,
                         icon: FaIcon(FontAwesomeIcons.handSparkles,
-                            size: kIsWeb ? 40 : 20),
+                            size: kIsWeb ? 56 : 20),
                         label: Padding(
                           padding: EdgeInsets.symmetric(
-                              horizontal: kIsWeb ? 12 : 0,
-                              vertical: kIsWeb ? 8 : 0),
+                              horizontal: kIsWeb ? 16 : 0,
+                              vertical: kIsWeb ? 12 : 0),
                           child: Text(
                             'Tirer une carte',
                             style: TextStyle(
-                                fontSize: kIsWeb ? 32 : 16,
+                                fontSize: kIsWeb ? 48 : 16,
                                 fontWeight: FontWeight.bold),
                           ),
                         ),
@@ -1023,7 +1023,7 @@ class _GameState extends State<Game> {
                       child: SpeedDial(
                         animatedIcon: AnimatedIcons.menu_close,
                         animatedIconTheme:
-                            IconThemeData(size: kIsWeb ? 44.0 : 22.0),
+                            IconThemeData(size: kIsWeb ? 56.0 : 22.0),
                         overlayColor: Colors.black,
                         overlayOpacity: 0.5,
                         tooltip: 'Menu',
@@ -1033,28 +1033,30 @@ class _GameState extends State<Game> {
                         foregroundColor: Colors.white,
                         backgroundColor: Colors.lightGreen,
                         curve: Curves.bounceIn,
-                        buttonSize: Size(kIsWeb ? 84 : 56, kIsWeb ? 84 : 56),
+                        buttonSize: Size(kIsWeb ? 100 : 56, kIsWeb ? 100 : 56),
                         children: [
                           SpeedDialChild(
                             child: Icon(Icons.info_outline,
-                                size: kIsWeb ? 44 : 24),
+                                size: kIsWeb ? 56 : 24),
                             backgroundColor: const Color(0xFF62D739),
                             label: 'À propos',
                             labelBackgroundColor: const Color(0xFF62D739),
                             labelStyle: TextStyle(
-                                fontSize: kIsWeb ? 34.0 : 18.0,
-                                color: Colors.white),
+                                fontSize: kIsWeb ? 48.0 : 18.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
                             onTap: () => showAppAboutDialog(context),
                           ),
                           SpeedDialChild(
                               child: Icon(Icons.filter_alt_sharp,
-                                  size: kIsWeb ? 44 : 24),
+                                  size: kIsWeb ? 56 : 24),
                               backgroundColor: const Color(0xFF12A0FF),
                               label: 'Filtres',
                               labelBackgroundColor: const Color(0xFF12A0FF),
                               labelStyle: TextStyle(
-                                  fontSize: kIsWeb ? 34.0 : 18.0,
-                                  color: Colors.white),
+                                  fontSize: kIsWeb ? 48.0 : 18.0,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600),
                               onTap: () async => showDialog(
                                   context: context,
                                   barrierDismissible: false,
@@ -1064,7 +1066,7 @@ class _GameState extends State<Game> {
                                           'Catégories à afficher',
                                           style: TextStyle(
                                               fontWeight: FontWeight.bold,
-                                              fontSize: 20.0),
+                                              fontSize: kIsWeb ? 44.0 : 20.0),
                                         ),
                                         all: allCategoryFilters,
                                         selected: _categoryListFilter != null
@@ -1136,24 +1138,26 @@ class _GameState extends State<Game> {
                               // },
                               ),
                           SpeedDialChild(
-                            child: Icon(Icons.refresh, size: kIsWeb ? 44 : 24),
+                            child: Icon(Icons.refresh, size: kIsWeb ? 56 : 24),
                             backgroundColor: const Color(0xFF9C27B0),
                             label: 'Recharger les cartes',
                             labelBackgroundColor: const Color(0xFF9C27B0),
                             labelStyle: TextStyle(
-                                fontSize: kIsWeb ? 34.0 : 18.0,
-                                color: Colors.white),
+                                fontSize: kIsWeb ? 48.0 : 18.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
                             onTap: () => _handleRefresh(),
                           ),
                           SpeedDialChild(
                             child: Icon(Icons.shuffle_outlined,
-                                size: kIsWeb ? 44 : 24),
+                                size: kIsWeb ? 56 : 24),
                             backgroundColor: const Color(0xFF97205E),
                             label: 'Mélanger les cartes',
                             labelBackgroundColor: const Color(0xFF97205E),
                             labelStyle: TextStyle(
-                                fontSize: kIsWeb ? 34.0 : 18.0,
-                                color: Colors.white),
+                                fontSize: kIsWeb ? 48.0 : 18.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
                             onTap: _shuffleCards,
                           ),
                         ],

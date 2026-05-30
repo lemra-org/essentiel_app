@@ -1437,19 +1437,19 @@ class EssentielCardWidget extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     // Match deck card aspect ratio: taller than wide (120w x 170h = 0.706 ratio)
-    // Scale based on screen height for consistency
-    // For web, use moderate size to show 3+ cards
-    final heightRatio = kIsWeb ? 0.40 : 0.25;
-    final maxHeight = kIsWeb ? 450.0 : 200.0;
+    // For horizontal cards, use landscape/paysage orientation (width > height)
+    // This preserves the Essentiel logo's original scale better
+    final widthRatio = kIsWeb ? 0.30 : 0.25;
+    final maxWidth = kIsWeb ? 500.0 : 250.0;
 
-    final cardHeight = screenHeight * heightRatio > maxHeight
-        ? maxHeight
-        : screenHeight * heightRatio;
-    final cardWidth =
-        cardHeight * 0.706; // Same aspect ratio as deck cards (120/170)
+    final cardWidth = screenWidth * widthRatio > maxWidth
+        ? maxWidth
+        : screenWidth * widthRatio;
+    final cardHeight =
+        cardWidth * 0.706; // Landscape: width > height (flipped from portrait)
 
     // For web, add much larger font sizes to card logos
-    final logoFontSize = kIsWeb ? cardHeight * 0.08 : cardHeight * 0.05;
+    final logoFontSize = kIsWeb ? cardWidth * 0.08 : cardWidth * 0.05;
 
     return
         // Transform.scale(

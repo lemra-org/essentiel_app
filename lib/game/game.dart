@@ -1056,30 +1056,6 @@ class _GameState extends State<Game> {
                                 fontSize: kIsWeb ? 48.0 : 18.0,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600),
-                            labelWidget: kIsWeb
-                                ? Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 24, vertical: 16),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF62D739),
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 8,
-                                          offset: Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Text(
-                                      'À propos',
-                                      style: TextStyle(
-                                          fontSize: 48.0,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  )
-                                : null,
                             onTap: () => showAppAboutDialog(context),
                           ),
                           SpeedDialChild(
@@ -1092,30 +1068,6 @@ class _GameState extends State<Game> {
                                   fontSize: kIsWeb ? 48.0 : 18.0,
                                   color: Colors.white,
                                   fontWeight: FontWeight.w600),
-                              labelWidget: kIsWeb
-                                  ? Container(
-                                      padding: EdgeInsets.symmetric(
-                                          horizontal: 24, vertical: 16),
-                                      decoration: BoxDecoration(
-                                        color: const Color(0xFF12A0FF),
-                                        borderRadius: BorderRadius.circular(12),
-                                        boxShadow: [
-                                          BoxShadow(
-                                            color: Colors.black26,
-                                            blurRadius: 8,
-                                            offset: Offset(0, 4),
-                                          ),
-                                        ],
-                                      ),
-                                      child: Text(
-                                        'Filtres',
-                                        style: TextStyle(
-                                            fontSize: 48.0,
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600),
-                                      ),
-                                    )
-                                  : null,
                               onTap: () async => showDialog(
                                   context: context,
                                   barrierDismissible: false,
@@ -1205,30 +1157,6 @@ class _GameState extends State<Game> {
                                 fontSize: kIsWeb ? 48.0 : 18.0,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600),
-                            labelWidget: kIsWeb
-                                ? Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 24, vertical: 16),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF9C27B0),
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 8,
-                                          offset: Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Text(
-                                      'Recharger les cartes',
-                                      style: TextStyle(
-                                          fontSize: 48.0,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  )
-                                : null,
                             onTap: () => _handleRefresh(),
                           ),
                           SpeedDialChild(
@@ -1241,30 +1169,6 @@ class _GameState extends State<Game> {
                                 fontSize: kIsWeb ? 48.0 : 18.0,
                                 color: Colors.white,
                                 fontWeight: FontWeight.w600),
-                            labelWidget: kIsWeb
-                                ? Container(
-                                    padding: EdgeInsets.symmetric(
-                                        horizontal: 24, vertical: 16),
-                                    decoration: BoxDecoration(
-                                      color: const Color(0xFF97205E),
-                                      borderRadius: BorderRadius.circular(12),
-                                      boxShadow: [
-                                        BoxShadow(
-                                          color: Colors.black26,
-                                          blurRadius: 8,
-                                          offset: Offset(0, 4),
-                                        ),
-                                      ],
-                                    ),
-                                    child: Text(
-                                      'Mélanger les cartes',
-                                      style: TextStyle(
-                                          fontSize: 48.0,
-                                          color: Colors.white,
-                                          fontWeight: FontWeight.w600),
-                                    ),
-                                  )
-                                : null,
                             onTap: _shuffleCards,
                           ),
                         ],

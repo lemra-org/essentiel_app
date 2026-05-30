@@ -7,7 +7,7 @@ class EssentielCardData {
   final QuestionCategory? category;
   final String? question;
   final bool isForCouples;
-  final bool isForFamilies;
+  final bool isForParents;
   final bool isForParentChild;
   final bool isForInternalMood;
 
@@ -16,7 +16,7 @@ class EssentielCardData {
       @required this.question,
       this.isForInternalMood = false,
       this.isForCouples = false,
-      this.isForFamilies = false,
+      this.isForParents = false,
       this.isForParentChild = false});
 
   factory EssentielCardData.fromGSheet(Map<String, dynamic> json) {
@@ -29,7 +29,7 @@ class EssentielCardData {
             question.toString().toLowerCase().contains("météo"),
         isForCouples: json["Pour Couples"]?.toString().toLowerCase() ==
             "Oui".toLowerCase(),
-        isForFamilies: (json["Pour Parents"]?.toString().toLowerCase() ==
+        isForParents: (json["Pour Parents"]?.toString().toLowerCase() ==
                 "Oui".toLowerCase()) ||
             (json["Pour Familles"]?.toString().toLowerCase() ==
                 "Oui".toLowerCase()),

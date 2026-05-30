@@ -145,16 +145,16 @@ func TestGetQuestions_Success(t *testing.T) {
 	mockClient := &mockSheetsClient{
 		questions: []sheets.Question{
 			{
-				Category:    "Choisis la vie",
-				Question:    "Je partage une chose qui me remplit de joie",
-				ForCouples:  false,
-				ForFamilies: false,
+				Category:   "Choisis la vie",
+				Question:   "Je partage une chose qui me remplit de joie",
+				ForCouples: false,
+				ForParents: false,
 			},
 			{
-				Category:    "Parent - Enfant",
-				Question:    "Quel animal aimerais-tu être pour une journée ?",
-				ForCouples:  false,
-				ForFamilies: true,
+				Category:   "Parent - Enfant",
+				Question:   "Quel animal aimerais-tu être pour une journée ?",
+				ForCouples: false,
+				ForParents: true,
 			},
 		},
 	}
@@ -182,8 +182,8 @@ func TestGetQuestions_Success(t *testing.T) {
 		t.Errorf("Category mismatch: got %s", questions[0].Category)
 	}
 
-	if questions[1].Category != "Parent - Enfant" || !questions[1].ForFamilies {
-		t.Errorf("Parent-Enfant question should have forFamilies=true: %+v", questions[1])
+	if questions[1].Category != "Parent - Enfant" || !questions[1].ForParents {
+		t.Errorf("Parent-Enfant question should have forParents=true: %+v", questions[1])
 	}
 }
 

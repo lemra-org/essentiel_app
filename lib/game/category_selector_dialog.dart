@@ -66,7 +66,8 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
                   icon: Icon(Icons.check_box, size: 20.0),
                   label: Text(
                     'Toutes',
-                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                    style:
+                        TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.green[700],
@@ -89,7 +90,8 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
                   icon: Icon(Icons.clear, size: 20.0),
                   label: Text(
                     'Aucune',
-                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                    style:
+                        TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.red[700],
@@ -106,34 +108,34 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
             children: widget.all!.map((element) {
               final isSelected = selectedItems?.contains(element) ?? false;
               return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (selectedItems != null &&
-                            selectedItems!.contains(element)) {
-                          selectedItems!.remove(element);
-                        } else {
-                          if (selectedItems == null) {
-                            selectedItems = LinkedHashSet();
-                          }
-                          selectedItems!.add(element);
-                        }
-                      });
-                    },
-                    child: Chip(
-                      backgroundColor: widget.textBackgroundColorProvider != null
-                          ? widget.textBackgroundColorProvider!(element, isSelected)
+                onTap: () {
+                  setState(() {
+                    if (selectedItems != null &&
+                        selectedItems!.contains(element)) {
+                      selectedItems!.remove(element);
+                    } else {
+                      if (selectedItems == null) {
+                        selectedItems = LinkedHashSet();
+                      }
+                      selectedItems!.add(element);
+                    }
+                  });
+                },
+                child: Chip(
+                  backgroundColor: widget.textBackgroundColorProvider != null
+                      ? widget.textBackgroundColorProvider!(element, isSelected)
+                      : null,
+                  label: Text(
+                    element,
+                    style: TextStyle(
+                      fontSize: 20.0,
+                      color: widget.textColorProvider != null
+                          ? widget.textColorProvider!(element, isSelected)
                           : null,
-                      label: Text(
-                        element,
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          color: widget.textColorProvider != null
-                              ? widget.textColorProvider!(element, isSelected)
-                              : null,
-                        ),
-                      ),
                     ),
-                  );
+                  ),
+                ),
+              );
             }).toList(),
           ),
         ],

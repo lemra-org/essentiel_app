@@ -181,24 +181,24 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 		}
 
 		forCouples := false
-		forFamilies := false
+		forParents := false
 		if len(row) > couplesCol {
 			forCouples = toBool(row[couplesCol])
 		}
 		if len(row) > familiesCol {
-			forFamilies = toBool(row[familiesCol])
+			forParents = toBool(row[familiesCol])
 		}
 
-		// Parent-child questions are inherently family questions
+		// Parent-child questions are inherently parent questions
 		if category == "Parent - Enfant" {
-			forFamilies = true
+			forParents = true
 		}
 
 		questions = append(questions, Question{
-			Question:    questionText,
-			Category:    category,
-			ForCouples:  forCouples,
-			ForFamilies: forFamilies,
+			Question:   questionText,
+			Category:   category,
+			ForCouples: forCouples,
+			ForParents: forParents,
 		})
 	}
 

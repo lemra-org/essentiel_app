@@ -564,7 +564,7 @@ class _GameState extends State<Game> {
                           color: const Color(0xFFF06292),
                           size: 50.0,
                         )
-                      else if (cardData?.isForFamilies == true)
+                      else if (cardData?.isForParents == true)
                         Image.asset(
                           'assets/images/family.png',
                           fit: BoxFit.scaleDown,
@@ -610,7 +610,7 @@ class _GameState extends State<Game> {
                           ],
                         ),
                       // Spacing between icon and text
-                      if (cardData!.isForFamilies ||
+                      if (cardData!.isForParents ||
                           cardData.isForParentChild ||
                           cardData.isForCouples ||
                           cardData.isForInternalMood)
@@ -1161,7 +1161,7 @@ class _GameState extends State<Game> {
       if (_categoryListFilter!.contains(cardData.category!.title)) {
         return true;
       }
-      if (_categoryListFilter!.contains("Parents") && cardData.isForFamilies) {
+      if (_categoryListFilter!.contains("Parents") && cardData.isForParents) {
         return true;
       }
       if (_categoryListFilter!.contains("Couples") && cardData.isForCouples) {
@@ -1394,7 +1394,7 @@ class _GameState extends State<Game> {
               'question': card.question,
               'category': card.category?.title,
               'isForCouples': card.isForCouples,
-              'isForFamilies': card.isForFamilies,
+              'isForParents': card.isForParents,
             })
         .toList();
     await prefs.setString('cached_cards', cardsJson.toString());

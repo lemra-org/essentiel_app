@@ -79,18 +79,18 @@ class BackendApiService {
         final questionsJson = data['questions'] as List;
 
         // Convert API response to format compatible with EssentielCardData.fromGSheet
-        // API returns: {question, category, forCouples, forFamilies}
+        // API returns: {question, category, forCouples, forParents}
         // We need to map to: {Question, Catégorie, Pour Couples, Pour Parents}
         final questions = questionsJson.map((questionJson) {
           // Safely extract boolean values with fallback to false
           final forCouples = questionJson['forCouples'] == true;
-          final forFamilies = questionJson['forFamilies'] == true;
+          final forParents = questionJson['forParents'] == true;
 
           return {
             'Question': questionJson['question'] as String? ?? '',
             'Catégorie': questionJson['category'] as String? ?? '',
             'Pour Couples': forCouples ? 'Oui' : 'Non',
-            'Pour Parents': forFamilies ? 'Oui' : 'Non',
+            'Pour Parents': forParents ? 'Oui' : 'Non',
             // Note: forParentChild is NOT in API response - derived from category in EssentielCardData.fromGSheet
           };
         }).toList();

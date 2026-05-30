@@ -101,17 +101,8 @@ jobs:
       - run: |
           flutter analyze --suggestions
       - run: flutter pub get
-      - name: Build debug APK
-        run: flutter build apk --debug
-      - name: Upload debug APK artifact
-        uses: actions/upload-artifact@v7
-        with:
-          name: android-debug-apk
-          path: build/app/outputs/flutter-apk/app-debug.apk
-          retention-days: 1
-          if-no-files-found: error
 
-      # Build production APK for PRs from same repo
+      # For same-repo PRs: build production APK only
       - name: Setup release keystore
         if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
         run: |
@@ -139,6 +130,20 @@ jobs:
           name: android-apk-pr-${{ github.event.pull_request.number }}
           path: build/app/outputs/flutter-apk/app-release.apk
           retention-days: 30
+          if-no-files-found: error
+
+      # For all other events (push, fork PRs): build debug APK only
+      - name: Build debug APK
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+        run: flutter build apk --debug
+
+      - name: Upload debug APK artifact
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-debug-apk
+          path: build/app/outputs/flutter-apk/app-debug.apk
+          retention-days: 1
           if-no-files-found: error
 
   build_ios:

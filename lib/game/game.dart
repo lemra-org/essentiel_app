@@ -733,7 +733,8 @@ class _GameState extends State<Game> {
                 constraints: BoxConstraints(minHeight: availableHeight),
                 child: Column(
                   children: [
-                    Expanded(
+                    SizedBox(
+                      height: cardDisplayHeight,
                       child: Stack(
                         children: [
                           widgetToDisplay,

@@ -151,13 +151,11 @@ class _GameState extends State<Game> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final availableHeight = constraints.maxHeight;
-              // On web, balance space between popup card area and horizontal list
-              final cardListHeight =
-                  kIsWeb ? 150.0 : availableHeight * 0.35;
-              final spacerHeight =
-                  kIsWeb ? 10.0 : availableHeight * 0.04;
-              final cardDisplayHeight =
-                  availableHeight - cardListHeight - spacerHeight;
+              // Push horizontal scrollbar to very bottom of screen (mobile only)
+              // Web keeps original spacing
+              final cardListHeight = kIsWeb ? 150.0 : 180.0;
+              final spacerHeight = kIsWeb ? 10.0 : 0.0;
+              final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
 
               return SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
@@ -228,16 +226,21 @@ class _GameState extends State<Game> {
                                             ((value - fadeStart) /
                                                 (1.0 - fadeStart));
 
+                                    // Use landscape cards for both web and mobile
+                                    final deckCardWidth = 170.0;
+                                    final deckCardHeight = 120.0;
+                                    final leftOffset = 85.0;
+
                                     return Positioned(
-                                      left: screenWidth / 2 - 60 + spreadX,
+                                      left: screenWidth / 2 - leftOffset + spreadX,
                                       top: currentY + stackOffset * (1 - value),
                                       child: Transform.rotate(
                                         angle: rotation * (1 - value),
                                         child: Opacity(
                                           opacity: fadeValue,
                                           child: Container(
-                                            width: 120,
-                                            height: 170,
+                                            width: deckCardWidth,
+                                            height: deckCardHeight,
                                             decoration: BoxDecoration(
                                               borderRadius:
                                                   BorderRadius.circular(8.0),
@@ -250,8 +253,8 @@ class _GameState extends State<Game> {
                                             child: Image.asset(
                                               "assets/images/essentiel_logo.svg.png",
                                               fit: BoxFit.contain,
-                                              cacheWidth: 240,
-                                              cacheHeight: 340,
+                                              cacheWidth: (deckCardWidth * 2).toInt(),
+                                              cacheHeight: (deckCardHeight * 2).toInt(),
                                             ),
                                           ),
                                         ),
@@ -264,7 +267,7 @@ class _GameState extends State<Game> {
                           ],
                         ),
                       ),
-                      SizedBox(height: spacerHeight),
+                      if (spacerHeight > 0) SizedBox(height: spacerHeight),
                       // Horizontal list fades in as deck cards fade out
                       SizedBox(
                         height: cardListHeight,
@@ -638,7 +641,7 @@ class _GameState extends State<Game> {
                                 fontSize: kIsWeb ? 56.0 : 19.0,
                                 color: cardData.category!.color,
                                 wordSpacing: 2.0,
-                                height: 1.75,
+                                height: 1.5,
                                 fontWeight: FontWeight.bold),
                             textAlign: TextAlign.center,
                           ),
@@ -722,15 +725,11 @@ class _GameState extends State<Game> {
             final availableHeight = constraints.maxHeight;
             final screenWidth = MediaQuery.of(context).size.width;
 
-            // Balanced allocation for card list - enough room without overwhelming
-            // For web, push horizontal scrollbar to bottom near menu buttons
-            final isMobileWeb = kIsWeb && screenWidth < 600;
-            final cardListHeight =
-                kIsWeb ? 150.0 : availableHeight * 0.35;
-            final spacerHeight =
-                kIsWeb ? 10.0 : availableHeight * 0.04;
-            final cardDisplayHeight =
-                availableHeight - cardListHeight - spacerHeight;
+            // Push horizontal scrollbar to very bottom of screen (mobile only)
+            // Web keeps original spacing
+            final cardListHeight = kIsWeb ? 150.0 : 180.0;
+            final spacerHeight = kIsWeb ? 10.0 : 0.0;
+            final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
 
             return SingleChildScrollView(
               physics: AlwaysScrollableScrollPhysics(),
@@ -746,9 +745,7 @@ class _GameState extends State<Game> {
                         ],
                       ),
                     ),
-                    SizedBox(
-                      height: spacerHeight,
-                    ),
+                    if (spacerHeight > 0) SizedBox(height: spacerHeight),
                     SizedBox(
                         height: cardListHeight,
                         child: Showcase(

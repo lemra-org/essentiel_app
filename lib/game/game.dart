@@ -435,7 +435,12 @@ class _GameState extends State<Game> {
         final isWeb = kIsWeb;
 
         widgetToDisplay = Container(
-            padding: const EdgeInsets.all(15.0),
+            padding: EdgeInsets.only(
+              top: 15.0,
+              left: 15.0,
+              right: 15.0,
+              bottom: kIsWeb ? 15.0 : 200.0, // Extra padding on mobile for horizontal scrollbar
+            ),
             child: Center(
               child: Stack(
                 alignment: Alignment.center,

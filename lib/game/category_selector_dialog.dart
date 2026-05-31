@@ -40,10 +40,12 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
   Widget build(BuildContext context) {
     return AlertDialog(
       title: widget.title,
-      content: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      content: SizedBox(
+        width: double.maxFinite,
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           // Select All / Deselect All action buttons
           Container(
             padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 12.0),
@@ -104,44 +106,49 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
             ),
           ),
           SizedBox(height: 16.0),
-          // Category chips
-          Wrap(
-            spacing: 8.0,
-            runSpacing: 8.0,
-            children: widget.all!.map((element) {
-              final isSelected = selectedItems?.contains(element) ?? false;
-              return GestureDetector(
-                onTap: () {
-                  setState(() {
-                    if (selectedItems != null &&
-                        selectedItems!.contains(element)) {
-                      selectedItems!.remove(element);
-                    } else {
-                      if (selectedItems == null) {
-                        selectedItems = LinkedHashSet();
-                      }
-                      selectedItems!.add(element);
-                    }
-                  });
-                },
-                child: Chip(
-                  backgroundColor: widget.textBackgroundColorProvider != null
-                      ? widget.textBackgroundColorProvider!(element, isSelected)
-                      : null,
-                  label: Text(
-                    element,
-                    style: TextStyle(
-                      fontSize: kIsWeb ? 44.0 : 20.0,
-                      color: widget.textColorProvider != null
-                          ? widget.textColorProvider!(element, isSelected)
+          // Category chips - scrollable
+          Flexible(
+            child: SingleChildScrollView(
+              child: Wrap(
+                spacing: 8.0,
+                runSpacing: 8.0,
+                children: widget.all!.map((element) {
+                  final isSelected = selectedItems?.contains(element) ?? false;
+                  return GestureDetector(
+                    onTap: () {
+                      setState(() {
+                        if (selectedItems != null &&
+                            selectedItems!.contains(element)) {
+                          selectedItems!.remove(element);
+                        } else {
+                          if (selectedItems == null) {
+                            selectedItems = LinkedHashSet();
+                          }
+                          selectedItems!.add(element);
+                        }
+                      });
+                    },
+                    child: Chip(
+                      backgroundColor: widget.textBackgroundColorProvider != null
+                          ? widget.textBackgroundColorProvider!(element, isSelected)
                           : null,
+                      label: Text(
+                        element,
+                        style: TextStyle(
+                          fontSize: kIsWeb ? 44.0 : 16.0,
+                          color: widget.textColorProvider != null
+                              ? widget.textColorProvider!(element, isSelected)
+                              : null,
+                        ),
+                      ),
                     ),
-                  ),
-                ),
-              );
-            }).toList(),
+                  );
+                }).toList(),
+              ),
+            ),
           ),
-        ],
+          ],
+        ),
       ),
       actions: [
         TextButton(

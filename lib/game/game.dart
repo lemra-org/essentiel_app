@@ -880,7 +880,7 @@ class _GameState extends State<Game> {
             child: Text(
               title,
               style: TextStyle(
-                fontSize: kIsWeb ? 42.0 : 36.0,
+                fontSize: kIsWeb ? 42.0 : 28.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,

@@ -706,6 +706,15 @@ class _GameState extends State<Game> {
 
         // Wrap in slide-up animation only for first card
         final isFirstCard = _previousIndex == null;
+
+        // Add bottom padding on mobile to prevent horizontal scrollbar from hiding content
+        final cardWithPadding = kIsWeb
+            ? cardContent
+            : Padding(
+                padding: const EdgeInsets.only(bottom: 200.0), // Space for horizontal scrollbar + FABs
+                child: cardContent,
+              );
+
         widgetToDisplay = Align(
           alignment: kIsWeb ? Alignment(0, -0.3) : Alignment.center,
           child: isFirstCard
@@ -720,9 +729,9 @@ class _GameState extends State<Game> {
                       child: Opacity(opacity: value, child: child),
                     );
                   },
-                  child: cardContent,
+                  child: cardWithPadding,
                 )
-              : cardContent,
+              : cardWithPadding,
         );
       }
       body = RefreshIndicator(

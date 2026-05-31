@@ -115,7 +115,7 @@ func (c *Client) FetchCategories(ctx context.Context) ([]Category, error) {
 }
 
 // FetchQuestions reads the Questions sheet and returns parsed Question objects
-// Expected columns: Catégorie, Question, Pour Couples, Pour Familles (detected from header row)
+// Expected columns: Catégorie, Question, Pour Couples, Pour Parents (detected from header row)
 func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 	// Fetch all columns - header parsing will find the right ones by name
 	resp, err := c.service.Spreadsheets.Values.Get(c.spreadsheetID, "Questions!A:Z").Context(ctx).Do()
@@ -143,7 +143,7 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 			questionCol = i
 		case "Pour Couples", "For Couples":
 			couplesCol = i
-		case "Pour Familles", "For Families":
+		case "Pour Parents", "For Parents", "Pour Familles", "For Families":
 			familiesCol = i
 		}
 	}
@@ -181,24 +181,24 @@ func (c *Client) FetchQuestions(ctx context.Context) ([]Question, error) {
 		}
 
 		forCouples := false
-		forFamilies := false
+		forParents := false
 		if len(row) > couplesCol {
 			forCouples = toBool(row[couplesCol])
 		}
 		if len(row) > familiesCol {
-			forFamilies = toBool(row[familiesCol])
+			forParents = toBool(row[familiesCol])
 		}
 
-		// Parent-child questions are inherently family questions
+		// Parent-child questions are inherently parent questions
 		if category == "Parent - Enfant" {
-			forFamilies = true
+			forParents = true
 		}
 
 		questions = append(questions, Question{
-			Question:    questionText,
-			Category:    category,
-			ForCouples:  forCouples,
-			ForFamilies: forFamilies,
+			Question:   questionText,
+			Category:   category,
+			ForCouples: forCouples,
+			ForParents: forParents,
 		})
 	}
 

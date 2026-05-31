@@ -14,12 +14,13 @@ class BackendApiService {
   /// Fetch all categories from the backend API
   /// Returns a list of QuestionCategory objects
   /// Set [forceRefresh] to true to bypass cache and fetch fresh data from spreadsheet
-  Future<List<QuestionCategory>> fetchCategories({bool forceRefresh = false}) async {
+  Future<List<QuestionCategory>> fetchCategories(
+      {bool forceRefresh = false}) async {
     try {
       final uri = Uri.parse('$baseUrl/api/categories');
       final uriWithParams = forceRefresh
-        ? uri.replace(queryParameters: {'refresh': 'true'})
-        : uri;
+          ? uri.replace(queryParameters: {'refresh': 'true'})
+          : uri;
 
       final response = await http.get(
         uriWithParams,
@@ -44,9 +45,11 @@ class BackendApiService {
 
         return categories;
       } else if (response.statusCode == 503) {
-        throw Exception('Service indisponible. Impossible de récupérer les données.');
+        throw Exception(
+            'Service indisponible. Impossible de récupérer les données.');
       } else {
-        throw Exception('Erreur lors de la récupération des catégories: ${response.statusCode}');
+        throw Exception(
+            'Erreur lors de la récupération des catégories: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Erreur de connexion au serveur: $e');
@@ -57,12 +60,13 @@ class BackendApiService {
   /// Returns a list of question data as Maps
   /// Note: The API does not return forParentChild - it must be derived client-side
   /// Set [forceRefresh] to true to bypass cache and fetch fresh data from spreadsheet
-  Future<List<Map<String, dynamic>>> fetchQuestions({bool forceRefresh = false}) async {
+  Future<List<Map<String, dynamic>>> fetchQuestions(
+      {bool forceRefresh = false}) async {
     try {
       final uri = Uri.parse('$baseUrl/api/questions');
       final uriWithParams = forceRefresh
-        ? uri.replace(queryParameters: {'refresh': 'true'})
-        : uri;
+          ? uri.replace(queryParameters: {'refresh': 'true'})
+          : uri;
 
       final response = await http.get(
         uriWithParams,
@@ -75,27 +79,29 @@ class BackendApiService {
         final questionsJson = data['questions'] as List;
 
         // Convert API response to format compatible with EssentielCardData.fromGSheet
-        // API returns: {question, category, forCouples, forFamilies}
-        // We need to map to: {Question, Catégorie, Pour Couples, Pour Familles}
+        // API returns: {question, category, forCouples, forParents}
+        // We need to map to: {Question, Catégorie, Pour Couples, Pour Parents}
         final questions = questionsJson.map((questionJson) {
           // Safely extract boolean values with fallback to false
           final forCouples = questionJson['forCouples'] == true;
-          final forFamilies = questionJson['forFamilies'] == true;
+          final forParents = questionJson['forParents'] == true;
 
           return {
             'Question': questionJson['question'] as String? ?? '',
             'Catégorie': questionJson['category'] as String? ?? '',
             'Pour Couples': forCouples ? 'Oui' : 'Non',
-            'Pour Familles': forFamilies ? 'Oui' : 'Non',
+            'Pour Parents': forParents ? 'Oui' : 'Non',
             // Note: forParentChild is NOT in API response - derived from category in EssentielCardData.fromGSheet
           };
         }).toList();
 
         return questions;
       } else if (response.statusCode == 503) {
-        throw Exception('Service indisponible. Impossible de récupérer les questions.');
+        throw Exception(
+            'Service indisponible. Impossible de récupérer les questions.');
       } else {
-        throw Exception('Erreur lors de la récupération des questions: ${response.statusCode}');
+        throw Exception(
+            'Erreur lors de la récupération des questions: ${response.statusCode}');
       }
     } catch (e) {
       throw Exception('Erreur de connexion au serveur: $e');

@@ -7,7 +7,7 @@ class EssentielCardData {
   final QuestionCategory? category;
   final String? question;
   final bool isForCouples;
-  final bool isForFamilies;
+  final bool isForParents;
   final bool isForParentChild;
   final bool isForInternalMood;
 
@@ -16,7 +16,7 @@ class EssentielCardData {
       @required this.question,
       this.isForInternalMood = false,
       this.isForCouples = false,
-      this.isForFamilies = false,
+      this.isForParents = false,
       this.isForParentChild = false});
 
   factory EssentielCardData.fromGSheet(Map<String, dynamic> json) {
@@ -29,8 +29,10 @@ class EssentielCardData {
             question.toString().toLowerCase().contains("météo"),
         isForCouples: json["Pour Couples"]?.toString().toLowerCase() ==
             "Oui".toLowerCase(),
-        isForFamilies: json["Pour Familles"]?.toString().toLowerCase() ==
-            "Oui".toLowerCase(),
+        isForParents: (json["Pour Parents"]?.toString().toLowerCase() ==
+                "Oui".toLowerCase()) ||
+            (json["Pour Familles"]?.toString().toLowerCase() ==
+                "Oui".toLowerCase()),
         isForParentChild: categoryName?.toString() == "Parent - Enfant");
   }
 }
@@ -55,17 +57,18 @@ class _EssentielCardState extends State<EssentielCard> {
 
     // Cards for horizontal list: balanced size with good spacing around logo
     // Maintain playing card aspect ratio (roughly 2.5:3.5 or 0.71)
-    // For mobile web, use larger cards for better readability
-    final isMobileWeb = kIsWeb && screenWidth < 600;
-    final baseHeightRatio = isMobileWeb ? 0.55 : 0.38;
-    final maxCardHeight = isMobileWeb ? 600.0 : 380.0;
+    // For web: smaller cards in horizontal scrollbar (200px height)
+    final baseHeightRatio = kIsWeb ? 0.20 : 0.38;
+    final maxCardHeight = kIsWeb ? 200.0 : 380.0;
 
-    final cardHeight = screenHeight * baseHeightRatio > maxCardHeight ? maxCardHeight : screenHeight * baseHeightRatio;
+    final cardHeight = screenHeight * baseHeightRatio > maxCardHeight
+        ? maxCardHeight
+        : screenHeight * baseHeightRatio;
     final cardWidth = cardHeight * 0.71;
 
-    // Responsive font sizes based on card height
-    final questionFontSize = cardHeight * 0.065; // ~6.5% of card height
-    final categoryFontSize = cardHeight * 0.05;  // ~5% of card height
+    // Font sizes adjusted for smaller web cards in horizontal list
+    final questionFontSize = kIsWeb ? 14.0 : cardHeight * 0.065;
+    final categoryFontSize = kIsWeb ? 12.0 : cardHeight * 0.05;
 
     return ConstrainedBox(
       constraints: BoxConstraints(
@@ -83,8 +86,7 @@ class _EssentielCardState extends State<EssentielCard> {
           height: cardHeight,
           width: cardWidth,
           child: Image.asset("assets/images/essentiel_logo.svg.png",
-              fit: BoxFit.fill,
-              cacheWidth: (cardWidth * 2).toInt()),
+              fit: BoxFit.fill, cacheWidth: (cardWidth * 2).toInt()),
         ),
         back: Container(
             decoration: BoxDecoration(
@@ -93,40 +95,40 @@ class _EssentielCardState extends State<EssentielCard> {
                 color: Colors.white),
             height: cardHeight,
             width: cardWidth,
-          child: Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: Stack(
-              children: [
-                Center(
-                  child: Text(
-                    widget.cardData!.question!,
-                    textAlign: TextAlign.center,
-                    style: TextStyle(
-                        fontSize: questionFontSize,
-                        color: widget.cardData!.category!.color),
-                  ),
-                ),
-                Positioned.fill(
-                    child: Align(
-                  alignment: Alignment.bottomCenter,
-                  child: Container(
-                    padding: const EdgeInsets.all(10.0),
-                    decoration: BoxDecoration(
-                      color: widget.cardData!.category!.color,
-                    ),
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Stack(
+                children: [
+                  Center(
                     child: Text(
-                      widget.cardData!.category!.title!,
+                      widget.cardData!.question!,
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: categoryFontSize,
-                        color: Colors.white,
-                      ),
+                          fontSize: questionFontSize,
+                          color: widget.cardData!.category!.color),
                     ),
                   ),
-                )),
-              ],
-            ),
-          )),
+                  Positioned.fill(
+                      child: Align(
+                    alignment: Alignment.bottomCenter,
+                    child: Container(
+                      padding: const EdgeInsets.all(10.0),
+                      decoration: BoxDecoration(
+                        color: widget.cardData!.category!.color,
+                      ),
+                      child: Text(
+                        widget.cardData!.category!.title!,
+                        textAlign: TextAlign.center,
+                        style: TextStyle(
+                          fontSize: categoryFontSize,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                  )),
+                ],
+              ),
+            )),
       ),
     );
   }

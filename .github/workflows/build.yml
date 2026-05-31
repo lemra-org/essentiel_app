@@ -69,6 +69,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-java@v5
         with:
           distribution: 'temurin'
@@ -101,9 +102,44 @@ jobs:
       - run: |
           flutter analyze --suggestions
       - run: flutter pub get
-      - name: Build APK
+
+      # For same-repo PRs: build production APK only
+      - name: Setup release keystore
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: |
+          echo "${{ secrets.RELEASE_KEYSTORE }}" | base64 -d > ${{ runner.temp }}/release.keystore
+          mkdir -p ~/.droid
+          cat > ~/.droid/essentiel.keystore.properties <<EOF
+          keystore=${{ runner.temp }}/release.keystore
+          keyPassword=${{ secrets.KEYSTORE_PASSWORD }}
+          EOF
+
+      - name: Setup production environment
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: echo "${PROD_DART}" > lib/environments/prod.dart
+        env:
+          PROD_DART: ${{ secrets.PROD_DART }}
+
+      - name: Build production APK
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        run: flutter build apk --release -t lib/environments/prod.dart
+
+      - name: Upload production APK artifact
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        uses: actions/upload-artifact@v7
+        with:
+          name: android-apk-pr-${{ github.event.pull_request.number }}
+          path: build/app/outputs/flutter-apk/app-release.apk
+          retention-days: 30
+          if-no-files-found: error
+
+      # For all other events (push, fork PRs): build debug APK only
+      - name: Build debug APK
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
         run: flutter build apk --debug
+
       - name: Upload debug APK artifact
+        if: github.event_name != 'pull_request' || github.event.pull_request.head.repo.full_name != github.repository
         uses: actions/upload-artifact@v7
         with:
           name: android-debug-apk

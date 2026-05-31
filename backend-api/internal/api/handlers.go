@@ -99,10 +99,10 @@ func GetQuestions(sheetsClient sheets.Fetcher, cacheInstance *cache.Cache) http.
 				for _, item := range v {
 					if itemMap, ok := item.(map[string]interface{}); ok {
 						q := sheets.Question{
-							Question:    itemMap["question"].(string),
-							Category:    itemMap["category"].(string),
-							ForCouples:  itemMap["forCouples"].(bool),
-							ForFamilies: itemMap["forFamilies"].(bool),
+							Question:   itemMap["question"].(string),
+							Category:   itemMap["category"].(string),
+							ForCouples: itemMap["forCouples"].(bool),
+							ForParents: itemMap["forParents"].(bool),
 						}
 						questions = append(questions, q)
 					}

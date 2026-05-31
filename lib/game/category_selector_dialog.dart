@@ -1,5 +1,6 @@
 import 'dart:collection';
 
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 
@@ -66,7 +67,9 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
                   icon: Icon(Icons.check_box, size: 20.0),
                   label: Text(
                     'Toutes',
-                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: kIsWeb ? 36.0 : 16.0,
+                        fontWeight: FontWeight.w600),
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.green[700],
@@ -89,7 +92,9 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
                   icon: Icon(Icons.clear, size: 20.0),
                   label: Text(
                     'Aucune',
-                    style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.w600),
+                    style: TextStyle(
+                        fontSize: kIsWeb ? 36.0 : 16.0,
+                        fontWeight: FontWeight.w600),
                   ),
                   style: TextButton.styleFrom(
                     foregroundColor: Colors.red[700],
@@ -106,34 +111,34 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
             children: widget.all!.map((element) {
               final isSelected = selectedItems?.contains(element) ?? false;
               return GestureDetector(
-                    onTap: () {
-                      setState(() {
-                        if (selectedItems != null &&
-                            selectedItems!.contains(element)) {
-                          selectedItems!.remove(element);
-                        } else {
-                          if (selectedItems == null) {
-                            selectedItems = LinkedHashSet();
-                          }
-                          selectedItems!.add(element);
-                        }
-                      });
-                    },
-                    child: Chip(
-                      backgroundColor: widget.textBackgroundColorProvider != null
-                          ? widget.textBackgroundColorProvider!(element, isSelected)
+                onTap: () {
+                  setState(() {
+                    if (selectedItems != null &&
+                        selectedItems!.contains(element)) {
+                      selectedItems!.remove(element);
+                    } else {
+                      if (selectedItems == null) {
+                        selectedItems = LinkedHashSet();
+                      }
+                      selectedItems!.add(element);
+                    }
+                  });
+                },
+                child: Chip(
+                  backgroundColor: widget.textBackgroundColorProvider != null
+                      ? widget.textBackgroundColorProvider!(element, isSelected)
+                      : null,
+                  label: Text(
+                    element,
+                    style: TextStyle(
+                      fontSize: kIsWeb ? 44.0 : 20.0,
+                      color: widget.textColorProvider != null
+                          ? widget.textColorProvider!(element, isSelected)
                           : null,
-                      label: Text(
-                        element,
-                        style: TextStyle(
-                          fontSize: 20.0,
-                          color: widget.textColorProvider != null
-                              ? widget.textColorProvider!(element, isSelected)
-                              : null,
-                        ),
-                      ),
                     ),
-                  );
+                  ),
+                ),
+              );
             }).toList(),
           ),
         ],
@@ -143,7 +148,8 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
           onPressed: () => Navigator.of(context).pop(),
           child: Text(
             'Annuler'.toUpperCase(),
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: kIsWeb ? 36.0 : 16.0, fontWeight: FontWeight.bold),
           ),
           style: TextButton.styleFrom(foregroundColor: Colors.blue),
         ),
@@ -164,7 +170,7 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
         //   },
         //   child: Text(
         //       'Tout ${selectedItems?.isEmpty ?? true ? '' : 'dé'}sélectionner',
-        //       style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),),
+        //       style: TextStyle(fontSize: kIsWeb ? 36.0 : 16.0, fontWeight: FontWeight.bold),),
         // ),
         TextButton(
           onPressed: () {
@@ -176,7 +182,7 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
                   gravity: ToastGravity.SNACKBAR,
                   backgroundColor: Colors.red,
                   textColor: Colors.white,
-                  fontSize: 16.0);
+                  fontSize: kIsWeb ? 36.0 : 16.0);
             } else {
               if (selectedItems != null && widget.callback != null) {
                 widget.callback!(selectedItems!.toList(growable: false));
@@ -186,7 +192,8 @@ class _CategorySelectorDialogState extends State<CategorySelectorDialog> {
           },
           child: Text(
             'Appliquer'.toUpperCase(),
-            style: TextStyle(fontSize: 16.0, fontWeight: FontWeight.bold),
+            style: TextStyle(
+                fontSize: kIsWeb ? 36.0 : 16.0, fontWeight: FontWeight.bold),
           ),
           style: TextButton.styleFrom(foregroundColor: Colors.blue),
         ),

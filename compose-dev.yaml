@@ -16,4 +16,6 @@ services:
       dockerfile: Dockerfile
       args:
         BUILD_ENV: ${BUILD_ENV:-dev}
+        VERSION_NAME: ${VERSION_NAME:-1.0.0}
+        VERSION_CODE: ${VERSION_CODE:-1}
     image: essentiel-frontend:dev

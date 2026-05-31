@@ -35,11 +35,18 @@ COPY . .
 
 # Build for production
 ARG BUILD_ENV=prod
-RUN flutter build web \
-    --release \
-    --base-href="/" \
-    --tree-shake-icons \
-    -t lib/environments/web_${BUILD_ENV}.dart
+ARG VERSION_NAME=1.0.0-web
+ARG VERSION_CODE=1
+
+# Build with version
+RUN echo "Building version: $VERSION_NAME (code: $VERSION_CODE)" && \
+    flutter build web \
+        --release \
+        --base-href="/" \
+        --tree-shake-icons \
+        --build-name="$VERSION_NAME" \
+        --build-number="$VERSION_CODE" \
+        -t lib/environments/web_${BUILD_ENV}.dart
 
 # Stage 2: Serve with nginx
 FROM nginx:alpine

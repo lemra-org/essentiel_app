@@ -31,10 +31,13 @@ import 'package:googleapis_auth/googleapis_auth.dart';
 const _spreadsheetId = '1cR8lE6eCvDrgUXAVD1bmm36j6v5MtOEurSOAEfrTcCI';
 
 const title = 'Jeu Essentiel';
+// Updated: 2026-05-30 - Large text for mobile web
 
 // French error messages for refresh failures
-const _errorNoNetwork = "Pas de connexion réseau. Veuillez vérifier votre connexion.";
-const _errorTimeout = "Le chargement des questions a expiré. Réessayez plus tard.";
+const _errorNoNetwork =
+    "Pas de connexion réseau. Veuillez vérifier votre connexion.";
+const _errorTimeout =
+    "Le chargement des questions a expiré. Réessayez plus tard.";
 const _errorAccess = "Impossible d'accéder à la feuille de calcul.";
 const _errorGeneric = "Erreur lors du chargement des questions.";
 
@@ -56,6 +59,7 @@ class _GameState extends State<Game> {
   List<String>? _categoryListFilter;
   bool _isRefreshing = false;
   bool _showDealingAnimation = false;
+  int? _previousIndex; // Track previous card for animation logic
 
   final ItemScrollController itemScrollController = ItemScrollController();
   final ItemPositionsListener itemPositionsListener =
@@ -137,10 +141,9 @@ class _GameState extends State<Game> {
       //Not initialized yet or showing dealing animation
       if (_showDealingAnimation) {
         // Show stacked deck animation with seamless transition to horizontal list
-        // Reduce card count on mobile browsers for better performance
-        final isMobileBrowser = kIsWeb && screenWidth < 600;
-        final numDeckCards = isMobileBrowser ? 12 : 20;
-        final cardHeight = screenHeight * 0.38 > 380 ? 380.0 : screenHeight * 0.38;
+        final numDeckCards = 20;
+        final cardHeight =
+            screenHeight * 0.38 > 380 ? 380.0 : screenHeight * 0.38;
         final cardWidth = cardHeight * 0.71;
 
         body = RefreshIndicator(
@@ -148,9 +151,13 @@ class _GameState extends State<Game> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final availableHeight = constraints.maxHeight;
-              final cardListHeight = availableHeight * 0.35;
-              final spacerHeight = availableHeight * 0.04;
-              final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
+              // On web, balance space between popup card area and horizontal list
+              final cardListHeight =
+                  kIsWeb ? 150.0 : availableHeight * 0.35;
+              final spacerHeight =
+                  kIsWeb ? 10.0 : availableHeight * 0.04;
+              final cardDisplayHeight =
+                  availableHeight - cardListHeight - spacerHeight;
 
               return SingleChildScrollView(
                 physics: AlwaysScrollableScrollPhysics(),
@@ -165,7 +172,8 @@ class _GameState extends State<Game> {
                             // Blurred logo in background
                             Center(
                               child: ImageFiltered(
-                                imageFilter: ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
+                                imageFilter:
+                                    ImageFilter.blur(sigmaX: 5.0, sigmaY: 5.0),
                                 child: Opacity(
                                   opacity: 0.6,
                                   child: Image.asset(
@@ -182,8 +190,7 @@ class _GameState extends State<Game> {
                             // Deck animation on top
                             TweenAnimationBuilder<double>(
                               tween: Tween<double>(begin: 0.0, end: 1.0),
-                              // Shorter duration on mobile browsers for better performance
-                              duration: Duration(milliseconds: isMobileBrowser ? 1200 : 2000),
+                              duration: Duration(milliseconds: 2000),
                               curve: Curves.easeInOutCubic,
                               onEnd: () {
                                 setState(() {
@@ -192,22 +199,34 @@ class _GameState extends State<Game> {
                               },
                               builder: (context, value, child) {
                                 return Stack(
-                                  children: List.generate(numDeckCards, (index) {
+                                  children:
+                                      List.generate(numDeckCards, (index) {
                                     final double stackOffset = index * 2.0;
-                                    final double rotation = (index - numDeckCards / 2) * 0.015;
+                                    final double rotation =
+                                        (index - numDeckCards / 2) * 0.015;
 
                                     // Start at center, move to bottom where horizontal list is
-                                    final double startY = cardDisplayHeight * 0.3;
-                                    final double endY = cardDisplayHeight * 0.85;
-                                    final double currentY = startY + (endY - startY) * value;
+                                    final double startY =
+                                        cardDisplayHeight * 0.3;
+                                    final double endY =
+                                        cardDisplayHeight * 0.85;
+                                    final double currentY =
+                                        startY + (endY - startY) * value;
 
                                     // Spread horizontally across the bottom
                                     final double maxSpread = screenWidth * 0.8;
-                                    final double spreadX = ((index / numDeckCards) - 0.5) * maxSpread * value;
+                                    final double spreadX =
+                                        ((index / numDeckCards) - 0.5) *
+                                            maxSpread *
+                                            value;
 
                                     // Fade out as they settle
                                     final double fadeStart = 0.7;
-                                    final double fadeValue = value < fadeStart ? 1.0 : 1.0 - ((value - fadeStart) / (1.0 - fadeStart));
+                                    final double fadeValue = value < fadeStart
+                                        ? 1.0
+                                        : 1.0 -
+                                            ((value - fadeStart) /
+                                                (1.0 - fadeStart));
 
                                     return Positioned(
                                       left: screenWidth / 2 - 60 + spreadX,
@@ -220,8 +239,11 @@ class _GameState extends State<Game> {
                                             width: 120,
                                             height: 170,
                                             decoration: BoxDecoration(
-                                              borderRadius: BorderRadius.circular(8.0),
-                                              border: Border.all(color: Colors.black, width: 2.0),
+                                              borderRadius:
+                                                  BorderRadius.circular(8.0),
+                                              border: Border.all(
+                                                  color: Colors.black,
+                                                  width: 2.0),
                                               color: Colors.white,
                                             ),
                                             padding: EdgeInsets.all(10),
@@ -248,8 +270,7 @@ class _GameState extends State<Game> {
                         height: cardListHeight,
                         child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(begin: 0.0, end: 1.0),
-                          // Match deck animation duration - shorter on mobile browsers
-                          duration: Duration(milliseconds: (kIsWeb && screenWidth < 600) ? 1200 : 2000),
+                          duration: Duration(milliseconds: 2000),
                           curve: Interval(0.5, 1.0, curve: Curves.easeIn),
                           builder: (context, value, child) {
                             return Opacity(
@@ -263,16 +284,19 @@ class _GameState extends State<Game> {
                             onTargetClick: () {},
                             descTextStyle: TextStyle(fontSize: 20.0),
                             overlayOpacity: 0.6,
-                            description: 'Faites défiler de gauche à droite \npour découvrir plus de cartes',
+                            description:
+                                'Faites défiler de gauche à droite \npour découvrir plus de cartes',
                             child: AnimationLimiter(
                               child: ScrollablePositionedList.builder(
-                                physics: BouncingScrollPhysics(parent: AlwaysScrollableScrollPhysics()),
+                                physics: BouncingScrollPhysics(
+                                    parent: AlwaysScrollableScrollPhysics()),
                                 scrollDirection: Axis.horizontal,
                                 itemScrollController: itemScrollController,
                                 itemPositionsListener: itemPositionsListener,
                                 itemCount: _allCardsData!.length,
-                                itemBuilder: (BuildContext context, int index) =>
-                                    AnimationConfiguration.staggeredList(
+                                itemBuilder:
+                                    (BuildContext context, int index) =>
+                                        AnimationConfiguration.staggeredList(
                                   position: index,
                                   duration: const Duration(milliseconds: 175),
                                   child: Align(
@@ -282,22 +306,34 @@ class _GameState extends State<Game> {
                                       child: FadeInAnimation(
                                         child: GestureDetector(
                                           child: AnimatedContainer(
-                                            duration: Duration(milliseconds: 300),
-                                            margin: const EdgeInsets.only(left: 5.0),
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            margin: const EdgeInsets.only(
+                                                left: 5.0),
                                             child: ImageFiltered(
-                                              // Disable blur on mobile web during dealing animation for better performance
-                                              imageFilter: (kIsWeb && screenWidth < 600 && _showDealingAnimation)
-                                                  ? ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0)
-                                                  : (_currentIndex != null && _currentIndex != index
-                                                      ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
-                                                      : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0)),
+                                              imageFilter:
+                                                  _currentIndex != null &&
+                                                          _currentIndex != index
+                                                      ? ImageFilter.blur(
+                                                          sigmaX: 3.0,
+                                                          sigmaY: 3.0)
+                                                      : ImageFilter.blur(
+                                                          sigmaX: 0.0,
+                                                          sigmaY: 0.0),
                                               child: Opacity(
-                                                opacity: _currentIndex != null && _currentIndex != index ? 0.5 : 1.0,
+                                                opacity: _currentIndex !=
+                                                            null &&
+                                                        _currentIndex != index
+                                                    ? 0.5
+                                                    : 1.0,
                                                 child: EssentielCardWidget(
                                                     index: index,
-                                                    selected: _currentIndex == index,
-                                                    noCardSelected: _currentIndex == null,
-                                                    cardData: _allCardsData!.elementAt(index)),
+                                                    selected:
+                                                        _currentIndex == index,
+                                                    noCardSelected:
+                                                        _currentIndex == null,
+                                                    cardData: _allCardsData!
+                                                        .elementAt(index)),
                                               ),
                                             ),
                                           ),
@@ -331,7 +367,8 @@ class _GameState extends State<Game> {
         );
       } else {
         body = Center(
-            child: Column(mainAxisAlignment: MainAxisAlignment.center, children: [
+            child:
+                Column(mainAxisAlignment: MainAxisAlignment.center, children: [
           SpinKitCubeGrid(
             size: 100.0,
             itemBuilder: (BuildContext context, int idx) => DecoratedBox(
@@ -357,8 +394,8 @@ class _GameState extends State<Game> {
                                   : "Initialisation") +
                       " en cours. Merci de patienter quelques instants...",
                   textAlign: TextAlign.center,
-                  style:
-                      TextStyle(fontSize: 24, height: 1.7, color: Colors.white))),
+                  style: TextStyle(
+                      fontSize: 24, height: 1.7, color: Colors.white))),
         ]));
       }
     } else if (_allCardsData != null && _allCardsData!.isEmpty) {
@@ -428,11 +465,12 @@ class _GameState extends State<Game> {
                           ),
                         ),
                         SizedBox(height: 10.0),
-                        Text(
-                            "Secouez votre téléphone pour choisir une carte.",
+                        Text("Secouez votre téléphone pour choisir une carte.",
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                                fontSize: 24, height: 1.2, color: Colors.white)),
+                                fontSize: 24,
+                                height: 1.2,
+                                color: Colors.white)),
                       ],
                     ),
                 ],
@@ -445,111 +483,93 @@ class _GameState extends State<Game> {
         final isTablet = screenWidth >= 600 && screenWidth < 1200;
         final isDesktop = screenWidth >= 1200;
 
-        // Responsive card size: optimized for each screen size
-        final heightRatio = isMobile ? 0.6 : (isTablet ? 0.65 : 0.7);
-        final maxHeight = isMobile ? 500.0 : (isTablet ? 550.0 : 600.0);
-        final aspectRatio = isMobile ? 0.85 : 0.9;
-        final widthCap = isMobile ? 0.9 : (isTablet ? 0.85 : 0.8); // More constrained on desktop
+        // Responsive card size: for web, use much larger sizes for readability
+        // Allow card to grow beyond initial size if text overflows
+        final heightRatio =
+            kIsWeb ? 0.80 : (isMobile ? 0.6 : (isTablet ? 0.65 : 0.7));
+        final minHeight = kIsWeb ? 700.0 : (isMobile ? 500.0 : 550.0);
+        final maxHeight = kIsWeb
+            ? screenHeight * 0.85
+            : (isMobile ? 500.0 : (isTablet ? 550.0 : 600.0));
+        final aspectRatio = kIsWeb ? 1.3 : (isMobile ? 0.85 : 0.9);
+        final widthCap = kIsWeb
+            ? 0.70
+            : (isMobile
+                ? 0.9
+                : (isTablet ? 0.85 : 0.8)); // More constrained on desktop
 
-        final selectedCardHeight = screenHeight * heightRatio > maxHeight ? maxHeight : screenHeight * heightRatio;
+        final calculatedHeight = screenHeight * heightRatio;
+        final selectedCardHeight = calculatedHeight < minHeight
+            ? minHeight
+            : (calculatedHeight > maxHeight ? maxHeight : calculatedHeight);
         final calculatedWidth = selectedCardHeight * aspectRatio;
-        final selectedCardWidth = calculatedWidth > screenWidth * widthCap ? screenWidth * widthCap : calculatedWidth;
+        final selectedCardWidth = calculatedWidth > screenWidth * widthCap
+            ? screenWidth * widthCap
+            : calculatedWidth;
 
-        widgetToDisplay = Center(
-          // Outer animation for initial card selection (slide up from bottom)
-          child: TweenAnimationBuilder<double>(
-            key: ValueKey('card-container'),
-            tween: Tween<double>(begin: 0.0, end: 1.0),
-            duration: Duration(milliseconds: 700),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, child) {
-              return Transform.translate(
-                offset: Offset(0, (1 - value) * screenHeight * 0.5),
-                child: Opacity(
-                  opacity: value,
-                  child: child,
-                ),
-              );
-            },
-            // Inner animation for card-to-card switching
-            child: AnimatedSwitcher(
-              duration: Duration(milliseconds: 1000),
-              switchInCurve: Curves.easeOutCubic,
-              switchOutCurve: Curves.easeInCubic,
-              transitionBuilder: (Widget child, Animation<double> animation) {
-                // Check if this is the incoming or outgoing widget
-                if (child.key == ValueKey(_currentIndex)) {
-                  // New card: ALWAYS slide up from bottom
-                  final slideUpAnimation = Tween<Offset>(
-                    begin: Offset(0.0, 1.0), // Start from bottom (full screen height)
-                    end: Offset.zero,        // End at center
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeOutCubic,
-                  ));
+        // Build the card content (AnimatedSwitcher for card-to-card transitions)
+        final cardContent = AnimatedSwitcher(
+          duration: Duration(milliseconds: 600),
+          switchInCurve: Curves.easeInOut,
+          switchOutCurve: Curves.easeInOut,
+          transitionBuilder: (Widget child, Animation<double> animation) {
+            // Flip animation: rotate on Y-axis
+            return AnimatedBuilder(
+              animation: animation,
+              builder: (context, child) {
+                // Determine rotation angle based on whether this is incoming or outgoing
+                final isIncoming = child?.key == ValueKey(_currentIndex);
+                final rotationValue = isIncoming
+                    ? (1 - animation.value) *
+                        0.5 // Incoming: rotate from 90° to 0°
+                    : animation.value * 0.5; // Outgoing: rotate from 0° to 90°
 
-                  return SlideTransition(
-                    position: slideUpAnimation,
-                    child: FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                  );
-                } else {
-                  // Old card: slide UP to the top and fade out simultaneously
-                  final slideOutAnimation = Tween<Offset>(
-                    begin: Offset.zero,       // Start at center
-                    end: Offset(0.0, -1.0),   // Slide up to top (negative = up)
-                  ).animate(CurvedAnimation(
-                    parent: animation,
-                    curve: Curves.easeInCubic,
-                  ));
-
-                  return SlideTransition(
-                    position: slideOutAnimation,
-                    child: FadeTransition(
-                      opacity: animation,
-                      child: child,
-                    ),
-                  );
-                }
-              },
-              child: Stack(
-                key: ValueKey(_currentIndex), // Key changes trigger the animation
-              clipBehavior: Clip.none,
-              children: [
-                ConstrainedBox(
-                  constraints: BoxConstraints(
-                    maxWidth: selectedCardWidth,
-                    maxHeight: selectedCardHeight,
+                return Transform(
+                  transform: Matrix4.identity()
+                    ..setEntry(3, 2, 0.001) // perspective
+                    ..rotateY(3.14159 * rotationValue), // rotate around Y-axis
+                  alignment: Alignment.center,
+                  child: Opacity(
+                    opacity:
+                        isIncoming ? animation.value : (1 - animation.value),
+                    child: child,
                   ),
-                  child: Container(
-                  padding: const EdgeInsets.all(10.0),
-                  decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(8.0),
-                      border: Border.all(color: Colors.black, width: 2.0),
-                      color: Colors.white),
-                  // height: screenHeight * 0.1,
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Stack(
-                    children: [
-                  // Parent-Child takes precedence over Families icon
-                  if (cardData?.isForParentChild == true)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.topCenter,
+                );
+              },
+              child: child,
+            );
+          },
+          child: Stack(
+            key: ValueKey(_currentIndex), // Key changes trigger the animation
+            clipBehavior: Clip.none,
+            children: [
+              Container(
+                constraints: BoxConstraints(
+                  minWidth: selectedCardWidth * 0.9,
+                  maxWidth: selectedCardWidth,
+                  minHeight: kIsWeb ? 800.0 : selectedCardHeight * 0.8,
+                  maxHeight: kIsWeb ? screenHeight * 0.95 : selectedCardHeight,
+                ),
+                decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(8.0),
+                    border: Border.all(color: Colors.black, width: 2.0),
+                    color: Colors.white),
+                clipBehavior: Clip.antiAlias,
+                child: Column(
+                  children: [
+                    // Icon at top - fixed position, doesn't scroll
+                    if (cardData?.isForParentChild == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18.0),
                         child: FaIcon(
                           FontAwesomeIcons.childReaching,
                           color: const Color(0xFFF06292),
                           size: 50.0,
                         ),
-                      ),
-                    )
-                  else if (cardData?.isForFamilies == true)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.topCenter,
+                      )
+                    else if (cardData?.isForParents == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18.0),
                         child: Image.asset(
                           'assets/images/family.png',
                           fit: BoxFit.scaleDown,
@@ -557,14 +577,11 @@ class _GameState extends State<Game> {
                           width: 60.0,
                           cacheWidth: 120,
                           cacheHeight: 120,
-                          // colorBlendMode: ,
                         ),
-                      ),
-                    ),
-                  if (cardData?.isForCouples == true)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.topCenter,
+                      )
+                    else if (cardData?.isForCouples == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18.0),
                         child: Image.asset(
                           'assets/images/couple.png',
                           fit: BoxFit.scaleDown,
@@ -572,14 +589,11 @@ class _GameState extends State<Game> {
                           cacheWidth: 120,
                           cacheHeight: 120,
                           width: 60.0,
-                          // colorBlendMode: ,
                         ),
-                      ),
-                    ),
-                  if (cardData?.isForInternalMood == true)
-                    Positioned.fill(
-                      child: Align(
-                        alignment: Alignment.topCenter,
+                      )
+                    else if (cardData?.isForInternalMood == true)
+                      Padding(
+                        padding: const EdgeInsets.only(top: 18.0),
                         child: Row(
                           mainAxisAlignment: MainAxisAlignment.spaceAround,
                           crossAxisAlignment: CrossAxisAlignment.center,
@@ -607,53 +621,51 @@ class _GameState extends State<Game> {
                           ],
                         ),
                       ),
-                    ),
-                  Center(
-                    child: SingleChildScrollView(
-                      child: Padding(
-                        padding: EdgeInsets.only(
-                            top: (cardData!.isForFamilies ||
-                                    cardData.isForParentChild ||
-                                    cardData.isForCouples ||
-                                    cardData.isForInternalMood)
-                                ? 40.0
-                                : 0.0,
-                            bottom: 35.0),
-                        child: Text(
-                          cardData.question!,
-                          style: TextStyle(
-                              fontSize: 25.0,
-                              color: cardData.category!.color,
-                              wordSpacing: 2.0,
-                              height: 1.75,
-                              fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
+                    // Spacing between icon and text
+                    if (cardData!.isForParents ||
+                        cardData.isForParentChild ||
+                        cardData.isForCouples ||
+                        cardData.isForInternalMood)
+                      SizedBox(height: 20.0),
+                    // Question text - centered and scrollable
+                    Expanded(
+                      child: Center(
+                        child: SingleChildScrollView(
+                          padding: const EdgeInsets.symmetric(horizontal: 18.0),
+                          child: Text(
+                            cardData.question!,
+                            style: TextStyle(
+                                fontSize: kIsWeb ? 56.0 : 25.0,
+                                color: cardData.category!.color,
+                                wordSpacing: 2.0,
+                                height: 1.75,
+                                fontWeight: FontWeight.bold),
+                            textAlign: TextAlign.center,
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                  Positioned.fill(
-                      child: Align(
-                    alignment: Alignment.bottomCenter,
-                    child: Container(
-                      padding: const EdgeInsets.all(10.0),
+                    // Category label at bottom - no padding, merged with card edge
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(
+                          vertical: 12.0, horizontal: 10.0),
                       decoration: BoxDecoration(
                         color: cardData.category!.color,
                       ),
                       child: Text(
                         cardData.category!.title!,
                         style: TextStyle(
-                          fontSize: 22.0,
+                          fontSize: kIsWeb ? 38.0 : 22.0,
                           color: Colors.white,
+                          fontWeight: FontWeight.w600,
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
-                  )),
-                ],
+                  ],
+                ),
               ),
-            ),
-          ),
-        ),
               // Close button positioned relative to the card
               Positioned(
                 top: -8,
@@ -663,6 +675,8 @@ class _GameState extends State<Game> {
                   child: IconButton(
                     onPressed: () {
                       setState(() {
+                        _previousIndex =
+                            _currentIndex; // Remember last card for next animation
                         _currentIndex = null;
                         _doShuffleCards = false;
                         _applyFilter = false;
@@ -676,10 +690,29 @@ class _GameState extends State<Game> {
                   ),
                 ),
               ),
-              ],
-              ),
-            ),
+            ],
           ),
+        );
+
+        // Wrap in slide-up animation only for first card
+        final isFirstCard = _previousIndex == null;
+        widgetToDisplay = Align(
+          alignment: kIsWeb ? Alignment(0, -0.3) : Alignment.center,
+          child: isFirstCard
+              ? TweenAnimationBuilder<double>(
+                  key: ValueKey('slide-$_currentIndex'),
+                  tween: Tween<double>(begin: 0.0, end: 1.0),
+                  duration: Duration(milliseconds: 700),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, child) {
+                    return Transform.translate(
+                      offset: Offset(0, (1 - value) * screenHeight * 0.5),
+                      child: Opacity(opacity: value, child: child),
+                    );
+                  },
+                  child: cardContent,
+                )
+              : cardContent,
         );
       }
       body = RefreshIndicator(
@@ -690,11 +723,14 @@ class _GameState extends State<Game> {
             final screenWidth = MediaQuery.of(context).size.width;
 
             // Balanced allocation for card list - enough room without overwhelming
-            // For mobile web, allocate more space to horizontal card list for better visibility
+            // For web, push horizontal scrollbar to bottom near menu buttons
             final isMobileWeb = kIsWeb && screenWidth < 600;
-            final cardListHeight = availableHeight * (isMobileWeb ? 0.40 : 0.35);
-            final spacerHeight = availableHeight * (isMobileWeb ? 0.02 : 0.04);
-            final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
+            final cardListHeight =
+                kIsWeb ? 150.0 : availableHeight * 0.35;
+            final spacerHeight =
+                kIsWeb ? 10.0 : availableHeight * 0.04;
+            final cardDisplayHeight =
+                availableHeight - cardListHeight - spacerHeight;
 
             return SingleChildScrollView(
               physics: AlwaysScrollableScrollPhysics(),
@@ -705,86 +741,100 @@ class _GameState extends State<Game> {
                     SizedBox(
                       height: cardDisplayHeight,
                       child: Stack(
-              children: [
-                widgetToDisplay,
-              ],
-            ),
-          ),
-          SizedBox(
-            height: spacerHeight,
-          ),
-          SizedBox(
-              height: cardListHeight,
-              child: Showcase(
-                key: _cardListShowcaseKey,
-                disposeOnTap: true,
-                onTargetClick: () {},
-                // onToolTipClick: () {},
-                descTextStyle: TextStyle(
-                  fontSize: 20.0,
-                ),
-                overlayOpacity: 0.6,
-                description:
-                    'Faites défiler de gauche à droite \npour découvrir plus de cartes',
-                child: AnimationLimiter(
-                  child: ScrollablePositionedList.builder(
-                    physics: BouncingScrollPhysics(
-                        parent: AlwaysScrollableScrollPhysics()),
-                    // clipBehavior: Clip.none,
-                    scrollDirection: Axis.horizontal,
-                    itemScrollController: itemScrollController,
-                    itemPositionsListener: itemPositionsListener,
-                    // shrinkWrap: true,
-                    itemCount: _allCardsData!.length,
-                    itemBuilder: (BuildContext context, int index) =>
-                        AnimationConfiguration.staggeredList(
-                      position: index,
-                      duration: const Duration(milliseconds: 175),
-                      child: Align(
-                        // widthFactor: (_currentIndex == index) ? 1.25 : 0.4,
-                        alignment: Alignment.topCenter,
-                        child: SlideAnimation(
-                          horizontalOffset: 50.0,
-                          child: FadeInAnimation(
-                            child: GestureDetector(
-                                child: AnimatedContainer(
-                                  duration: Duration(milliseconds: 300),
-                                  margin: const EdgeInsets.only(left: 5.0),
-                                  // Add blur to unselected cards
-                                  child: ImageFiltered(
-                                    imageFilter: _currentIndex != null && _currentIndex != index
-                                        ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
-                                        : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
-                                    child: Opacity(
-                                      opacity: _currentIndex != null && _currentIndex != index ? 0.5 : 1.0,
-                                      child: EssentielCardWidget(
-                                          index: index,
-                                          selected: _currentIndex == index,
-                                          noCardSelected: _currentIndex == null,
-                                          cardData:
-                                              _allCardsData!.elementAt(index)),
+                        children: [
+                          widgetToDisplay,
+                        ],
+                      ),
+                    ),
+                    SizedBox(
+                      height: spacerHeight,
+                    ),
+                    SizedBox(
+                        height: cardListHeight,
+                        child: Showcase(
+                          key: _cardListShowcaseKey,
+                          disposeOnTap: true,
+                          onTargetClick: () {},
+                          // onToolTipClick: () {},
+                          descTextStyle: TextStyle(
+                            fontSize: 20.0,
+                          ),
+                          overlayOpacity: 0.6,
+                          description:
+                              'Faites défiler de gauche à droite \npour découvrir plus de cartes',
+                          child: AnimationLimiter(
+                            child: ScrollablePositionedList.builder(
+                              physics: BouncingScrollPhysics(
+                                  parent: AlwaysScrollableScrollPhysics()),
+                              // clipBehavior: Clip.none,
+                              scrollDirection: Axis.horizontal,
+                              itemScrollController: itemScrollController,
+                              itemPositionsListener: itemPositionsListener,
+                              // shrinkWrap: true,
+                              itemCount: _allCardsData!.length,
+                              itemBuilder: (BuildContext context, int index) =>
+                                  AnimationConfiguration.staggeredList(
+                                position: index,
+                                duration: const Duration(milliseconds: 175),
+                                child: Align(
+                                  // widthFactor: (_currentIndex == index) ? 1.25 : 0.4,
+                                  alignment: Alignment.topCenter,
+                                  child: SlideAnimation(
+                                    horizontalOffset: 50.0,
+                                    child: FadeInAnimation(
+                                      child: GestureDetector(
+                                          child: AnimatedContainer(
+                                            duration:
+                                                Duration(milliseconds: 300),
+                                            margin: const EdgeInsets.only(
+                                                left: 5.0),
+                                            // Add blur to unselected cards
+                                            child: ImageFiltered(
+                                              imageFilter:
+                                                  _currentIndex != null &&
+                                                          _currentIndex != index
+                                                      ? ImageFilter.blur(
+                                                          sigmaX: 3.0,
+                                                          sigmaY: 3.0)
+                                                      : ImageFilter.blur(
+                                                          sigmaX: 0.0,
+                                                          sigmaY: 0.0),
+                                              child: Opacity(
+                                                opacity: _currentIndex !=
+                                                            null &&
+                                                        _currentIndex != index
+                                                    ? 0.5
+                                                    : 1.0,
+                                                child: EssentielCardWidget(
+                                                    index: index,
+                                                    selected:
+                                                        _currentIndex == index,
+                                                    noCardSelected:
+                                                        _currentIndex == null,
+                                                    cardData: _allCardsData!
+                                                        .elementAt(index)),
+                                              ),
+                                            ),
+                                          ),
+                                          onTap: () {
+                                            //TODO Animate card selection
+                                            if (_currentIndex == index) {
+                                              setState(() {
+                                                _currentIndex = null;
+                                                _doShuffleCards = false;
+                                                _applyFilter = false;
+                                              });
+                                            } else {
+                                              _jumpTo(index);
+                                            }
+                                          }),
                                     ),
                                   ),
                                 ),
-                                onTap: () {
-                                  //TODO Animate card selection
-                                  if (_currentIndex == index) {
-                                    setState(() {
-                                      _currentIndex = null;
-                                      _doShuffleCards = false;
-                                      _applyFilter = false;
-                                    });
-                                  } else {
-                                    _jumpTo(index);
-                                  }
-                                }),
+                              ),
+                            ),
                           ),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ))
+                        ))
                   ],
                 ),
               ),
@@ -815,11 +865,13 @@ class _GameState extends State<Game> {
           alignment: Alignment.topLeft,
           child: Padding(
             padding: EdgeInsets.only(
-                top: screenHeight * 0.085, left: 10.0, right: 10.0),
+                top: kIsWeb ? screenHeight * 0.01 : screenHeight * 0.085,
+                left: 10.0,
+                right: 10.0),
             child: Text(
               title,
               style: TextStyle(
-                fontSize: 36.0,
+                fontSize: kIsWeb ? 42.0 : 36.0,
                 color: Colors.white,
                 fontWeight: FontWeight.bold,
                 letterSpacing: 1.2,
@@ -833,7 +885,7 @@ class _GameState extends State<Game> {
               child: Container(
                 padding: EdgeInsets.only(
                     top: screenHeight * 0.2,
-                    bottom: screenHeight * 0.13,
+                    bottom: kIsWeb ? 100 : screenHeight * 0.13,
                     left: 10.0,
                     right: 10.0),
                 // height: screenHeight * 0.5,
@@ -850,9 +902,7 @@ class _GameState extends State<Game> {
           _allCardsData!.shuffle();
           _doShuffleCards = false;
           _applyFilter = false;
-          // Disable deck animation on mobile browsers - causes freezing
-          final screenWidth = MediaQuery.of(context).size.width;
-          _showDealingAnimation = !(kIsWeb && screenWidth < 600);
+          _showDealingAnimation = true; // Show dealing animation
         });
       });
     } else if (_applyFilter!) {
@@ -862,9 +912,7 @@ class _GameState extends State<Game> {
           _allCardsData = _filter(_categoryListFilter!);
           _doShuffleCards = false;
           _applyFilter = false;
-          // Disable deck animation on mobile browsers - causes freezing
-          final screenWidth = MediaQuery.of(context).size.width;
-          _showDealingAnimation = !(kIsWeb && screenWidth < 600);
+          _showDealingAnimation = true; // Show dealing animation
         });
       });
     }
@@ -876,7 +924,7 @@ class _GameState extends State<Game> {
         CategoryStore.findAll();
 
     final allCategoryFilters = allCategoryTitlesMap.keys.toList()
-      ..addAll(["Familles", "Couples"])
+      ..addAll(["Parents", "Couples"])
       ..sort((a, b) {
         // Normalize French accents for proper alphabetical sorting
         String normalize(String s) {
@@ -898,6 +946,7 @@ class _GameState extends State<Game> {
               .replaceAll('î', 'i')
               .replaceAll('ï', 'i');
         }
+
         return normalize(a).compareTo(normalize(b));
       });
 
@@ -909,7 +958,7 @@ class _GameState extends State<Game> {
       if (category == "Couples") {
         return Colors.pink;
       }
-      if (category == "Familles") {
+      if (category == "Parents") {
         return Colors.brown;
       }
       return null;
@@ -951,11 +1000,25 @@ class _GameState extends State<Game> {
                         onPressed: _randomDraw,
                         backgroundColor: const Color(0xFFED2910),
                         foregroundColor: Colors.white,
-                        elevation: 8.0,
-                        icon: FaIcon(FontAwesomeIcons.handSparkles, size: 20),
-                        label: Text(
-                          'Tirer une carte',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        elevation: kIsWeb ? 12.0 : 8.0,
+                        shape: kIsWeb
+                            ? RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(16),
+                              )
+                            : null,
+                        icon: FaIcon(FontAwesomeIcons.handSparkles,
+                            size: kIsWeb ? 56 : 20),
+                        label: Padding(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: kIsWeb ? 24 : 0,
+                              vertical: kIsWeb ? 18 : 0),
+                          child: Text(
+                            'Tirer une carte',
+                            style: TextStyle(
+                                fontSize: kIsWeb ? 48 : 16,
+                                fontWeight: FontWeight.bold,
+                                letterSpacing: kIsWeb ? 1.2 : 0),
+                          ),
                         ),
                       ),
                     ),
@@ -964,133 +1027,153 @@ class _GameState extends State<Game> {
                     MouseRegion(
                       cursor: SystemMouseCursors.click,
                       child: SpeedDial(
-                  animatedIcon: AnimatedIcons.menu_close,
-                  animatedIconTheme: IconThemeData(size: 22.0),
-                  overlayColor: Colors.black,
-                  overlayOpacity: 0.5,
-                  tooltip: 'Menu',
-                  heroTag: 'essentiel-speed-dial-hero-tag',
-                  elevation: 8.0,
-                  shape: CircleBorder(),
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.lightGreen,
-                  curve: Curves.bounceIn,
-                  children: [
-                    SpeedDialChild(
-                      child: Icon(Icons.info_outline),
-                      backgroundColor: const Color(0xFF62D739),
-                      label: 'À propos',
-                      labelBackgroundColor: const Color(0xFF62D739),
-                      labelStyle:
-                          TextStyle(fontSize: 18.0, color: Colors.white),
-                      onTap: () => showAppAboutDialog(context),
-                    ),
-                    SpeedDialChild(
-                        child: Icon(Icons.filter_alt_sharp),
-                        backgroundColor: const Color(0xFF12A0FF),
-                        label: 'Filtres',
-                        labelBackgroundColor: const Color(0xFF12A0FF),
-                        labelStyle:
-                            TextStyle(fontSize: 18.0, color: Colors.white),
-                        onTap: () async => showDialog(
-                            context: context,
-                            barrierDismissible: false,
-                            builder: (BuildContext ctx) =>
-                                CategorySelectorDialog(
-                                  title: Text(
-                                    'Catégories à afficher',
-                                    style: TextStyle(
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 20.0),
-                                  ),
-                                  all: allCategoryFilters,
-                                  selected: _categoryListFilter != null
-                                      ? _categoryListFilter
-                                      : <String>[],
-                                  textBackgroundColorProvider:
-                                      (String category, bool isSelected) {
-                                    var color = isSelected
-                                        ? chipColorFn(category)
-                                        : Colors.grey[200];
-                                    if (color == null) {
-                                      return Colors.grey;
-                                    }
-                                    return color;
-                                  },
-                                  textColorProvider:
-                                      (String category, bool isSelected) {
-                                    var color = isSelected
-                                        ? Colors.white
-                                        : chipColorFn(category);
-                                    if (color == null) {
-                                      return Colors.white;
-                                    }
-                                    return color;
-                                  },
-                                  callback:
-                                      (List<String> selectedCategories) async {
-                                    debugPrint(
-                                        "selectedCategories: $selectedCategories");
-                                    if (selectedCategories.isNotEmpty) {
-                                      final prefs =
-                                          await SharedPreferences.getInstance();
-                                      prefs.setStringList(
-                                          CATEGORY_FILTER_PREF_KEY,
-                                          selectedCategories);
-                                      setState(() {
-                                        _categoryListFilter =
-                                            selectedCategories;
-                                        _applyFilter = true;
-                                        _doShuffleCards = false;
-                                      });
-                                    }
-                                  },
-                                ))
-                        // onTap: () async {
-                        //   await FilterListDialog.display(context,
-                        //       allTextList: allCategoryFilters,
-                        //       height: 480,
-                        //       borderRadius: 20,
-                        //       headlineText: "Catégories de carte à afficher",
-                        //       hideSearchField: true,
-                        //       selectedTextList: _categoryListFilter,
-                        //       onApplyButtonClick: (list) async {
-                        //     if (list != null) {
-                        //       final selectedCategories =
-                        //           list.map((e) => e.toString()).toList();
-                        //       final prefs = await SharedPreferences.getInstance();
-                        //       prefs.setStringList(
-                        //           CATEGORY_FILTER_PREF_KEY, selectedCategories);
-                        //       setState(() {
-                        //         _categoryListFilter = selectedCategories;
-                        //         _applyFilter = true;
-                        //         _doShuffleCards = false;
-                        //       });
-                        //     }
-                        //     Navigator.pop(context);
-                        //   });
-                        // },
-                        ),
-                    SpeedDialChild(
-                      child: Icon(Icons.refresh),
-                      backgroundColor: const Color(0xFF9C27B0),
-                      label: 'Recharger les cartes',
-                      labelBackgroundColor: const Color(0xFF9C27B0),
-                      labelStyle:
-                          TextStyle(fontSize: 18.0, color: Colors.white),
-                      onTap: () => _handleRefresh(),
-                    ),
-                    SpeedDialChild(
-                      child: Icon(Icons.shuffle_outlined),
-                      backgroundColor: const Color(0xFF97205E),
-                      label: 'Mélanger les cartes',
-                      labelBackgroundColor: const Color(0xFF97205E),
-                      labelStyle:
-                          TextStyle(fontSize: 18.0, color: Colors.white),
-                      onTap: _shuffleCards,
-                    ),
-                  ],
-                ),
+                        animatedIcon: AnimatedIcons.menu_close,
+                        animatedIconTheme:
+                            IconThemeData(size: kIsWeb ? 56.0 : 22.0),
+                        overlayColor: Colors.black,
+                        overlayOpacity: 0.5,
+                        tooltip: 'Menu',
+                        heroTag: 'essentiel-speed-dial-hero-tag',
+                        elevation: 8.0,
+                        shape: CircleBorder(),
+                        foregroundColor: Colors.white,
+                        backgroundColor: Colors.lightGreen,
+                        curve: Curves.bounceIn,
+                        buttonSize: Size(kIsWeb ? 100 : 56, kIsWeb ? 100 : 56),
+                        spacing: kIsWeb ? 20 : 12,
+                        spaceBetweenChildren: kIsWeb ? 20 : 12,
+                        childPadding: kIsWeb ? EdgeInsets.all(16) : EdgeInsets.all(5),
+                        childMargin: kIsWeb
+                            ? EdgeInsets.symmetric(vertical: 10)
+                            : EdgeInsets.symmetric(vertical: 4),
+                        children: [
+                          SpeedDialChild(
+                            child: Icon(Icons.info_outline,
+                                size: kIsWeb ? 56 : 24),
+                            backgroundColor: const Color(0xFF62D739),
+                            label: 'À propos',
+                            labelBackgroundColor: const Color(0xFF62D739),
+                            labelStyle: TextStyle(
+                                fontSize: kIsWeb ? 48.0 : 18.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
+                            onTap: () => showAppAboutDialog(context),
+                          ),
+                          SpeedDialChild(
+                              child: Icon(Icons.filter_alt_sharp,
+                                  size: kIsWeb ? 56 : 24),
+                              backgroundColor: const Color(0xFF12A0FF),
+                              label: 'Filtres',
+                              labelBackgroundColor: const Color(0xFF12A0FF),
+                              labelStyle: TextStyle(
+                                  fontSize: kIsWeb ? 48.0 : 18.0,
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600),
+                              onTap: () async => showDialog(
+                                  context: context,
+                                  barrierDismissible: false,
+                                  builder: (BuildContext ctx) =>
+                                      CategorySelectorDialog(
+                                        title: Text(
+                                          'Catégories à afficher',
+                                          style: TextStyle(
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: kIsWeb ? 44.0 : 20.0),
+                                        ),
+                                        all: allCategoryFilters,
+                                        selected: _categoryListFilter != null
+                                            ? _categoryListFilter
+                                            : <String>[],
+                                        textBackgroundColorProvider:
+                                            (String category, bool isSelected) {
+                                          var color = isSelected
+                                              ? chipColorFn(category)
+                                              : Colors.grey[200];
+                                          if (color == null) {
+                                            return Colors.grey;
+                                          }
+                                          return color;
+                                        },
+                                        textColorProvider:
+                                            (String category, bool isSelected) {
+                                          var color = isSelected
+                                              ? Colors.white
+                                              : chipColorFn(category);
+                                          if (color == null) {
+                                            return Colors.white;
+                                          }
+                                          return color;
+                                        },
+                                        callback: (List<String>
+                                            selectedCategories) async {
+                                          debugPrint(
+                                              "selectedCategories: $selectedCategories");
+                                          if (selectedCategories.isNotEmpty) {
+                                            final prefs =
+                                                await SharedPreferences
+                                                    .getInstance();
+                                            prefs.setStringList(
+                                                CATEGORY_FILTER_PREF_KEY,
+                                                selectedCategories);
+                                            setState(() {
+                                              _categoryListFilter =
+                                                  selectedCategories;
+                                              _applyFilter = true;
+                                              _doShuffleCards = false;
+                                            });
+                                          }
+                                        },
+                                      ))
+                              // onTap: () async {
+                              //   await FilterListDialog.display(context,
+                              //       allTextList: allCategoryFilters,
+                              //       height: 480,
+                              //       borderRadius: 20,
+                              //       headlineText: "Catégories de carte à afficher",
+                              //       hideSearchField: true,
+                              //       selectedTextList: _categoryListFilter,
+                              //       onApplyButtonClick: (list) async {
+                              //     if (list != null) {
+                              //       final selectedCategories =
+                              //           list.map((e) => e.toString()).toList();
+                              //       final prefs = await SharedPreferences.getInstance();
+                              //       prefs.setStringList(
+                              //           CATEGORY_FILTER_PREF_KEY, selectedCategories);
+                              //       setState(() {
+                              //         _categoryListFilter = selectedCategories;
+                              //         _applyFilter = true;
+                              //         _doShuffleCards = false;
+                              //       });
+                              //     }
+                              //     Navigator.pop(context);
+                              //   });
+                              // },
+                              ),
+                          SpeedDialChild(
+                            child: Icon(Icons.refresh, size: kIsWeb ? 56 : 24),
+                            backgroundColor: const Color(0xFF9C27B0),
+                            label: 'Recharger les cartes',
+                            labelBackgroundColor: const Color(0xFF9C27B0),
+                            labelStyle: TextStyle(
+                                fontSize: kIsWeb ? 48.0 : 18.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
+                            onTap: () => _handleRefresh(),
+                          ),
+                          SpeedDialChild(
+                            child: Icon(Icons.shuffle_outlined,
+                                size: kIsWeb ? 56 : 24),
+                            backgroundColor: const Color(0xFF97205E),
+                            label: 'Mélanger les cartes',
+                            labelBackgroundColor: const Color(0xFF97205E),
+                            labelStyle: TextStyle(
+                                fontSize: kIsWeb ? 48.0 : 18.0,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600),
+                            onTap: _shuffleCards,
+                          ),
+                        ],
+                      ),
                     ),
                   ],
                 )
@@ -1111,7 +1194,7 @@ class _GameState extends State<Game> {
       if (_categoryListFilter!.contains(cardData.category!.title)) {
         return true;
       }
-      if (_categoryListFilter!.contains("Familles") && cardData.isForFamilies) {
+      if (_categoryListFilter!.contains("Parents") && cardData.isForParents) {
         return true;
       }
       if (_categoryListFilter!.contains("Couples") && cardData.isForCouples) {
@@ -1157,6 +1240,7 @@ class _GameState extends State<Game> {
               curve: Curves.easeInOutCubic)
           .whenComplete(() {
         setState(() {
+          _previousIndex = _currentIndex; // Track previous for animation
           _currentIndex = index;
           _doShuffleCards = false;
           _applyFilter = false;
@@ -1235,10 +1319,12 @@ class _GameState extends State<Game> {
         final apiService = BackendApiService(baseUrl: backendUrl);
 
         // Fetch categories from backend API
-        categoryList = await apiService.fetchCategories(forceRefresh: forceRefresh);
+        categoryList =
+            await apiService.fetchCategories(forceRefresh: forceRefresh);
 
         // Fetch questions from backend API
-        final questionsData = await apiService.fetchQuestions(forceRefresh: forceRefresh);
+        final questionsData =
+            await apiService.fetchQuestions(forceRefresh: forceRefresh);
         cardData = questionsData
             .map((questionJson) => EssentielCardData.fromGSheet(questionJson))
             .where((element) =>
@@ -1255,19 +1341,29 @@ class _GameState extends State<Game> {
                 ClientId(Env.value!.saId!), Env.value!.saPK!));
 
         final spreadsheet = await gsheets.spreadsheet(spreadsheetId);
-        final categoriesSheet = await spreadsheet.worksheetByTitle('Categories')?.values.map.allRows();
+        final categoriesSheet = await spreadsheet
+            .worksheetByTitle('Categories')
+            ?.values
+            .map
+            .allRows();
         categoryList = categoriesSheet != null
             ? (categoriesSheet as List<Map<String, dynamic>>)
                 .map((json) => QuestionCategory.fromGSheet(json))
                 .toList()
             : <QuestionCategory>[];
 
-        final questionsSheet = await spreadsheet.worksheetByTitle('Questions')?.values.map.allRows();
+        final questionsSheet = await spreadsheet
+            .worksheetByTitle('Questions')
+            ?.values
+            .map
+            .allRows();
         cardData = questionsSheet != null
             ? (questionsSheet as List<Map<String, dynamic>>)
-                .map((questionJson) => EssentielCardData.fromGSheet(questionJson))
+                .map((questionJson) =>
+                    EssentielCardData.fromGSheet(questionJson))
                 .where((element) =>
-                    element.question != null && element.question!.trim().isNotEmpty)
+                    element.question != null &&
+                    element.question!.trim().isNotEmpty)
                 .toList()
             : <EssentielCardData>[];
       }
@@ -1295,8 +1391,10 @@ class _GameState extends State<Game> {
       _categoryList = categoryList.toList(growable: false);
       if (_categoryListFilter == null || _categoryListFilter!.length == 0) {
         // All categories selected by default
-        _categoryListFilter = <String>["Familles", "Couples"];
-        categoryList.where((element) => element.title != null).forEach((element) {
+        _categoryListFilter = <String>["Parents", "Couples"];
+        categoryList
+            .where((element) => element.title != null)
+            .forEach((element) {
           _categoryListFilter!.add(element.title!);
         });
       }
@@ -1309,20 +1407,17 @@ class _GameState extends State<Game> {
       }
 
       // Show dealing animation on initial load
-      // Disable on mobile browsers due to performance issues causing freezing
-      final screenWidth = MediaQuery.of(context).size.width;
-      _showDealingAnimation = !(kIsWeb && screenWidth < 600);
+      _showDealingAnimation = true;
     });
   }
 
   // Cache data to localStorage for offline support (web only)
-  Future<void> _cacheDataToLocalStorage(
-      SharedPreferences prefs,
-      List<QuestionCategory> categories,
-      List<EssentielCardData> cards) async {
+  Future<void> _cacheDataToLocalStorage(SharedPreferences prefs,
+      List<QuestionCategory> categories, List<EssentielCardData> cards) async {
     // Store categories as JSON
     final categoriesJson = categories
-        .map((cat) => {'title': cat.title, 'color': cat.color?.value.toString()})
+        .map(
+            (cat) => {'title': cat.title, 'color': cat.color?.value.toString()})
         .toList();
     await prefs.setString('cached_categories', categoriesJson.toString());
 
@@ -1332,7 +1427,7 @@ class _GameState extends State<Game> {
               'question': card.question,
               'category': card.category?.title,
               'isForCouples': card.isForCouples,
-              'isForFamilies': card.isForFamilies,
+              'isForParents': card.isForParents,
             })
         .toList();
     await prefs.setString('cached_cards', cardsJson.toString());
@@ -1340,7 +1435,8 @@ class _GameState extends State<Game> {
   }
 
   // Load cached data from localStorage (web only)
-  Future<Map<String, List>?> _loadCachedDataFromLocalStorage(SharedPreferences prefs) async {
+  Future<Map<String, List>?> _loadCachedDataFromLocalStorage(
+      SharedPreferences prefs) async {
     final categoriesJson = prefs.getString('cached_categories');
     final cardsJson = prefs.getString('cached_cards');
 
@@ -1374,14 +1470,19 @@ class EssentielCardWidget extends StatelessWidget {
     final screenHeight = MediaQuery.of(context).size.height;
 
     // Match deck card aspect ratio: taller than wide (120w x 170h = 0.706 ratio)
-    // Scale based on screen height for consistency
-    // For mobile web, use larger cards in horizontal scrollbar for better visibility
-    final isMobileWeb = kIsWeb && screenWidth < 600;
-    final heightRatio = isMobileWeb ? 0.30 : 0.25;
-    final maxHeight = isMobileWeb ? 300.0 : 200.0;
+    // For horizontal cards, use landscape/paysage orientation (width > height)
+    // This preserves the Essentiel logo's original scale better
+    final widthRatio = kIsWeb ? 0.10 : 0.25;
+    final maxWidth = kIsWeb ? 150.0 : 250.0;
 
-    final cardHeight = screenHeight * heightRatio > maxHeight ? maxHeight : screenHeight * heightRatio;
-    final cardWidth = cardHeight * 0.706; // Same aspect ratio as deck cards (120/170)
+    final cardWidth = screenWidth * widthRatio > maxWidth
+        ? maxWidth
+        : screenWidth * widthRatio;
+    final cardHeight =
+        cardWidth * 0.706; // Landscape: width > height (flipped from portrait)
+
+    // For web, add much larger font sizes to card logos
+    final logoFontSize = kIsWeb ? cardWidth * 0.08 : cardWidth * 0.05;
 
     return
         // Transform.scale(

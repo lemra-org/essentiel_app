@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Essentiel - Application pour animer vos groupes de partage autour de la Parole. Vie fraternelle, prière, formation, service et évangélisation.">
+    <meta name="keywords" content="essentiel, groupe de partage, vie fraternelle, évangile, prière, formation, service, évangélisation">
+    <title>Essentiel - Animation de Groupes de Partage</title>
+    <link rel="icon" type="image/png" href="logo.png">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: #333;
+            overflow-x: hidden;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        header {
+            padding: 40px 0 20px;
+            text-align: center;
+        }
+
+        .logo-img {
+            max-width: 500px;
+            width: 90%;
+            height: auto;
+            margin: 0 auto 20px;
+            display: block;
+            filter: drop-shadow(2px 2px 8px rgba(0, 0, 0, 0.3));
+        }
+
+        .tagline {
+            font-size: 1.3rem;
+            color: rgba(255, 255, 255, 0.95);
+            font-weight: 300;
+            margin-bottom: 30px;
+        }
+
+        .header-cta {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            flex-wrap: wrap;
+            margin-bottom: 40px;
+        }
+
+        .header-cta .cta-button {
+            padding: 15px 30px;
+            font-size: 1.1rem;
+        }
+
+        .hero {
+            background: white;
+            border-radius: 20px;
+            padding: 60px 40px;
+            margin: 40px 0;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .hero h2 {
+            font-size: 2.5rem;
+            color: #667eea;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .description {
+            font-size: 1.2rem;
+            line-height: 1.8;
+            color: #555;
+            margin-bottom: 40px;
+            text-align: center;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin: 50px 0;
+            max-width: 1000px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        @media (min-width: 900px) {
+            .features {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .testimonials {
+            margin-top: 60px;
+        }
+
+        .testimonial-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .testimonial {
+            background: linear-gradient(135deg, #fdfbfb 0%, #ebedee 100%);
+            padding: 30px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+            font-style: italic;
+            color: #555;
+        }
+
+        .testimonial p {
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .testimonial cite {
+            display: block;
+            text-align: right;
+            font-style: normal;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .feature {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .feature:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+
+        .feature h3 {
+            font-size: 1.5rem;
+            color: #667eea;
+            margin-bottom: 15px;
+        }
+
+        .feature p {
+            color: #666;
+            line-height: 1.6;
+        }
+
+        .cta-section {
+            text-align: center;
+            margin: 60px 0 40px;
+        }
+
+        .cta-title {
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+
+        .cta-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+
+        .cta-button {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            padding: 20px 40px;
+            font-size: 1.2rem;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+
+        .cta-button.primary {
+            background: #34D399;
+            color: white;
+        }
+
+        .cta-button.primary:hover {
+            background: #10B981;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(52, 211, 153, 0.4);
+        }
+
+        .cta-button.secondary {
+            background: #F59E0B;
+            color: white;
+        }
+
+        .cta-button.secondary:hover {
+            background: #D97706;
+            transform: translateY(-3px);
+            box-shadow: 0 15px 40px rgba(245, 158, 11, 0.4);
+        }
+
+        .cta-icon {
+            font-size: 1.8rem;
+        }
+
+        footer {
+            text-align: center;
+            padding: 40px 0;
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 0.9rem;
+        }
+
+        footer a {
+            color: white;
+            text-decoration: none;
+            font-weight: 600;
+        }
+
+        footer a:hover {
+            text-decoration: underline;
+        }
+
+        @media (max-width: 768px) {
+            .logo-img {
+                max-width: 300px;
+            }
+
+            .tagline {
+                font-size: 1.1rem;
+            }
+
+            .hero {
+                padding: 40px 25px;
+            }
+
+            .hero h2 {
+                font-size: 2rem;
+            }
+
+            .description {
+                font-size: 1.1rem;
+            }
+
+            .cta-title {
+                font-size: 1.6rem;
+            }
+
+            .cta-buttons {
+                flex-direction: column;
+                gap: 20px;
+            }
+
+            .cta-button {
+                width: 100%;
+                max-width: 350px;
+                justify-content: center;
+            }
+
+            .header-cta {
+                flex-direction: column;
+                align-items: center;
+                gap: 15px;
+            }
+        }
+
+        .wave {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            overflow: hidden;
+            line-height: 0;
+        }
+
+        .wave svg {
+            position: relative;
+            display: block;
+            width: calc(100% + 1.3px);
+            height: 150px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <img src="logo.png" alt="Essentiel" class="logo-img">
+            <p class="tagline">Animation de groupes de partage autour de la Parole</p>
+            <div class="header-cta">
+                <a href="https://jeu.essentiel-app.com" class="cta-button primary" target="_self">
+                    <span class="cta-icon">🌐</span>
+                    <span>Utiliser l'application Web</span>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=lemrapp.essentiel" class="cta-button secondary" target="_blank" rel="noopener noreferrer">
+                    <span class="cta-icon">📱</span>
+                    <span>Télécharger sur Android</span>
+                </a>
+            </div>
+        </header>
+
+        <main>
+            <section class="hero">
+                <h2>Vivez pleinement votre appel de disciple du Christ</h2>
+                <p class="description">
+                    Essentiel est une application d'animation pour les groupes de partage autour de l'Évangile.
+                    Elle accompagne votre cheminement spirituel à travers cinq dimensions fondamentales :
+                    la vie fraternelle, la relation à Dieu, l'annonce de l'amour de Dieu, le service et la formation.
+                </p>
+
+                <div class="features">
+                    <div class="feature">
+                        <div class="feature-icon">🤝</div>
+                        <h3>Vie Fraternelle</h3>
+                        <p>Une vie fraternelle accueillante et joyeuse pour vivre la complémentarité des approches autour de la Parole</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">🙏</div>
+                        <h3>Prière</h3>
+                        <p>Nourrissez votre relation à Dieu à travers des temps de prière et de partage autour de l'Évangile</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">📖</div>
+                        <h3>Formation</h3>
+                        <p>Approfondissez votre foi et laissez la Parole interpeller vos représentations</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">❤️</div>
+                        <h3>Service</h3>
+                        <p>Mettez vos talents au service des autres et du Seigneur</p>
+                    </div>
+                    <div class="feature">
+                        <div class="feature-icon">✨</div>
+                        <h3>Évangélisation</h3>
+                        <p>Annoncez l'amour de Dieu et partagez la Bonne Nouvelle</p>
+                    </div>
+                </div>
+
+                <div class="testimonials">
+                    <h3 style="text-align: center; color: #667eea; margin: 50px 0 30px; font-size: 2rem;">Témoignages</h3>
+                    <div class="testimonial-grid">
+                        <blockquote class="testimonial">
+                            <p>"Essentiel me fait vivre la joie de la vie fraternelle !"</p>
+                        </blockquote>
+                        <blockquote class="testimonial">
+                            <p>"Une complémentarité des approches autour de la Parole et une vie fraternelle avec des personnes que je n'aurais pas rencontrées autrement."</p>
+                        </blockquote>
+                        <blockquote class="testimonial">
+                            <p>"La Parole interpelle mes représentations et devient une bonne nouvelle."</p>
+                        </blockquote>
+                    </div>
+                </div>
+            </section>
+
+            <section class="cta-section">
+                <h2 class="cta-title">Animez vos groupes de partage</h2>
+                <div class="cta-buttons">
+                    <a href="https://jeu.essentiel-app.com" class="cta-button primary" target="_self">
+                        <span class="cta-icon">🌐</span>
+                        <span>Utiliser l'application Web</span>
+                    </a>
+                    <a href="https://play.google.com/store/apps/details?id=lemrapp.essentiel" class="cta-button secondary" target="_blank" rel="noopener noreferrer">
+                        <span class="cta-icon">📱</span>
+                        <span>Télécharger sur Android</span>
+                    </a>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <footer>
+        <p>&copy; 2026 Essentiel. Application développée avec ❤️ pour accompagner vos groupes de partage.</p>
+        <p style="margin-top: 15px;">
+            Initialement créé pour la <a href="https://www.saintemadeleinevilleurbanne.fr/groupe-essentiel/" target="_blank" rel="noopener noreferrer">Paroisse Sainte Madeleine des Charpennes de Villeurbanne</a>
+        </p>
+        <p style="margin-top: 15px;">
+            <a href="https://github.com/lemra-org/essentiel_app" target="_blank" rel="noopener noreferrer">Code source sur GitHub</a>
+        </p>
+    </footer>
+</body>
+</html>

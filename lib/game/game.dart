@@ -151,22 +151,14 @@ class _GameState extends State<Game> {
           child: LayoutBuilder(
             builder: (context, constraints) {
               final availableHeight = constraints.maxHeight;
-              // Push horizontal scrollbar to very bottom of screen (mobile only)
-              // Web keeps original spacing
+              // On mobile, the horizontal scrollbar is rendered separately as an overlay
+              // On web, it remains part of the body layout
               final cardListHeight = kIsWeb ? 150.0 : 180.0;
               final spacerHeight = kIsWeb ? 10.0 : 0.0;
               final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
 
-              return SingleChildScrollView(
-                physics: AlwaysScrollableScrollPhysics(),
-                child: ConstrainedBox(
-                  constraints: BoxConstraints(minHeight: availableHeight),
-                  child: Column(
-                    children: [
-                      SizedBox(
-                        height: cardDisplayHeight,
-                        child: Stack(
-                          children: [
+              Widget dealingAnimationContent = Stack(
+                children: [
                             // Blurred logo in background
                             Center(
                               child: ImageFiltered(
@@ -265,13 +257,24 @@ class _GameState extends State<Game> {
                               },
                             ),
                           ],
+                        );
+
+              if (kIsWeb) {
+                return SingleChildScrollView(
+                  physics: AlwaysScrollableScrollPhysics(),
+                  child: ConstrainedBox(
+                    constraints: BoxConstraints(minHeight: availableHeight),
+                    child: Column(
+                      children: [
+                        SizedBox(
+                          height: cardDisplayHeight,
+                          child: dealingAnimationContent,
                         ),
-                      ),
-                      if (spacerHeight > 0) SizedBox(height: spacerHeight),
-                      // Horizontal list fades in as deck cards fade out
-                      SizedBox(
-                        height: cardListHeight,
-                        child: TweenAnimationBuilder<double>(
+                        SizedBox(height: spacerHeight),
+                        // Horizontal list fades in as deck cards fade out
+                        SizedBox(
+                          height: cardListHeight,
+                          child: TweenAnimationBuilder<double>(
                           tween: Tween<double>(begin: 0.0, end: 1.0),
                           duration: Duration(milliseconds: 2000),
                           curve: Interval(0.5, 1.0, curve: Curves.easeIn),
@@ -360,11 +363,15 @@ class _GameState extends State<Game> {
                             ),
                           ),
                         ),
-                      ),
-                    ],
+                        ),
+                      ],
+                    ),
                   ),
-                ),
-              );
+                );
+              } else {
+                // On mobile, just show the animation without the scrollbar
+                return dealingAnimationContent;
+              }
             },
           ),
         );
@@ -725,30 +732,31 @@ class _GameState extends State<Game> {
             final availableHeight = constraints.maxHeight;
             final screenWidth = MediaQuery.of(context).size.width;
 
-            // Push horizontal scrollbar to very bottom of screen (mobile only)
-            // Web keeps original spacing
-            final cardListHeight = kIsWeb ? 150.0 : 180.0;
-            final spacerHeight = kIsWeb ? 10.0 : 0.0;
-            final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
+            // On mobile, the horizontal scrollbar is rendered separately as an overlay
+            // On web, it remains part of the body layout
+            if (kIsWeb) {
+              final cardListHeight = 150.0;
+              final spacerHeight = 10.0;
+              final cardDisplayHeight = availableHeight - cardListHeight - spacerHeight;
 
-            return SingleChildScrollView(
-              physics: AlwaysScrollableScrollPhysics(),
-              child: ConstrainedBox(
-                constraints: BoxConstraints(minHeight: availableHeight),
-                child: Column(
-                  children: [
-                    SizedBox(
-                      height: cardDisplayHeight,
-                      child: Stack(
-                        children: [
-                          widgetToDisplay,
-                        ],
+              return SingleChildScrollView(
+                physics: AlwaysScrollableScrollPhysics(),
+                child: ConstrainedBox(
+                  constraints: BoxConstraints(minHeight: availableHeight),
+                  child: Column(
+                    children: [
+                      SizedBox(
+                        height: cardDisplayHeight,
+                        child: Stack(
+                          children: [
+                            widgetToDisplay,
+                          ],
+                        ),
                       ),
-                    ),
-                    if (spacerHeight > 0) SizedBox(height: spacerHeight),
-                    SizedBox(
-                        height: cardListHeight,
-                        child: Showcase(
+                      SizedBox(height: spacerHeight),
+                      SizedBox(
+                          height: cardListHeight,
+                          child: Showcase(
                           key: _cardListShowcaseKey,
                           disposeOnTap: true,
                           onTargetClick: () {},
@@ -832,10 +840,14 @@ class _GameState extends State<Game> {
                             ),
                           ),
                         ))
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-            );
+              );
+            } else {
+              // On mobile, just show the widget without the scrollbar
+              return widgetToDisplay;
+            }
           },
         ),
       );
@@ -882,13 +894,87 @@ class _GameState extends State<Game> {
               child: Container(
                 padding: EdgeInsets.only(
                     top: screenHeight * 0.2,
-                    bottom: kIsWeb ? 100 : screenHeight * 0.13,
+                    bottom: kIsWeb ? 100 : 0, // Remove bottom padding on mobile
                     left: 10.0,
                     right: 10.0),
                 // height: screenHeight * 0.5,
                 child: body,
               )),
         ),
+        // On mobile, add horizontal scrollbar as overlay at the bottom
+        if (!kIsWeb && _allCardsData != null && _allCardsData!.isNotEmpty)
+          Positioned(
+            left: 0,
+            right: 0,
+            bottom: 0,
+            height: 180,
+            child: Showcase(
+              key: _cardListShowcaseKey,
+              disposeOnTap: true,
+              onTargetClick: () {},
+              descTextStyle: TextStyle(fontSize: 20.0),
+              overlayOpacity: 0.6,
+              description:
+                  'Faites défiler de gauche à droite \npour découvrir plus de cartes',
+              child: AnimationLimiter(
+                child: ScrollablePositionedList.builder(
+                  physics: BouncingScrollPhysics(
+                      parent: AlwaysScrollableScrollPhysics()),
+                  scrollDirection: Axis.horizontal,
+                  itemScrollController: itemScrollController,
+                  itemPositionsListener: itemPositionsListener,
+                  itemCount: _allCardsData!.length,
+                  itemBuilder: (BuildContext context, int index) =>
+                      AnimationConfiguration.staggeredList(
+                    position: index,
+                    duration: const Duration(milliseconds: 175),
+                    child: Align(
+                      alignment: Alignment.topCenter,
+                      child: SlideAnimation(
+                        horizontalOffset: 50.0,
+                        child: FadeInAnimation(
+                          child: GestureDetector(
+                              child: AnimatedContainer(
+                                duration: Duration(milliseconds: 300),
+                                margin: const EdgeInsets.only(left: 5.0),
+                                child: ImageFiltered(
+                                  imageFilter: _currentIndex != null &&
+                                          _currentIndex != index
+                                      ? ImageFilter.blur(sigmaX: 3.0, sigmaY: 3.0)
+                                      : ImageFilter.blur(sigmaX: 0.0, sigmaY: 0.0),
+                                  child: Opacity(
+                                    opacity: _currentIndex != null &&
+                                            _currentIndex != index
+                                        ? 0.5
+                                        : 1.0,
+                                    child: EssentielCardWidget(
+                                        index: index,
+                                        selected: _currentIndex == index,
+                                        noCardSelected: _currentIndex == null,
+                                        cardData:
+                                            _allCardsData!.elementAt(index)),
+                                  ),
+                                ),
+                              ),
+                              onTap: () {
+                                if (_currentIndex == index) {
+                                  setState(() {
+                                    _currentIndex = null;
+                                    _doShuffleCards = false;
+                                    _applyFilter = false;
+                                  });
+                                } else {
+                                  _jumpTo(index);
+                                }
+                              }),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
       ],
     );
 

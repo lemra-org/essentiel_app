@@ -635,7 +635,7 @@ class _GameState extends State<Game> {
                           child: Text(
                             cardData.question!,
                             style: TextStyle(
-                                fontSize: kIsWeb ? 56.0 : 25.0,
+                                fontSize: kIsWeb ? 56.0 : 19.0,
                                 color: cardData.category!.color,
                                 wordSpacing: 2.0,
                                 height: 1.75,
@@ -656,7 +656,7 @@ class _GameState extends State<Game> {
                       child: Text(
                         cardData.category!.title!,
                         style: TextStyle(
-                          fontSize: kIsWeb ? 38.0 : 22.0,
+                          fontSize: kIsWeb ? 38.0 : 18.0,
                           color: Colors.white,
                           fontWeight: FontWeight.w600,
                         ),
